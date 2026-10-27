@@ -13,13 +13,13 @@
  * ADR-011 Search/Fetch (deepseek_search / deepseek_fetch) keep independent
  * per-capability budgets and must omit sharedBudget on PaidRequestContext.
  *
- * Pool limit reuses translation.monthlyBudget + TRANSLATION_CURRENCY until a
- * dedicated Settings field is authorized; isolated tests inject fake amounts only.
+ * Pool limit comes from ShippingSettings.sharedLlmBudget (dedicated Settings).
+ * Never invent spend authorization from translation.monthlyBudget; that remains
+ * a stricter translation sub-limit checked inside the same claim.
  */
 import type { Database } from "db0"
 import { BudgetAggregateError, aggregatePaidMonthSpend } from "#/intel/llm/budget-aggregate"
 import { type PaidBudgetCode, decidePaidBudget } from "#/services/paid-budget"
-import { TRANSLATION_CURRENCY } from "#/services/translation-settings"
 
 const CURRENCY_RE = /^[A-Z]{3}$/
 
@@ -68,8 +68,11 @@ export function sharedLlmBudgetCapabilities(): readonly string[] {
   return SHARED_LLM_BUDGET_CAPABILITIES
 }
 
-/** Resolve the shared pool from translation settings (isolated/fake amounts in tests). */
-export function resolveSharedLlmBudgetFromTranslation(monthlyBudget: number | null | undefined, currency: string = TRANSLATION_CURRENCY): SharedLlmBudgetGate {
+/**
+ * Build a SharedLlmBudgetGate from explicit pool fields (Settings or test fakes).
+ * Callers must NOT pass translation.monthlyBudget as a substitute for the pool.
+ */
+export function resolveSharedLlmBudgetGate(monthlyBudget: number | null | undefined, currency: string): SharedLlmBudgetGate {
   return {
     monthlyBudget,
     currency,
@@ -90,6 +93,12 @@ export async function assertSharedLlmBudgetInTransaction(
 ): Promise<void> {
   if (typeof callCurrency !== "string" || !CURRENCY_RE.test(callCurrency)) {
     throw new SharedBudgetGateError("budget_currency_unknown", `call currency invalid: ${String(callCurrency)}`)
+  }
+  // Unconfigured/zero fail-closed before currency completeness: missing Settings
+  // field yields empty currency + null monthlyBudget and must not look like FX noise.
+  const early = decidePaidBudget(gate.monthlyBudget, 0, 0)
+  if (early === "budget_unconfigured" || early === "budget_zero") {
+    throw new SharedBudgetGateError(early)
   }
   if (typeof gate.currency !== "string" || !CURRENCY_RE.test(gate.currency)) {
     throw new SharedBudgetGateError("budget_currency_unknown", `shared budget currency invalid: ${String(gate.currency)}`)

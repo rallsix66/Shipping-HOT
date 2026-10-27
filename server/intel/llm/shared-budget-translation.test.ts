@@ -19,7 +19,7 @@ import {
   markPendingReceiptsUnknownAtExclusiveStartup,
   paidRequest,
 } from "#/intel/llm/receipts"
-import { SHARED_LLM_BUDGET_CAPABILITIES, resolveSharedLlmBudgetFromTranslation } from "#/intel/llm/shared-budget"
+import { SHARED_LLM_BUDGET_CAPABILITIES, resolveSharedLlmBudgetGate } from "#/intel/llm/shared-budget"
 import { runLlmTestConnection } from "#/intel/llm/test-connection"
 import { createMockOpenAiTransport } from "#/intel/llm/openai-compatible.mock"
 import { executeTranslationViaPaidRequest } from "#/services/translation-paid"
@@ -91,9 +91,10 @@ function sharedCtx(db: Awaited<ReturnType<typeof setup>>["db"], monthlyBudget: n
   return {
     db,
     secretStore: secrets(),
-    monthlyBudget,
+    // Registry path: no capability sub-limit — only the dedicated shared pool.
+    monthlyBudget: undefined,
     currency,
-    sharedBudget: resolveSharedLlmBudgetFromTranslation(monthlyBudget, currency),
+    sharedBudget: resolveSharedLlmBudgetGate(monthlyBudget, currency),
     now: () => T0,
   }
 }
@@ -163,6 +164,8 @@ describe("shared LLM budget gate on paidRequest (not helper-alone)", () => {
       db,
       secretStore: secrets(),
       monthlyBudget: 0.05,
+      sharedPoolMonthlyBudget: 0.05,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider: fake,
       source,
       estimatedCost: 0.02,
@@ -182,6 +185,8 @@ describe("shared LLM budget gate on paidRequest (not helper-alone)", () => {
       db,
       secretStore: secrets(),
       monthlyBudget: 0.05,
+      sharedPoolMonthlyBudget: 0.05,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider: fake,
       source: prepared("Beta title"),
       estimatedCost: 0.02,
@@ -241,6 +246,8 @@ describe("shared LLM budget gate on paidRequest (not helper-alone)", () => {
       db: db2,
       secretStore: secrets(),
       monthlyBudget: 1,
+      sharedPoolMonthlyBudget: 1,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider: fake,
       source,
       estimatedCost: 0.01,
@@ -252,6 +259,8 @@ describe("shared LLM budget gate on paidRequest (not helper-alone)", () => {
       db: db2,
       secretStore: secrets(),
       monthlyBudget: 1,
+      sharedPoolMonthlyBudget: 1,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider: fake,
       source,
       estimatedCost: 0.01,
@@ -279,7 +288,8 @@ describe("shared LLM budget gate on paidRequest (not helper-alone)", () => {
     const zero = await runLlmTestConnection({
       db,
       secretStore: secrets(),
-      monthlyBudget: 0,
+      sharedPoolMonthlyBudget: 0,
+      sharedPoolCurrency: "USD",
       providerId: "fixture-chat",
       modelId: "fixture-chat-model",
       transport,
@@ -289,10 +299,12 @@ describe("shared LLM budget gate on paidRequest (not helper-alone)", () => {
     if (!zero.ok) expect(zero.code).toBe("paid_budget_zero")
     expect(transport.state.chatHits).toBe(0)
 
+    // Explicit null = unconfigured pool override (undefined would fall through to Settings).
     const unset = await runLlmTestConnection({
       db,
       secretStore: secrets(),
-      monthlyBudget: undefined,
+      sharedPoolMonthlyBudget: null,
+      sharedPoolCurrency: "USD",
       providerId: "fixture-chat",
       modelId: "fixture-chat-model",
       transport,
@@ -310,7 +322,8 @@ describe("shared LLM budget gate on paidRequest (not helper-alone)", () => {
     const ok = await runLlmTestConnection({
       db,
       secretStore: secrets(),
-      monthlyBudget: 5,
+      sharedPoolMonthlyBudget: 5,
+      sharedPoolCurrency: "USD",
       providerId: "fixture-chat",
       modelId: "fixture-chat-model",
       transport,
@@ -342,6 +355,8 @@ describe("shared LLM budget gate on paidRequest (not helper-alone)", () => {
       db,
       secretStore: secrets(),
       monthlyBudget: 1,
+      sharedPoolMonthlyBudget: 1,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider,
       source,
       estimatedCost: 0.01,
@@ -355,6 +370,8 @@ describe("shared LLM budget gate on paidRequest (not helper-alone)", () => {
       db,
       secretStore: secrets(),
       monthlyBudget: 1,
+      sharedPoolMonthlyBudget: 1,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider,
       source,
       estimatedCost: 0.01,
@@ -429,6 +446,8 @@ describe("billing classification: HTTP 200 + usage + bad output keeps spend", ()
       db,
       secretStore: secrets(),
       monthlyBudget: 0.05,
+      sharedPoolMonthlyBudget: 0.05,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider: fake,
       source,
       estimatedCost: 0.03,
@@ -456,6 +475,8 @@ describe("billing classification: HTTP 200 + usage + bad output keeps spend", ()
       db,
       secretStore: secrets(),
       monthlyBudget: 0.05,
+      sharedPoolMonthlyBudget: 0.05,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider: fake,
       source: prepared(`after-wrapper-${wrapper.slice(0, 8)}`),
       estimatedCost: 0.05,
@@ -487,6 +508,8 @@ describe("billing classification: HTTP 200 + usage + bad output keeps spend", ()
       db,
       secretStore: secrets(),
       monthlyBudget: 5,
+      sharedPoolMonthlyBudget: 5,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider: fake,
       source,
       estimatedCost: 0.03,
@@ -502,6 +525,8 @@ describe("billing classification: HTTP 200 + usage + bad output keeps spend", ()
       db,
       secretStore: secrets(),
       monthlyBudget: 5,
+      sharedPoolMonthlyBudget: 5,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider: fake,
       source,
       estimatedCost: 0.03,
@@ -536,6 +561,8 @@ describe("billing classification: HTTP 200 + usage + bad output keeps spend", ()
       db,
       secretStore: secrets(),
       monthlyBudget: 5,
+      sharedPoolMonthlyBudget: 5,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider: fake,
       source,
       estimatedCost: 0.03,
@@ -584,6 +611,8 @@ describe("billing classification: HTTP 200 + usage + bad output keeps spend", ()
       db,
       secretStore: secrets(),
       monthlyBudget: 0.05,
+      sharedPoolMonthlyBudget: 0.05,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider: fake,
       source,
       estimatedCost: 0.03,
@@ -607,6 +636,8 @@ describe("billing classification: HTTP 200 + usage + bad output keeps spend", ()
       db,
       secretStore: secrets(),
       monthlyBudget: 0.05,
+      sharedPoolMonthlyBudget: 0.05,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
       provider: fake,
       source: prepared("after-protected"),
       estimatedCost: 0.05,
@@ -618,7 +649,7 @@ describe("billing classification: HTTP 200 + usage + bad output keeps spend", ()
 })
 
 describe("translation test entrance shares paidRequest + sharedBudget", () => {
-  function enabledSettings(monthlyBudget: number): ShippingSettings {
+  function enabledSettings(monthlyBudget: number, sharedPool: number | null = monthlyBudget): ShippingSettings {
     return {
       ...structuredClone(defaultShippingSettings),
       translation: {
@@ -628,6 +659,9 @@ describe("translation test entrance shares paidRequest + sharedBudget", () => {
         targetLanguage: "zh-CN",
         monthlyBudget,
       },
+      ...(sharedPool === null
+        ? {}
+        : { sharedLlmBudget: { monthlyBudget: sharedPool, currency: TRANSLATION_CURRENCY } }),
     }
   }
 

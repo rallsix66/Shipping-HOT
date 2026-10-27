@@ -286,10 +286,13 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
             latestSource.maxTokens,
             latestSource.protectedTerms ?? [],
           )
+          // Re-read full settings so shared pool + translation sub-limit cannot use a stale snapshot.
+          const latestShippingSettings = await shippingRepository.getSettings()
           const execution = await executeTranslationViaPaidRequest({
             db: options.database,
             secretStore: options.secretStore,
-            monthlyBudget: gateSettings.monthlyBudget,
+            monthlyBudget: normalizeTranslationSettings(latestShippingSettings?.translation).monthlyBudget,
+            sharedLlmBudget: latestShippingSettings?.sharedLlmBudget,
             provider,
             source: latestSource,
             estimatedCost: projectedCost,

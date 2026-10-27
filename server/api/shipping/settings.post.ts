@@ -1,9 +1,14 @@
-import type { Port, ShippingSettings, TranslationSettings } from "@shared/shipping"
+import type { Port, SharedLlmBudgetSettings, ShippingSettings, TranslationSettings } from "@shared/shipping"
 import { updateShippingSettings } from "#/shipping-store"
 import { clearBlockedTranslationCircuitBestEffort } from "#/services/translation-recovery"
+import { SharedLlmBudgetSettingsError } from "#/services/shared-llm-budget-settings"
 
 const congestionLevels: Port["congestionLevel"][] = ["low", "medium", "high", "critical"]
-type SettingsPatch = Partial<Omit<ShippingSettings, "eventThresholds" | "translation">> & { eventThresholds?: Partial<ShippingSettings["eventThresholds"]>, translation?: Partial<TranslationSettings> }
+type SettingsPatch = Partial<Omit<ShippingSettings, "eventThresholds" | "translation" | "sharedLlmBudget">> & {
+  eventThresholds?: Partial<ShippingSettings["eventThresholds"]>
+  translation?: Partial<TranslationSettings>
+  sharedLlmBudget?: Partial<SharedLlmBudgetSettings> | null
+}
 
 function positiveInteger(value: unknown, name: string, max: number) {
   if (typeof value !== "number" || !Number.isInteger(value) || value < 1 || value > max) throw createError({ statusCode: 400, message: `${name} must be an integer from 1 to ${max}` })
@@ -44,7 +49,26 @@ export default defineEventHandler(async (event) => {
     if (translation.monthlyBudget !== undefined && (typeof translation.monthlyBudget !== "number" || !Number.isFinite(translation.monthlyBudget) || translation.monthlyBudget < 0)) throw createError({ statusCode: 400, message: "translation.monthlyBudget is invalid" })
     next.translation = translation
   }
-  const updated = await updateShippingSettings(next)
+  if (body.sharedLlmBudget !== undefined) {
+    // Saving the shared pool alone must NOT trigger translation circuit recovery
+    // (recovery runs only when next.translation has keys below).
+    if (body.sharedLlmBudget === null) {
+      next.sharedLlmBudget = null
+    } else if (!body.sharedLlmBudget || typeof body.sharedLlmBudget !== "object" || Array.isArray(body.sharedLlmBudget)) {
+      throw createError({ statusCode: 400, message: "sharedLlmBudget must be an object" })
+    } else {
+      next.sharedLlmBudget = body.sharedLlmBudget
+    }
+  }
+  let updated
+  try {
+    updated = await updateShippingSettings(next)
+  } catch (error) {
+    if (error instanceof SharedLlmBudgetSettingsError) {
+      throw createError({ statusCode: 400, message: error.message })
+    }
+    throw error
+  }
   // Saving Translation settings is the operator's deliberate "try translation
   // again" action, so it also releases a blocked Translation circuit. Only a patch
   // that actually carries a translation field counts: an empty `translation: {}`

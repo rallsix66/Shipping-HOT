@@ -65,4 +65,21 @@ describe("shipping settings API translation recovery", () => {
     expect(store.updateShippingSettings).not.toHaveBeenCalled()
     expect(recovery.clearBlockedTranslationCircuitBestEffort).not.toHaveBeenCalled()
   })
+
+  it("does not clear the translation circuit when only sharedLlmBudget is saved", async () => {
+    const handler = await loadSettingsHandler()
+    await handler({ body: { sharedLlmBudget: { monthlyBudget: 2, currency: "USD" } } })
+    expect(store.updateShippingSettings).toHaveBeenCalledWith({ sharedLlmBudget: { monthlyBudget: 2, currency: "USD" } })
+    expect(recovery.clearBlockedTranslationCircuitBestEffort).not.toHaveBeenCalled()
+  })
+
+  it("rejects an invalid sharedLlmBudget object before write when store validates", async () => {
+    store.updateShippingSettings.mockImplementation(async () => {
+      const { SharedLlmBudgetSettingsError } = await import("#/services/shared-llm-budget-settings")
+      throw new SharedLlmBudgetSettingsError("sharedLlmBudget.currency must be ISO 4217 (A-Z x3)")
+    })
+    const handler = await loadSettingsHandler()
+    await expect(handler({ body: { sharedLlmBudget: { monthlyBudget: 1, currency: "usd" } } })).rejects.toMatchObject({ statusCode: 400 })
+    expect(recovery.clearBlockedTranslationCircuitBestEffort).not.toHaveBeenCalled()
+  })
 })

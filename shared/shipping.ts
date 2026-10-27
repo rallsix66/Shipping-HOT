@@ -322,6 +322,21 @@ export interface ShippingSettings {
   retentionDays: number
   calendarSync?: CalendarCoverage[]
   translation?: TranslationSettings
+  /**
+   * Shared LLM monthly pool (R3-1 / ADR-007).
+   * Missing on old JSON => unconfigured (fail-closed); do not invent from translation.monthlyBudget.
+   * Coverage: registry chat/embedding tests + translation sync/test + reserved intel steps.
+   * Search/Fetch stay on independent budgets (ADR-011).
+   */
+  sharedLlmBudget?: SharedLlmBudgetSettings
+}
+
+/** Dedicated shared-pool config; never auto-copied from translation.monthlyBudget. */
+export interface SharedLlmBudgetSettings {
+  /** UTC-month pool limit. Must be finite >= 0 when configured. */
+  monthlyBudget: number
+  /** ISO 4217; same-currency only (no FX). */
+  currency: string
 }
 
 export interface TranslationSettings {

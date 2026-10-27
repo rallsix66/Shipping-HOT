@@ -698,7 +698,8 @@ describe("test-connection mock", () => {
     const denied = await runLlmTestConnection({
       db,
       secretStore: store,
-      monthlyBudget: 0,
+      sharedPoolMonthlyBudget: 0,
+      sharedPoolCurrency: "USD",
       providerId: seeded.chatProvider.id,
       modelId: seeded.chatModel.id,
       now: () => T0,
@@ -712,7 +713,8 @@ describe("test-connection mock", () => {
     const ok = await runLlmTestConnection({
       db,
       secretStore: store,
-      monthlyBudget: 10,
+      sharedPoolMonthlyBudget: 10,
+      sharedPoolCurrency: "USD",
       providerId: seeded.chatProvider.id,
       modelId: seeded.chatModel.id,
       transport,
@@ -736,7 +738,8 @@ describe("test-connection mock", () => {
     const again = await runLlmTestConnection({
       db,
       secretStore: store2,
-      monthlyBudget: 10,
+      sharedPoolMonthlyBudget: 10,
+      sharedPoolCurrency: "USD",
       providerId: seeded.chatProvider.id,
       modelId: seeded.chatModel.id,
       transport,
@@ -758,7 +761,8 @@ describe("test-connection mock", () => {
     const denied = await runLlmTestConnection({
       db,
       secretStore: bareOnly,
-      monthlyBudget: 10,
+      sharedPoolMonthlyBudget: 10,
+      sharedPoolCurrency: "USD",
       providerId: seeded.chatProvider.id,
       modelId: seeded.chatModel.id,
       now: () => T0,
@@ -770,7 +774,8 @@ describe("test-connection mock", () => {
     const ok = await runLlmTestConnection({
       db,
       secretStore: namespaced,
-      monthlyBudget: 10,
+      sharedPoolMonthlyBudget: 10,
+      sharedPoolCurrency: "USD",
       providerId: seeded.chatProvider.id,
       modelId: seeded.chatModel.id,
       transport,

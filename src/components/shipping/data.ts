@@ -113,3 +113,28 @@ export function useTranslationSecret() {
     staleTime: 10_000,
   })
 }
+
+export interface SharedLlmBudgetStatusResponse {
+  configured: boolean
+  monthlyBudget: number | null
+  currency: string | null
+  estimatedUsage: number
+  pendingUnknownReserve: number
+  estimatedTotal: number
+  windowFrom: string
+  windowTo: string
+  capabilities: readonly string[]
+  state: "unconfigured" | "budget_zero" | "budget_exhausted" | "currency_invalid" | "ready"
+  gateCode?: string
+  rejectionReason?: string
+  controlBasis: "estimated_usage_plus_pending_unknown_reserve"
+  notAHardInvoiceCap: true
+}
+
+export function useSharedLlmBudgetStatus() {
+  return useQuery({
+    queryKey: ["shared-llm-budget-status"],
+    queryFn: () => myFetch<SharedLlmBudgetStatusResponse>("/shipping/llm/shared-budget"),
+    staleTime: 10_000,
+  })
+}

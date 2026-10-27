@@ -1,5 +1,4 @@
 import process from "node:process"
-import { defaultTranslationSettings } from "@shared/shipping"
 import { FileSecretStore } from "#/secrets/file-secret-store"
 import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { defaultShippingSettings } from "#/database/runtime"
@@ -21,11 +20,10 @@ export default defineEventHandler(async (event) => {
   const dataMode = process.env.SHIPPING_DATA_MODE === "real" ? "real" : "mock"
   await initShippingTables(database, dataMode)
   const settings = await new ShippingRepository(database, dataMode).getSettings() ?? defaultShippingSettings
-  const monthlyBudget = settings.translation?.monthlyBudget ?? defaultTranslationSettings.monthlyBudget
   const result = await runLlmTestConnection({
     db: database,
     secretStore: new FileSecretStore(),
-    monthlyBudget,
+    sharedLlmBudget: settings.sharedLlmBudget,
     providerId: body.providerId,
     modelId: body.modelId,
   })

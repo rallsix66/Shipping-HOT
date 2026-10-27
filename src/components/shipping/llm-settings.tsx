@@ -117,15 +117,45 @@ export function LlmSettingsPanel() {
   const [editPriceOut, setEditPriceOut] = useState("0")
   const [editCurrency, setEditCurrency] = useState("USD")
   const [confirmDelete, setConfirmDelete] = useState<ConfirmTarget | null>(null)
+  const [sharedBudgetInput, setSharedBudgetInput] = useState("")
+  const [sharedCurrencyInput, setSharedCurrencyInput] = useState("USD")
+  const [sharedBudgetStatus, setSharedBudgetStatus] = useState<{
+    configured: boolean
+    monthlyBudget: number | null
+    currency: string | null
+    estimatedUsage: number
+    pendingUnknownReserve: number
+    estimatedTotal: number
+    state: string
+    rejectionReason?: string
+    notAHardInvoiceCap?: boolean
+  }>()
+  const [sharedBudgetMessage, setSharedBudgetMessage] = useState<string>()
 
   const reload = useCallback(async () => {
     setLoadError(undefined)
     try {
-      const [p, m, b] = await Promise.all([
+      const [p, m, b, budgetStatus] = await Promise.all([
         myFetch<{ items: ProviderItem[] }>("/shipping/llm/providers"),
         myFetch<{ items: ModelItem[] }>("/shipping/llm/models"),
         myFetch<{ items: BindingItem[] }>("/shipping/llm/bindings"),
+        myFetch<{
+          configured: boolean
+          monthlyBudget: number | null
+          currency: string | null
+          estimatedUsage: number
+          pendingUnknownReserve: number
+          estimatedTotal: number
+          state: string
+          rejectionReason?: string
+          notAHardInvoiceCap?: boolean
+        }>("/shipping/llm/shared-budget"),
       ])
+      setSharedBudgetStatus(budgetStatus)
+      if (budgetStatus.configured && budgetStatus.monthlyBudget != null && budgetStatus.currency) {
+        setSharedBudgetInput(String(budgetStatus.monthlyBudget))
+        setSharedCurrencyInput(budgetStatus.currency)
+      }
       setProviders(p.items)
       setModels(m.items)
       setBindings(b.items)
@@ -310,7 +340,8 @@ export function LlmSettingsPanel() {
       currency: editCurrency,
     }
     try {
-      await myFetch(`/shipping/llm/models/${editingModelId}`, {
+      // Precise API readback: trust persisted numbers from PATCH response, not local Number() alone.
+      const updated = await myFetch<ModelItem>(`/shipping/llm/models/${editingModelId}`, {
         method: "PATCH",
         body: {
           modelName: editModelName,
@@ -320,8 +351,13 @@ export function LlmSettingsPanel() {
           currency: editCurrency,
         },
       })
+      setEditModelName(updated.modelName)
+      setEditModelPurpose(updated.purpose)
+      setEditPriceIn(String(updated.unitPriceIn))
+      setEditPriceOut(String(updated.unitPriceOut))
+      setEditCurrency(updated.currency)
       setEditingModelId(undefined)
-      setActionMessage("模型已更新（价格/币种/用途已写入）")
+      setActionMessage(`模型已更新（回读价格 in=${updated.unitPriceIn} out=${updated.unitPriceOut} ${updated.currency}）`)
       await reload()
     } catch (error) {
       setEditModelName(retained.name)
@@ -434,6 +470,41 @@ export function LlmSettingsPanel() {
     }
   }
 
+  const saveSharedBudget = async () => {
+    setBusy(true)
+    setSharedBudgetMessage(undefined)
+    setActionMessage(undefined)
+    try {
+      const monthlyBudget = Number(sharedBudgetInput)
+      const currency = sharedCurrencyInput.trim().toUpperCase()
+      await myFetch("/shipping/settings", {
+        method: "POST",
+        body: { sharedLlmBudget: { monthlyBudget, currency } },
+      })
+      const status = await myFetch<{
+        configured: boolean
+        monthlyBudget: number | null
+        currency: string | null
+        estimatedUsage: number
+        pendingUnknownReserve: number
+        estimatedTotal: number
+        state: string
+        rejectionReason?: string
+        notAHardInvoiceCap?: boolean
+      }>("/shipping/llm/shared-budget")
+      setSharedBudgetStatus(status)
+      if (status.configured && status.monthlyBudget != null && status.currency) {
+        setSharedBudgetInput(String(status.monthlyBudget))
+        setSharedCurrencyInput(status.currency)
+      }
+      setSharedBudgetMessage(`共享 LLM 总池已保存（回读 ${status.monthlyBudget ?? "—"} ${status.currency ?? ""} · 状态 ${status.state}）`)
+    } catch (error) {
+      setSharedBudgetMessage(`共享 LLM 总池保存失败：${apiErrorCode(error)}`)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <section className="glass-panel translation-panel max-w-2xl p-6" aria-label="模型服务商设置" data-testid="llm-settings-panel">
       <p className="text-xs op-65">
@@ -454,6 +525,93 @@ export function LlmSettingsPanel() {
           {actionMessage}
         </p>
       )}
+
+      <div className="mt-5 rounded border border-dashed border-slate-300 p-4" data-testid="shared-llm-budget-panel">
+        <h3 className="text-sm font-medium">共享 LLM 总池（Settings）</h3>
+        <p className="mt-1 text-xs op-65">
+          覆盖 registry chat/embedding、translation sync/test 等同一估算总池。默认未配置/零额/非法币种 fail-closed；
+          不会从 translation.monthlyBudget 自动复制授权。translation 原预算仍是更严的子限制。
+          Search/Fetch 独立门禁不变。本控件只做估算用量 + pending/unknown 占用，不是真实账单硬封顶。
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <label className="text-xs">
+            月额度
+            <input
+              className="mt-1 w-full rounded border px-2 py-1 text-sm"
+              data-testid="shared-llm-budget-input"
+              inputMode="decimal"
+              value={sharedBudgetInput}
+              onChange={e => setSharedBudgetInput(e.target.value)}
+              placeholder="未配置则 fail-closed"
+            />
+          </label>
+          <label className="text-xs">
+            币种（ISO 4217）
+            <input
+              className="mt-1 w-full rounded border px-2 py-1 text-sm uppercase"
+              data-testid="shared-llm-budget-currency"
+              value={sharedCurrencyInput}
+              onChange={e => setSharedCurrencyInput(e.target.value.toUpperCase())}
+              maxLength={3}
+            />
+          </label>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="btn-gradient"
+            data-testid="shared-llm-budget-save"
+            disabled={busy}
+            onClick={() => void saveSharedBudget()}
+          >
+            保存总池
+          </button>
+        </div>
+        {sharedBudgetMessage && (
+          <p className="mt-2 text-sm" data-testid="shared-llm-budget-message">{sharedBudgetMessage}</p>
+        )}
+        {sharedBudgetStatus && (
+          <dl className="mt-3 grid gap-1 text-xs" data-testid="shared-llm-budget-status">
+            <div className="flex justify-between gap-3">
+              <dt className="op-60">配置状态</dt>
+              <dd>
+                {sharedBudgetStatus.configured ? "已配置" : "未配置"}
+                {" "}
+                ·
+                {" "}
+                {sharedBudgetStatus.state}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="op-60">配置额度</dt>
+              <dd>
+                {sharedBudgetStatus.monthlyBudget ?? "—"}
+                {" "}
+                {sharedBudgetStatus.currency ?? ""}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="op-60">已估算用量</dt>
+              <dd>{sharedBudgetStatus.estimatedUsage}</dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="op-60">pending/unknown 占用</dt>
+              <dd>{sharedBudgetStatus.pendingUnknownReserve}</dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="op-60">估算合计</dt>
+              <dd>{sharedBudgetStatus.estimatedTotal}</dd>
+            </div>
+            {sharedBudgetStatus.rejectionReason && (
+              <div className="flex justify-between gap-3 text-rose-600">
+                <dt className="op-60">拒绝原因</dt>
+                <dd data-testid="shared-llm-budget-rejection">{sharedBudgetStatus.rejectionReason}</dd>
+              </div>
+            )}
+            <div className="mt-1 op-50">控制依据：估算用量 + pending/unknown 预留；非真实账单绝对硬封顶。</div>
+          </dl>
+        )}
+      </div>
 
       {confirmDelete && (
         <div className="mt-4 rounded border border-rose-300 bg-rose-50 p-3" data-testid="llm-delete-confirm">

@@ -2,7 +2,8 @@
  * Translation paid bridge (R3-1 / ADR-007).
  *
  * Routes a translation Provider call through paidRequest + shared LLM budget
- * so registry chat/embedding and translation share one same-currency pool.
+ * (ShippingSettings.sharedLlmBudget) so registry chat/embedding and translation
+ * share one same-currency pool; translation.monthlyBudget stays a stricter sub-limit.
  * Reservation ownership stays on paid_receipt (BEGIN IMMEDIATE); this module
  * does not invent a second ledger. Search/Fetch omit sharedBudget (ADR-011).
  *
@@ -16,6 +17,7 @@
  * and estimatedCost 0 (characters metadata only) to avoid double-billing.
  */
 import type { Database } from "db0"
+import type { SharedLlmBudgetSettings } from "@shared/shipping"
 import type { SecretStore, TranslationProvider, TranslationUsage } from "#/providers/contracts"
 import { ProviderError } from "#/providers/contracts"
 import { estimateDeepSeekCost } from "#/providers/translation/deepseek-provider"
@@ -27,7 +29,8 @@ import {
   completeReceipt,
   paidRequest,
 } from "#/intel/llm/receipts"
-import { resolveSharedLlmBudgetFromTranslation } from "#/intel/llm/shared-budget"
+import { resolveSharedLlmBudgetGate } from "#/intel/llm/shared-budget"
+import { resolveSharedLlmBudgetFromSettings } from "#/services/shared-llm-budget-settings"
 import { TranslationValidationError, protectTranslationText, restoreAndValidateProtectedTranslation } from "#/services/translation-protection"
 import {
   type PreparedTranslationSource,
@@ -77,8 +80,17 @@ interface TranslationPaidResponse {
 export interface PaidTranslationOptions {
   db: Database
   secretStore: SecretStore
-  /** Pool limit from translation.monthlyBudget (isolated/fake amounts in tests). */
+  /** Translation sub-limit (translation.monthlyBudget). Checked inside the claim; pool cannot relax it. */
   monthlyBudget: number | null | undefined
+  /**
+   * Dedicated shared pool from ShippingSettings.sharedLlmBudget.
+   * Required for the pool gate; never invent from translation.monthlyBudget.
+   * Tests may pass an explicit SharedLlmBudgetSettings / gate fields.
+   */
+  sharedLlmBudget?: SharedLlmBudgetSettings | null
+  /** Test-only explicit pool override (isolated fake amounts). */
+  sharedPoolMonthlyBudget?: number | null
+  sharedPoolCurrency?: string
   provider: TranslationProvider
   source: PreparedTranslationSource
   /** Pre-call reserve; must be finite >= 0. */
@@ -109,15 +121,18 @@ export async function executeTranslationViaPaidRequest(options: PaidTranslationO
   const clock = options.now ?? (() => new Date())
   const source = options.source
   const provider = options.provider
-  const sharedBudget = resolveSharedLlmBudgetFromTranslation(options.monthlyBudget, TRANSLATION_CURRENCY)
+  const sharedBudget = options.sharedPoolMonthlyBudget !== undefined
+    ? resolveSharedLlmBudgetGate(options.sharedPoolMonthlyBudget, options.sharedPoolCurrency ?? TRANSLATION_CURRENCY)
+    : resolveSharedLlmBudgetFromSettings(options.sharedLlmBudget)
 
   try {
     const paid = await paidRequest(
       {
         db: options.db,
         secretStore: options.secretStore,
+        // Sub-limit: translation.monthlyBudget (dual gate with shared pool inside claim).
         monthlyBudget: options.monthlyBudget,
-        currency: TRANSLATION_CURRENCY,
+        currency: sharedBudget.currency || TRANSLATION_CURRENCY,
         sharedBudget,
         now: clock,
         timeoutMs: options.timeoutMs,

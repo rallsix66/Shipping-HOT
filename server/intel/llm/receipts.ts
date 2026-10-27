@@ -94,7 +94,11 @@ export interface ReceiptRequest {
 export interface PaidRequestContext {
   db: Database
   secretStore: SecretStore
-  /** From the caller's existing settings; null/undefined = unconfigured = no call. */
+  /**
+   * Capability sub-limit (translation) or ADR-011 per-capability budget (Search/Fetch).
+   * With sharedBudget: undefined skips the sub-limit (registry tests); null/number still gated.
+   * Without sharedBudget: null/undefined = unconfigured = no call.
+   */
   monthlyBudget: number | null | undefined
   currency: string
   now?: () => Date
@@ -102,7 +106,8 @@ export interface PaidRequestContext {
   timeoutMs?: number
   /**
    * When set, the BEGIN IMMEDIATE claim gates against the shared LLM pool
-   * (aggregate usage + pending/unknown) instead of per provider x capability.
+   * (aggregate usage + pending/unknown) from ShippingSettings.sharedLlmBudget.
+   * Translation also passes monthlyBudget as a stricter sub-limit in the same claim.
    * Search/Fetch must omit this (ADR-011 independent budgets).
    * aggregatePaidMonthSpend alone is never an execution gate -- only this path is.
    */
@@ -204,6 +209,14 @@ async function checkBudget(ctx: PaidRequestContext, req: ReceiptRequest, now: Da
     } catch (error) {
       if (error instanceof SharedBudgetGateError) throw mapSharedBudgetError(error)
       throw error
+    }
+    // Dual gate: capability sub-limit (e.g. translation.monthlyBudget) still applies
+    // inside the same BEGIN IMMEDIATE claim. Shared pool must never relax it.
+    // Registry chat/embedding omit monthlyBudget (undefined) so only the pool applies.
+    // Explicit null still fail-closes as unconfigured for the sub-limit.
+    if (ctx.monthlyBudget !== undefined) {
+      const sub = decidePaidBudget(ctx.monthlyBudget, await monthSpend(ctx.db, req, now), req.estimatedCost)
+      if (sub) throw new PaidGateError(`paid_${sub}`)
     }
     return
   }

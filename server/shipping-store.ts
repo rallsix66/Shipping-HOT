@@ -1,6 +1,6 @@
 import process from "node:process"
 import { filterEventsForOperationalContext, recordAllowedForDataMode, sourceAllowedForOperationalContext } from "@shared/shipping"
-import type { DataEvidence, DatabasePersistenceStatus, FeedItem, ProvenanceAware, ShippingSettings, ShippingSnapshot, TranslationSettings } from "@shared/shipping"
+import type { DataEvidence, DatabasePersistenceStatus, FeedItem, ProvenanceAware, SharedLlmBudgetSettings, ShippingSettings, ShippingSnapshot, TranslationSettings } from "@shared/shipping"
 import { createMockSnapshot } from "@shared/shipping-fixtures"
 import { type CalendarCountryCode, type CalendarEvent, type CalendarProviderResult, type CalendarQuery, calendarCountries, calendarEventKey, calendarEventLegacyId } from "@shared/calendar"
 import { detectShippingEvents } from "@shared/shipping-engine"
@@ -10,6 +10,7 @@ import { PromoCalendarRepository } from "#/database/promo-calendar"
 import { PolicyRepository } from "#/database/policy"
 import { defaultShippingSettings, healthyPersistenceStatus, persistenceUnavailableError } from "#/database/runtime"
 import { normalizeTranslationSettings } from "#/services/translation-settings"
+import { validateSharedLlmBudgetForSave } from "#/services/shared-llm-budget-settings"
 import { isWeatherFeedItem, operationalSourceContext, providerModes, providers } from "#/providers/shipping"
 
 let repository: ShippingRepository | undefined
@@ -251,17 +252,37 @@ export async function togglePortFollow(id: string) {
   return { id, isWatched }
 }
 
-export async function updateShippingSettings(settings: Partial<Omit<ShippingSettings, "eventThresholds" | "translation">> & { eventThresholds?: Partial<ShippingSettings["eventThresholds"]>, translation?: Partial<TranslationSettings> }) {
+export async function updateShippingSettings(settings: Partial<Omit<ShippingSettings, "eventThresholds" | "translation" | "sharedLlmBudget">> & {
+  eventThresholds?: Partial<ShippingSettings["eventThresholds"]>
+  translation?: Partial<TranslationSettings>
+  sharedLlmBudget?: Partial<SharedLlmBudgetSettings> | null
+}) {
   await initialize()
   const persistence = requireRepository()
+  // Read raw stored row so missing sharedLlmBudget is not invented by snapshot normalize.
+  const storedRaw = await persistence.getSettings() ?? structuredClone(defaultShippingSettings)
   const current = await getShippingSnapshot()
+  const { sharedLlmBudget: _sharedLlmBudgetPatch, translation: _translationPatch, eventThresholds: _eventThresholdsPatch, ...scalarPatch } = settings
+  void _sharedLlmBudgetPatch
+  void _translationPatch
+  void _eventThresholdsPatch
   const next: ShippingSettings = {
     ...current.settings,
-    ...settings,
+    ...scalarPatch,
     eventThresholds: { ...current.settings.eventThresholds, ...settings.eventThresholds },
     translation: settings.translation === undefined
       ? normalizeTranslationSettings(current.settings.translation)
       : normalizeTranslationSettings({ ...current.settings.translation, ...settings.translation }),
+  }
+  // Preserve absent sharedLlmBudget on unrelated patches (no rewrite of old JSON).
+  // Explicit null clears the dedicated pool (back to unconfigured).
+  if (settings.sharedLlmBudget === undefined) {
+    if (storedRaw.sharedLlmBudget !== undefined) next.sharedLlmBudget = storedRaw.sharedLlmBudget
+    else delete next.sharedLlmBudget
+  } else if (settings.sharedLlmBudget === null) {
+    delete next.sharedLlmBudget
+  } else {
+    next.sharedLlmBudget = validateSharedLlmBudgetForSave(settings.sharedLlmBudget, storedRaw.sharedLlmBudget)
   }
   try {
     await persistence.saveSettings(next)

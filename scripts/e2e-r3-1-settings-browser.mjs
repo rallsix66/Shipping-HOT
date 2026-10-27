@@ -203,12 +203,63 @@ async function main() {
   if (!ready) throw new Error(`server not ready; log: ${serverLogPath}`)
   check(ready?.database?.schemaVersion === 31, `schema v31 after init (got ${ready?.database?.schemaVersion})`)
 
+  // Shared pool GET before configure: unconfigured fail-closed, zero provider/receipt side effects.
+  const countersBeforeSharedGet = await readDbCounters()
+  const sharedGet0 = await fetch(`${BASE}/api/shipping/llm/shared-budget`)
+  const sharedBody0 = await sharedGet0.json().catch(() => ({}))
+  check(sharedGet0.status === 200, `GET shared-budget unconfigured -> ${sharedGet0.status}`)
+  check(sharedBody0.configured === false && sharedBody0.state === "unconfigured", `shared-budget starts unconfigured (got ${JSON.stringify(sharedBody0)})`)
+  check(sharedBody0.notAHardInvoiceCap === true, "shared-budget discloses notAHardInvoiceCap")
+  const countersAfterSharedGet = await readDbCounters()
+  check(
+    countersAfterSharedGet.usage === countersBeforeSharedGet.usage
+    && countersAfterSharedGet.receipts === countersBeforeSharedGet.receipts
+    && countersAfterSharedGet.attempts === countersBeforeSharedGet.attempts,
+    `GET shared-budget: no receipt/usage increment (before=${JSON.stringify(countersBeforeSharedGet)} after=${JSON.stringify(countersAfterSharedGet)})`,
+  )
+  evidence.api.sharedBudgetGet0 = sharedBody0
+
+  const badCurrency = await fetch(`${BASE}/api/shipping/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ sharedLlmBudget: { monthlyBudget: 5, currency: "usd" } }),
+  })
+  check(badCurrency.status === 400, `sharedLlmBudget bad currency rejected -> ${badCurrency.status}`)
+
+  // Translation sub-limit + enable (must NOT invent shared pool authorization).
   const patch = await fetch(`${BASE}/api/shipping/settings`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ translation: { enabled: true, monthlyBudget: 10 } }),
   })
-  check(patch.status < 500, `settings budget configure -> ${patch.status}`)
+  check(patch.status < 500, `settings translation sub-budget configure -> ${patch.status}`)
+  const sharedAfterTranslationOnly = await (await fetch(`${BASE}/api/shipping/llm/shared-budget`)).json().catch(() => ({}))
+  check(sharedAfterTranslationOnly.configured === false, `translation-only save must not invent shared pool (got ${JSON.stringify(sharedAfterTranslationOnly)})`)
+
+  // Dedicated shared pool — separate from translation.monthlyBudget.
+  const sharedSave = await fetch(`${BASE}/api/shipping/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ sharedLlmBudget: { monthlyBudget: 5, currency: "USD" } }),
+  })
+  const sharedSaveBody = await sharedSave.json().catch(() => ({}))
+  check(sharedSave.status === 200 || sharedSave.status === 201, `sharedLlmBudget save -> ${sharedSave.status}`)
+  check(sharedSaveBody?.sharedLlmBudget?.monthlyBudget === 5 && sharedSaveBody?.sharedLlmBudget?.currency === "USD", `shared pool persisted on settings response (got ${JSON.stringify(sharedSaveBody?.sharedLlmBudget)})`)
+
+  const sharedGet1 = await fetch(`${BASE}/api/shipping/llm/shared-budget`)
+  const sharedBody1 = await sharedGet1.json().catch(() => ({}))
+  check(sharedGet1.status === 200 && sharedBody1.configured === true && sharedBody1.monthlyBudget === 5 && sharedBody1.currency === "USD", `GET shared-budget after save (got ${JSON.stringify(sharedBody1)})`)
+  evidence.api.sharedBudgetGet1 = sharedBody1
+
+  // Unrelated patch must preserve shared pool (no overwrite / no rewrite of absent fields elsewhere).
+  const unrelated = await fetch(`${BASE}/api/shipping/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ refreshInterval: 15 }),
+  })
+  const unrelatedBody = await unrelated.json().catch(() => ({}))
+  check(unrelated.status === 200 || unrelated.status === 201, `unrelated settings patch -> ${unrelated.status}`)
+  check(unrelatedBody?.sharedLlmBudget?.monthlyBudget === 5 && unrelatedBody?.sharedLlmBudget?.currency === "USD", `unrelated patch preserves shared pool (got ${JSON.stringify(unrelatedBody?.sharedLlmBudget)})`)
 
   const providerRes = await fetch(`${BASE}/api/shipping/llm/providers`, {
     method: "POST",
@@ -332,7 +383,11 @@ async function main() {
   })
   const modelPatched = await modelPatch.json().catch(() => ({}))
   check(modelPatch.status === 200 || modelPatch.status === 201, `PATCH model price/purpose -> ${modelPatch.status}`)
-  check(modelPatched.unitPriceIn === 0.01 && modelPatched.currency === "USD", "model price/currency persisted")
+  check(modelPatched.unitPriceIn === 0.01 && modelPatched.unitPriceOut === 0.02 && modelPatched.currency === "USD", `model price precise API readback (got in=${modelPatched.unitPriceIn} out=${modelPatched.unitPriceOut} ${modelPatched.currency})`)
+  // Re-GET list and confirm same numbers (precise readback, not client Number alone).
+  const modelsAfterPrice = await (await fetch(`${BASE}/api/shipping/llm/models`)).json().catch(() => ({ items: [] }))
+  const priceRow = (modelsAfterPrice.items || []).find(m => m.id === model.id)
+  check(priceRow?.unitPriceIn === 0.01 && priceRow?.unitPriceOut === 0.02 && priceRow?.currency === "USD", `GET models list matches PATCH readback (got ${JSON.stringify(priceRow && { in: priceRow.unitPriceIn, out: priceRow.unitPriceOut, currency: priceRow.currency })})`)
 
   const bindRes = await fetch(`${BASE}/api/shipping/llm/bindings`, {
     method: "PUT",
@@ -484,6 +539,45 @@ async function main() {
   )
   check(bodyText.includes("不是真实服务商已连接") || bodyText.includes("不能当作真实"), "settings UI denies real connected claim")
   check(bodyText.includes("LLM") || bodyText.includes("服务商") || bodyText.includes("模型"), "settings UI shows LLM registry panel")
+  check(bodyText.includes("共享 LLM 总池") || bodyText.includes("shared"), "settings UI shows shared LLM pool panel copy")
+
+  const sharedUi = await evaluate(`(async () => {
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const q = (sel) => document.querySelector(sel);
+    const setNative = (el, value) => {
+      const proto = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
+      if (proto && proto.set) proto.set.call(el, value); else el.value = value;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    const out = { panel: !!q('[data-testid="shared-llm-budget-panel"]') };
+    if (!out.panel) return out;
+    const input = q('[data-testid="shared-llm-budget-input"]');
+    const currency = q('[data-testid="shared-llm-budget-currency"]');
+    const save = q('[data-testid="shared-llm-budget-save"]');
+    out.hasControls = !!(input && currency && save);
+    if (input) { input.focus(); setNative(input, '4.5'); }
+    if (currency) { currency.focus(); setNative(currency, 'USD'); }
+    if (save) save.click();
+    for (let i = 0; i < 40; i++) {
+      await sleep(250);
+      const msg = q('[data-testid="shared-llm-budget-message"]')?.textContent || '';
+      const status = q('[data-testid="shared-llm-budget-status"]')?.textContent || '';
+      if (msg.includes('已保存') && (msg.includes('4.5') || status.includes('4.5'))) {
+        out.message = msg; out.statusText = status; out.savedOk = true; return out;
+      }
+    }
+    out.message = q('[data-testid="shared-llm-budget-message"]')?.textContent || '';
+    out.statusText = q('[data-testid="shared-llm-budget-status"]')?.textContent || '';
+    out.savedOk = (out.message.includes('已保存') && (out.message.includes('4.5') || out.statusText.includes('4.5')));
+    return out;
+  })()`, true)
+  evidence.uiSharedBudget = sharedUi
+  check(sharedUi?.panel === true, `UI shared pool panel present (got ${JSON.stringify(sharedUi)})`)
+  check(sharedUi?.hasControls === true, "UI shared pool has input/currency/save")
+  check(sharedUi?.savedOk === true, `UI shared pool save + status (got ${JSON.stringify(sharedUi)})`)
+  const sharedAfterUi = await (await fetch(`${BASE}/api/shipping/llm/shared-budget`)).json().catch(() => ({}))
+  check(sharedAfterUi.configured === true && Number(sharedAfterUi.monthlyBudget) === 4.5 && sharedAfterUi.currency === "USD", `GET shared-budget matches UI save (got ${JSON.stringify(sharedAfterUi)})`)
 
   const clickResult = await evaluate(`(() => {
     const buttons = Array.from(document.querySelectorAll("button"));
@@ -559,9 +653,10 @@ async function main() {
   const countersBeforeBrowse = await readDbCounters()
   evidence.countersBeforeBrowse = countersBeforeBrowse
   await navigate("/settings")
+  const providerEditSel = `[data-testid="llm-provider-edit-${provider.id}"]`
   await waitFor(async () => {
-    const text = await evaluate("document.body?.innerText ?? ''")
-    return (text.includes("\u5DF2\u767B\u8BB0\u670D\u52A1\u5546") || text.includes("\u7F16\u8F91")) ? true : undefined
+    const editReady = await evaluate(`Boolean(document.querySelector(${JSON.stringify(providerEditSel)}))`)
+    return editReady ? true : undefined
   }, 20000)
 
   const manageUi = await evaluate(`(async () => {\n`

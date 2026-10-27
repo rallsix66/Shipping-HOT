@@ -190,6 +190,7 @@ async function runTranslationTestUnlocked(input: TranslationTestInput): Promise<
     db: input.database,
     secretStore: input.secretStore,
     monthlyBudget: gate.settings.monthlyBudget,
+    sharedLlmBudget: input.settings.sharedLlmBudget,
     provider,
     source: prepared,
     estimatedCost,

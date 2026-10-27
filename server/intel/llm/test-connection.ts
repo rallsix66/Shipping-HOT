@@ -4,14 +4,15 @@
  * results are labelled as test fixtures and must never be shown as a real vendor connection.
  */
 import type { Database } from "db0"
+import type { SharedLlmBudgetSettings } from "@shared/shipping"
 import type { SecretStore } from "#/providers/contracts"
 import { LlmRegistryError, LlmRegistryRepository } from "#/database/llm-registry"
 import { PaidGateError, paidRequest } from "#/intel/llm/receipts"
 import { MOCK_TRANSPORT_LABEL, createMockOpenAiTransport } from "#/intel/llm/openai-compatible.mock"
 import { createOpenAiCompatibleClient } from "#/intel/llm/openai-compatible"
 import { estimateTokenCost } from "#/intel/llm/registry"
-import { resolveSharedLlmBudgetFromTranslation } from "#/intel/llm/shared-budget"
-import { TRANSLATION_CURRENCY } from "#/services/translation-settings"
+import { resolveSharedLlmBudgetGate } from "#/intel/llm/shared-budget"
+import { resolveSharedLlmBudgetFromSettings } from "#/services/shared-llm-budget-settings"
 
 export type TestConnectionResult =
   | {
@@ -37,7 +38,11 @@ export type TestConnectionResult =
 export interface TestConnectionOptions {
   db: Database
   secretStore: SecretStore
-  monthlyBudget: number | null | undefined
+  /** Dedicated shared pool (Settings). Never translation.monthlyBudget. */
+  sharedLlmBudget?: SharedLlmBudgetSettings | null
+  /** Test-only explicit pool override. */
+  sharedPoolMonthlyBudget?: number | null
+  sharedPoolCurrency?: string
   providerId: string
   modelId: string
   /** Injected transport; defaults to zero-network mock. */
@@ -62,12 +67,15 @@ export async function runLlmTestConnection(options: TestConnectionOptions): Prom
   const estimatedCost = estimateTokenCost(model, estimateTokensIn, estimateTokensOut)
 
   try {
-    const sharedBudget = resolveSharedLlmBudgetFromTranslation(options.monthlyBudget, TRANSLATION_CURRENCY)
+    const sharedBudget = options.sharedPoolMonthlyBudget !== undefined
+      ? resolveSharedLlmBudgetGate(options.sharedPoolMonthlyBudget, options.sharedPoolCurrency ?? model.currency)
+      : resolveSharedLlmBudgetFromSettings(options.sharedLlmBudget)
     const result = await paidRequest(
       {
         db: options.db,
         secretStore: options.secretStore,
-        monthlyBudget: options.monthlyBudget,
+        // Registry test: no translation sub-limit — only the shared pool.
+        monthlyBudget: undefined,
         currency: model.currency,
         sharedBudget,
         now: options.now,
