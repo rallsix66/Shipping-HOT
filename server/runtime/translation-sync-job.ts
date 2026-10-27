@@ -25,6 +25,7 @@ import {
 import { type PreparedTranslationSource, TranslationService, feedTranslationSources, isFeedItemProviderTranslationEligible } from "#/services/translation-service"
 import { isTranslationCircuitBlockingFailure, isTranslationRetryableFailure, translationRetryBackoffMs } from "#/services/translation-failure-policy"
 import { withTranslationExecutor } from "#/services/translation-executor"
+import { executeTranslationViaPaidRequest, translationCharactersUsagePatch } from "#/services/translation-paid"
 import type { RuntimeJob, SyncResult } from "#/runtime/background-runtime"
 
 export const TRANSLATION_SYNC_JOB_ID = "translation-sync"
@@ -212,7 +213,6 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
 
         for (const item of work) {
           if (processed >= maxFields || stopAfterFailure) break
-          const service = item.scope === "article" ? articleService : feedService
           const prepared = item.source
           const claimAt = now()
           const claimAtIso = claimAt.toISOString()
@@ -278,12 +278,57 @@ export function createTranslationSyncJob(options: TranslationSyncJobOptions): Ru
             break
           }
 
-          const execution = await service.execute(latestSource)
+          // Shared LLM pool reserve (ADR-007): paidRequest + sharedBudget.
+          // Search/Fetch keep independent gates and never enter this path (ADR-011).
+          const projectedCost = articleConservativeProjectedCostUsd(
+            latestSource.sourceText,
+            latestSource.targetLanguage,
+            latestSource.maxTokens,
+            latestSource.protectedTerms ?? [],
+          )
+          const execution = await executeTranslationViaPaidRequest({
+            db: options.database,
+            secretStore: options.secretStore,
+            monthlyBudget: gateSettings.monthlyBudget,
+            provider,
+            source: latestSource,
+            estimatedCost: projectedCost,
+            now,
+            timeoutMs: TRANSLATION_PROVIDER_TIMEOUT_MS,
+          })
           const completedAt = now().toISOString()
-          const usagePatch = usageFor(latestSource, item.scope, execution, completedAt)
+          // Avoid double-billing: paidRequest already wrote cost/tokens; characters-only metadata optional.
+          const usagePatch = execution.usageRecordedByPaidRequest
+            ? (execution.status === "succeeded"
+                ? translationCharactersUsagePatch({
+                    sourceText: latestSource.sourceText,
+                    translatedText: execution.translatedText,
+                    scope: item.scope,
+                    now: completedAt,
+                  })
+                : undefined)
+            : usageFor(latestSource, item.scope, execution, completedAt)
           if (execution.status === "succeeded") {
             await translationRepository.completeTranslationSuccess({ ...identity, leaseUntil, now: completedAt, translatedText: execution.translatedText, translatedAt: completedAt, providerUsage: usagePatch })
             succeeded += 1
+            continue
+          }
+          if (execution.paidGateCode) {
+            await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "translation_gate_changed", errorMessage: execution.paidGateCode, retryable: true, nextRetryAt: completedAt })
+            terminalStatus = "skipped"
+            terminalErrorCode = execution.paidGateCode
+            break
+          }
+          if (execution.errorCode === "paid_result_unknown") {
+            // DeepSeek/paid unknown: hold reservation; do not auto-retry the same receipt.
+            await translationRepository.completeNonRetryableFailure({ ...identity, leaseUntil, now: completedAt, errorCode: "paid_result_unknown", errorMessage: execution.errorMessage ?? "paid_result_unknown" })
+            terminalStatus = "failed"
+            terminalErrorCode = "paid_result_unknown"
+            stopAfterFailure = true
+            continue
+          }
+          if (execution.errorCode === "paid_receipt_busy") {
+            await translationRepository.releaseTranslationClaim({ ...identity, leaseUntil, errorCode: "paid_receipt_busy", errorMessage: "receipt in flight", retryable: true, nextRetryAt: completedAt })
             continue
           }
           if (execution.status === "unconfigured") {

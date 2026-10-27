@@ -14,8 +14,9 @@ import type { Database } from "db0"
 import type { SecretStore } from "#/providers/contracts"
 import { recordProviderUsageInTransaction } from "#/database/runtime-jobs"
 import { type PaidBudgetCode, decidePaidBudget, paidBudgetWindow } from "#/services/paid-budget"
+import { SharedBudgetGateError, type SharedLlmBudgetGate, assertSharedLlmBudgetInTransaction } from "#/intel/llm/shared-budget"
 
-export type PaidGateCode = `paid_${PaidBudgetCode}` | "paid_secret_missing"
+export type PaidGateCode = `paid_${PaidBudgetCode}` | "paid_secret_missing" | "paid_budget_currency_mismatch" | "paid_budget_currency_mixed" | "paid_budget_currency_unknown" | "paid_budget_scope_invalid"
 
 /** No request was sent: budget or credential gate. */
 export class PaidGateError extends Error {
@@ -99,6 +100,13 @@ export interface PaidRequestContext {
   now?: () => Date
   /** Optional deadline for the call; hitting it after sending leaves the outcome unknown. */
   timeoutMs?: number
+  /**
+   * When set, the BEGIN IMMEDIATE claim gates against the shared LLM pool
+   * (aggregate usage + pending/unknown) instead of per provider x capability.
+   * Search/Fetch must omit this (ADR-011 independent budgets).
+   * aggregatePaidMonthSpend alone is never an execution gate -- only this path is.
+   */
+  sharedBudget?: SharedLlmBudgetGate
 }
 
 export interface ReceiptResult {
@@ -181,7 +189,25 @@ async function monthSpend(db: Database, req: ReceiptRequest, now: Date): Promise
   return Number(usage.spend) + Number(pending.spend)
 }
 
+function mapSharedBudgetError(error: SharedBudgetGateError): PaidGateError {
+  if (error.code === "budget_currency_mismatch") return new PaidGateError("paid_budget_currency_mismatch")
+  if (error.code === "budget_currency_mixed") return new PaidGateError("paid_budget_currency_mixed")
+  if (error.code === "budget_currency_unknown") return new PaidGateError("paid_budget_currency_unknown")
+  if (error.code === "budget_scope_invalid") return new PaidGateError("paid_budget_scope_invalid")
+  return new PaidGateError(`paid_${error.code}`)
+}
+
 async function checkBudget(ctx: PaidRequestContext, req: ReceiptRequest, now: Date): Promise<void> {
+  if (ctx.sharedBudget) {
+    try {
+      await assertSharedLlmBudgetInTransaction(ctx.db, ctx.sharedBudget, ctx.currency, req.estimatedCost, now)
+    } catch (error) {
+      if (error instanceof SharedBudgetGateError) throw mapSharedBudgetError(error)
+      throw error
+    }
+    return
+  }
+  // ADR-011 default: per provider_id x capability (Search/Fetch independent).
   const code = decidePaidBudget(ctx.monthlyBudget, await monthSpend(ctx.db, req, now), req.estimatedCost)
   if (code) throw new PaidGateError(`paid_${code}`)
 }

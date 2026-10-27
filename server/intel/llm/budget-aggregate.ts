@@ -6,8 +6,8 @@
  * Cross-currency numeric sum is forbidden; unknown/mismatched currency → fail-closed (no FX network).
  * Pending/unknown with usage_recorded = 0 stay reserved (never auto-released here).
  *
- * Translation executor still uses its own budget path and is NOT wired through this aggregate —
- * shared "all LLM" total budget remains pending until that path is connected without double-billing.
+ * Translation paid path wires through paidRequest(sharedBudget),
+ * which calls this helper inside BEGIN IMMEDIATE; this module itself is never a standalone execution gate.
  */
 import type { Database } from "db0"
 import { paidBudgetWindow } from "#/services/paid-budget"

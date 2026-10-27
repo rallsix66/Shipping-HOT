@@ -10,6 +10,8 @@ import { PaidGateError, paidRequest } from "#/intel/llm/receipts"
 import { MOCK_TRANSPORT_LABEL, createMockOpenAiTransport } from "#/intel/llm/openai-compatible.mock"
 import { createOpenAiCompatibleClient } from "#/intel/llm/openai-compatible"
 import { estimateTokenCost } from "#/intel/llm/registry"
+import { resolveSharedLlmBudgetFromTranslation } from "#/intel/llm/shared-budget"
+import { TRANSLATION_CURRENCY } from "#/services/translation-settings"
 
 export type TestConnectionResult =
   | {
@@ -60,12 +62,14 @@ export async function runLlmTestConnection(options: TestConnectionOptions): Prom
   const estimatedCost = estimateTokenCost(model, estimateTokensIn, estimateTokensOut)
 
   try {
+    const sharedBudget = resolveSharedLlmBudgetFromTranslation(options.monthlyBudget, TRANSLATION_CURRENCY)
     const result = await paidRequest(
       {
         db: options.db,
         secretStore: options.secretStore,
         monthlyBudget: options.monthlyBudget,
         currency: model.currency,
+        sharedBudget,
         now: options.now,
       },
       {
