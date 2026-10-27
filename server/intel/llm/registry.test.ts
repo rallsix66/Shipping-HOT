@@ -3,12 +3,17 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import type { ClipAudit } from "@shared/manual-clip"
 import { initShippingTables } from "#/database/shipping"
 import { readDatabaseMetadata } from "#/database/runtime"
-import { LlmRegistryError, LlmRegistryRepository } from "#/database/llm-registry"
-import { aggregatePaidMonthSpend } from "#/intel/llm/budget-aggregate"
+import {
+  LLM_SECRET_REF_PREFIX,
+  LlmRegistryError,
+  LlmRegistryRepository,
+  llmSecretRefForProviderId,
+} from "#/database/llm-registry"
+import { BudgetAggregateError, aggregatePaidMonthSpend } from "#/intel/llm/budget-aggregate"
 import { admitModelPayload } from "#/intel/llm/model-payload-gate"
 import { resolveStepBinding } from "#/intel/llm/registry"
 import { MOCK_TRANSPORT_LABEL, createMockOpenAiTransport } from "#/intel/llm/openai-compatible.mock"
@@ -153,15 +158,60 @@ describe("migration 031 llm-registry", () => {
     native.close()
     rmSync(dir, { recursive: true, force: true })
   })
-  it("rolls back a failed migration transaction without recording version 31", async () => {
-    const { native } = await setup()
-    // Force a failure inside a fresh transaction-like call by corrupting after tables exist is N/A;
-    // verify CHECK constraints reject bad inserts (failure closed at schema).
-    expect(() => native.prepare(`
-      INSERT INTO llm_provider (id, name, base_url, api_compat, secret_ref, enabled, created_at, updated_at)
-      VALUES ('x', 'X', 'https://ok.example/v1', 'not-openai', 'x', 1, 't', 't')
-    `).run()).toThrow(/CHECK/)
-    expect(native.prepare("SELECT version FROM schema_migrations WHERE version = 31").get()).toEqual({ version: 31 })
+  it("rolls back a mid-fail 031 injected via production migration entry, stays on v30, then retries to v31", async () => {
+    const { shippingMigrations } = await import("#/database/migrations")
+    const dir = mkdtempSync(join(tmpdir(), "r3-1-mig-rb-"))
+    const path = join(dir, "v30-fail.sqlite3")
+    const native = new NativeDatabase(path)
+    const db = wrap(native)
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        version INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        applied_at TEXT NOT NULL
+      )
+    `)
+    for (const migration of shippingMigrations.filter(m => m.version <= 30)) {
+      await migration.up(db)
+      await db.prepare("INSERT INTO schema_migrations (version, name, applied_at) VALUES (?, ?, ?)").run(
+        migration.version,
+        migration.name,
+        "2026-10-01T00:00:00.000Z",
+      )
+    }
+    expect(native.prepare("SELECT MAX(version) AS v FROM schema_migrations").get()).toEqual({ v: 30 })
+    expect(native.prepare("SELECT name FROM sqlite_master WHERE name LIKE 'llm_%'").all()).toEqual([])
+
+    const upSpy = vi.spyOn(llmRegistryMigration, "up").mockImplementation(async (migDb) => {
+      await migDb.exec(`
+        CREATE TABLE IF NOT EXISTS llm_provider (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          base_url TEXT NOT NULL,
+          api_compat TEXT NOT NULL,
+          secret_ref TEXT NOT NULL,
+          enabled INTEGER NOT NULL DEFAULT 1,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      `)
+      throw new Error("injected_031_mid_fail")
+    })
+    try {
+      await expect(initShippingTables(db, "mock")).rejects.toThrow(/injected_031_mid_fail/)
+    } finally {
+      upSpy.mockRestore()
+    }
+
+    expect(native.prepare("SELECT MAX(version) AS v FROM schema_migrations").get()).toEqual({ v: 30 })
+    expect(native.prepare("SELECT version FROM schema_migrations WHERE version = 31").get()).toBeUndefined()
+    expect(native.prepare("SELECT name FROM sqlite_master WHERE name LIKE 'llm_%'").all()).toEqual([])
+
+    await initShippingTables(db, "mock")
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(31)
+    expect(native.prepare("SELECT name FROM sqlite_master WHERE name = 'llm_provider'").get()).toEqual({ name: "llm_provider" })
+    native.close()
+    rmSync(dir, { recursive: true, force: true })
   })
 })
 
@@ -183,15 +233,69 @@ describe("llm registry repository", () => {
     expect(audit[0]?.previousModelId).toBe("mdl-chat-a")
   })
 
-  it("enforces purpose and second-opinion different-provider constraints", async () => {
+  it("enforces purpose and bidirectional second-opinion different-provider constraints", async () => {
     const { db } = await setup()
     const repo = new LlmRegistryRepository(db)
     const seeded = await seedTwoProviders(repo)
     await expect(repo.upsertBinding({ step: "embeddings", modelId: seeded.chatModel.id })).rejects.toMatchObject({ code: "model_purpose_mismatch" })
     await expect(repo.upsertBinding({ step: "extract", modelId: seeded.embedModel.id })).rejects.toMatchObject({ code: "model_purpose_mismatch" })
+    // second then group
+    await repo.upsertBinding({ step: "group_second_opinion", modelId: seeded.chatModelB.id })
+    await expect(repo.upsertBinding({ step: "group", modelId: seeded.chatModelB.id })).rejects.toMatchObject({ code: "second_opinion_same_provider" })
     await repo.upsertBinding({ step: "group", modelId: seeded.chatModel.id })
-    await expect(repo.upsertBinding({ step: "group_second_opinion", modelId: seeded.chatModel.id })).rejects.toMatchObject({ code: "second_opinion_same_provider" })
-    await expect(repo.upsertBinding({ step: "group_second_opinion", modelId: seeded.chatModelB.id })).resolves.toMatchObject({ step: "group_second_opinion" })
+    // changing group to same provider as second must fail
+    await expect(repo.upsertBinding({ step: "group", modelId: seeded.chatModelB.id })).rejects.toMatchObject({ code: "second_opinion_same_provider" })
+    const resolvedSecond = await resolveStepBinding(db, "group_second_opinion")
+    expect(resolvedSecond.ok).toBe(true)
+    const resolvedGroup = await resolveStepBinding(db, "group")
+    expect(resolvedGroup.ok).toBe(true)
+  })
+
+  it("uses namespaced secretRef and does not collide with reserved bare ids", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const provider = await repo.createProvider({
+      id: "deepseek",
+      name: "Registry DeepSeek",
+      baseUrl: "https://api.deepseek-registry.example/v1",
+    })
+    expect(provider.secretRef).toBe(`${LLM_SECRET_REF_PREFIX}deepseek`)
+    expect(provider.secretRef).toBe(llmSecretRefForProviderId("deepseek"))
+    expect(provider.secretRef).not.toBe("deepseek")
+  })
+
+  it("rolls back binding write when audit insert fails (same serial transaction)", async () => {
+    const { db, native } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const seeded = await seedTwoProviders(repo)
+    await repo.upsertBinding({ step: "extract", modelId: seeded.chatModel.id, updatedBy: "seed" })
+    native.exec(`CREATE TRIGGER fail_llm_audit BEFORE INSERT ON llm_binding_audit BEGIN
+      SELECT RAISE(ABORT, 'audit_fail');
+    END;`)
+    await expect(repo.upsertBinding({ step: "extract", modelId: seeded.chatModelB.id, updatedBy: "should-roll-back" }))
+      .rejects
+      .toThrow(/audit_fail/)
+    const binding = await repo.getBinding("extract")
+    expect(binding?.modelId).toBe(seeded.chatModel.id)
+    expect(binding?.updatedBy).toBe("seed")
+    const audit = await repo.listBindingAudit()
+    expect(audit).toHaveLength(1)
+    expect(audit[0]?.modelId).toBe(seeded.chatModel.id)
+  })
+
+  it("records full binding audit history across switches", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const seeded = await seedTwoProviders(repo)
+    await repo.upsertBinding({ step: "summary", modelId: seeded.chatModel.id, updatedBy: "a" })
+    await repo.upsertBinding({ step: "summary", modelId: seeded.chatModelB.id, updatedBy: "b" })
+    await repo.upsertBinding({ step: "summary", modelId: seeded.chatModel.id, updatedBy: "c" })
+    const audit = await repo.listBindingAudit()
+    expect(audit.map(row => [row.modelId, row.previousModelId, row.updatedBy])).toEqual([
+      ["mdl-chat-a", "mdl-chat-b", "c"],
+      ["mdl-chat-b", "mdl-chat-a", "b"],
+      ["mdl-chat-a", null, "a"],
+    ])
   })
 
   it("rejects invalid provider URLs and does not silent-fallback missing bindings", async () => {
@@ -204,30 +308,89 @@ describe("llm registry repository", () => {
   })
 })
 
-describe("shared budget aggregate", () => {
-  it("sums spend across providers/capabilities and keeps pending/unknown reserved", async () => {
+describe("scoped budget aggregate (does not replace ADR-011 capability gates)", () => {
+  it("sums same-currency spend in scope and keeps pending/unknown reserved", async () => {
     const { db, native } = await setup()
     native.prepare(`
       INSERT INTO provider_usage (id, provider_id, capability, window_start, request_count, success_count, failure_count, estimated_cost, currency)
       VALUES
         ('u1', 'p-a', 'intel_extract', '2026-10-01T00:00:00.000Z', 1, 1, 0, 1.5, 'USD'),
-        ('u2', 'p-b', 'translation', '2026-10-01T00:00:00.000Z', 1, 1, 0, 2.0, 'USD')
+        ('u2', 'p-b', 'translation', '2026-10-01T00:00:00.000Z', 1, 1, 0, 2.0, 'USD'),
+        ('u3', 'p-d', 'search', '2026-10-01T00:00:00.000Z', 1, 1, 0, 9.0, 'CNY')
     `).run()
     native.prepare(`
       INSERT INTO paid_receipt (id, logical_key, provider_id, capability, purpose, status, estimated_cost, attempts, created_at, updated_at)
       VALUES ('r1', 'k1', 'p-c', 'llm_test_chat', 'x', 'pending', 0.5, 1, 't', 't')
     `).run()
     native.prepare(`
-      INSERT INTO paid_receipt_attempt (id, receipt_id, attempt, provider_id, capability, status, estimated_cost, started_at, usage_recorded)
-      VALUES ('a1', 'r1', 1, 'p-c', 'llm_test_chat', 'pending', 0.5, '2026-10-15T00:00:00.000Z', 0)
+      INSERT INTO paid_receipt_attempt (id, receipt_id, attempt, provider_id, capability, status, estimated_cost, currency, started_at, usage_recorded)
+      VALUES ('a1', 'r1', 1, 'p-c', 'llm_test_chat', 'pending', 0.5, 'USD', '2026-10-15T00:00:00.000Z', 0)
     `).run()
-    const agg = await aggregatePaidMonthSpend(db, T0)
+    const agg = await aggregatePaidMonthSpend(db, { currency: "USD" }, T0)
     expect(agg.usageSpend).toBe(3.5)
     expect(agg.pendingReserve).toBe(0.5)
     expect(agg.total).toBe(4)
+    expect(agg.currency).toBe("USD")
   })
 
-  it("zero/unconfigured budget still sends zero calls with aggregate gate", async () => {
+  it("fail-closes on mixed currency in scope and on unknown/blank currency", async () => {
+    const { db, native } = await setup()
+    native.prepare(`
+      INSERT INTO provider_usage (id, provider_id, capability, window_start, request_count, success_count, failure_count, estimated_cost, currency)
+      VALUES
+        ('u1', 'p-a', 'intel_extract', '2026-10-01T00:00:00.000Z', 1, 1, 0, 1.5, 'USD'),
+        ('u2', 'p-b', 'translation', '2026-10-01T00:00:00.000Z', 1, 1, 0, 2.0, 'CNY')
+    `).run()
+    await expect(aggregatePaidMonthSpend(db, { currency: "USD", capabilities: ["intel_extract", "translation"] }, T0))
+      .rejects
+      .toMatchObject({ name: "BudgetAggregateError", code: "budget_currency_mixed" })
+    await expect(aggregatePaidMonthSpend(db, { currency: "ZZ" } as never, T0))
+      .rejects
+      .toBeInstanceOf(BudgetAggregateError)
+    native.prepare(`
+      INSERT INTO provider_usage (id, provider_id, capability, window_start, request_count, success_count, failure_count, estimated_cost, currency)
+      VALUES ('u3', 'p-c', 'llm_test_chat', '2026-10-01T00:00:00.000Z', 1, 1, 0, 0.1, '')
+    `).run()
+    await expect(aggregatePaidMonthSpend(db, { currency: "USD", capabilities: ["llm_test_chat"] }, T0))
+      .rejects
+      .toMatchObject({ code: "budget_currency_unknown" })
+  })
+
+  it("capability filter keeps Search and Fetch domains separate; paidRequest gates per capability", async () => {
+    const { db, native } = await setup()
+    native.prepare(`
+      INSERT INTO provider_usage (id, provider_id, capability, window_start, request_count, success_count, failure_count, estimated_cost, currency)
+      VALUES
+        ('u1', 'deepseek', 'search', '2026-10-01T00:00:00.000Z', 1, 1, 0, 1, 'CNY')
+    `).run()
+    const searchOnly = await aggregatePaidMonthSpend(db, { currency: "CNY", capabilities: ["search"] }, T0)
+    expect(searchOnly.total).toBe(1)
+    const fetchOnly = await aggregatePaidMonthSpend(db, { currency: "CNY", capabilities: ["fetch"] }, T0)
+    expect(fetchOnly.total).toBe(0)
+    // Search spend must not exhaust Fetch's own monthlyBudget.
+    const fake = { hits: 0 }
+    const req: ReceiptRequest = {
+      providerId: "deepseek",
+      capability: "fetch",
+      model: "deepseek-fetch",
+      purpose: "invariant_test",
+      subject: "cap-sep",
+      identity: { subject: "cap-sep" },
+      requestSummary: {},
+      estimatedCost: 1,
+    }
+    await paidRequest(
+      { db, secretStore: secrets({ deepseek: "test-placeholder" }), monthlyBudget: 1, currency: "CNY", now: () => T0 },
+      req,
+      async () => {
+        fake.hits++
+        return { response: { ok: true }, requestId: "x", usage: { tokensIn: 1, tokensOut: 0 } }
+      },
+    )
+    expect(fake.hits).toBe(1)
+  })
+
+  it("zero/unconfigured budget still sends zero calls (per-capability gate, not aggregate)", async () => {
     const { db, native } = await setup()
     const fake = { hits: 0 }
     const req: ReceiptRequest = {
@@ -286,7 +449,7 @@ describe("test-connection mock", () => {
     const { db } = await setup()
     const repo = new LlmRegistryRepository(db)
     const seeded = await seedTwoProviders(repo)
-    const store = secrets({ "fixture-chat": "test-placeholder" })
+    const store = secrets({ [llmSecretRefForProviderId("fixture-chat")]: "test-placeholder" })
     const denied = await runLlmTestConnection({
       db,
       secretStore: store,
@@ -319,5 +482,55 @@ describe("test-connection mock", () => {
     })
     expect(ok.ok && ok.note).toContain("不是真实服务商")
     expect(transport.state.chatHits).toBe(1)
+    if (!ok.ok) throw new Error("expected ok")
+    const firstReceipt = ok.receiptId
+
+    // Changing baseUrl must not reuse the prior receipt identity.
+    await repo.updateProvider(seeded.chatProvider.id, { baseUrl: "https://api.fixture-chat-v2.example/v1" })
+    const store2 = secrets({ [llmSecretRefForProviderId(seeded.chatProvider.id)]: "test-placeholder" })
+    const again = await runLlmTestConnection({
+      db,
+      secretStore: store2,
+      monthlyBudget: 10,
+      providerId: seeded.chatProvider.id,
+      modelId: seeded.chatModel.id,
+      transport,
+      now: () => T0,
+    })
+    expect(again.ok).toBe(true)
+    if (again.ok) {
+      expect(again.reused).toBe(false)
+      expect(again.receiptId).not.toBe(firstReceipt)
+    }
+    expect(transport.state.chatHits).toBe(2)
+  })
+
+  it("looks up secrets via namespaced secretRef (not bare provider id)", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const seeded = await seedTwoProviders(repo)
+    const bareOnly = secrets({ "fixture-chat": "test-placeholder" })
+    const denied = await runLlmTestConnection({
+      db,
+      secretStore: bareOnly,
+      monthlyBudget: 10,
+      providerId: seeded.chatProvider.id,
+      modelId: seeded.chatModel.id,
+      now: () => T0,
+    })
+    expect(denied.ok).toBe(false)
+    if (!denied.ok) expect(denied.code).toBe("paid_secret_missing")
+    const namespaced = secrets({ [llmSecretRefForProviderId("fixture-chat")]: "test-placeholder" })
+    const transport = createMockOpenAiTransport()
+    const ok = await runLlmTestConnection({
+      db,
+      secretStore: namespaced,
+      monthlyBudget: 10,
+      providerId: seeded.chatProvider.id,
+      modelId: seeded.chatModel.id,
+      transport,
+      now: () => T0,
+    })
+    expect(ok.ok).toBe(true)
   })
 })

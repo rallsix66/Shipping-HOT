@@ -20,6 +20,9 @@ const BAD_REQUEST = new Set([
   "secret_payload_invalid",
   "secret_required",
   "secret_too_long",
+  "secret_ref_namespace_required",
+  "secret_ref_reserved_collision",
+  "secret_ref_immutable",
 ])
 
 const CONFLICT = new Set([

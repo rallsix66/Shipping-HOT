@@ -22,7 +22,7 @@ export type ResolveBindingResult =
   | {
     ok: false
     step: LlmStep
-    code: "binding_missing" | "model_missing" | "model_disabled" | "provider_missing" | "provider_disabled" | "purpose_mismatch"
+    code: "binding_missing" | "model_missing" | "model_disabled" | "provider_missing" | "provider_disabled" | "purpose_mismatch" | "second_opinion_same_provider"
   }
 
 export async function resolveStepBinding(db: Database, step: LlmStep): Promise<ResolveBindingResult> {
@@ -37,6 +37,16 @@ export async function resolveStepBinding(db: Database, step: LlmStep): Promise<R
   if (!provider.enabled) return { ok: false, step, code: "provider_disabled" }
   if (step === "embeddings" && model.purpose !== "embedding") return { ok: false, step, code: "purpose_mismatch" }
   if (step !== "embeddings" && model.purpose !== "chat") return { ok: false, step, code: "purpose_mismatch" }
+  if (step === "group" || step === "group_second_opinion") {
+    const otherStep: LlmStep = step === "group" ? "group_second_opinion" : "group"
+    const other = await repo.getBinding(otherStep)
+    if (other) {
+      const otherModel = await repo.getModel(other.modelId)
+      if (otherModel && otherModel.providerId === model.providerId) {
+        return { ok: false, step, code: "second_opinion_same_provider" }
+      }
+    }
+  }
   return { ok: true, step, binding, model, provider }
 }
 

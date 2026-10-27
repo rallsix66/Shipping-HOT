@@ -74,8 +74,25 @@ export async function runLlmTestConnection(options: TestConnectionOptions): Prom
         model: model.modelName,
         purpose: "llm_registry_test_connection",
         subject: `llm-test:${provider.id}:${model.id}`,
-        identity: { providerId: provider.id, modelId: model.id, purpose: "test_connection", transport: MOCK_TRANSPORT_LABEL },
-        requestSummary: { kind: "test_connection", providerId: provider.id, modelId: model.id, transport: MOCK_TRANSPORT_LABEL },
+        identity: {
+          providerId: provider.id,
+          modelId: model.id,
+          purpose: "test_connection",
+          transport: MOCK_TRANSPORT_LABEL,
+          // Endpoint/config identity: changing baseUrl or secretRef must not reuse old receipt.
+          baseUrl: provider.baseUrl,
+          apiCompat: provider.apiCompat,
+          secretRef: provider.secretRef,
+          providerUpdatedAt: provider.updatedAt,
+        },
+        requestSummary: {
+          kind: "test_connection",
+          providerId: provider.id,
+          modelId: model.id,
+          transport: MOCK_TRANSPORT_LABEL,
+          baseUrl: provider.baseUrl,
+          providerUpdatedAt: provider.updatedAt,
+        },
         estimatedCost,
       },
       async (apiKey) => {

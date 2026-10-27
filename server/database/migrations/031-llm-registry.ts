@@ -3,7 +3,8 @@ import type { Database } from "db0"
 /**
  * R3-1 LLM registry (ADR-007). Additive, idempotent CREATE TABLE IF NOT EXISTS.
  * No budgets table — paid gate continues over provider_usage + paid_receipt_attempt.
- * Secrets stay in SecretStore; secret_ref stores the SecretStore key (= provider id).
+ * Secrets stay in SecretStore; secret_ref uses isolated namespace `llm-registry:<providerId>`
+ * (never a bare translation/env id such as deepseek).
  */
 export const llmRegistryMigration = {
   version: 31,

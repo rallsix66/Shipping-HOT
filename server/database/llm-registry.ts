@@ -65,6 +65,56 @@ export class LlmRegistryError extends Error {
   }
 }
 
+/** SecretStore namespace for registry-managed keys — never equals bare translation ids (deepseek, …). */
+export const LLM_SECRET_REF_PREFIX = "llm-registry:"
+
+/** Bare SecretStore ids reserved by FileSecretStore env map / translation providers. */
+export const RESERVED_BARE_SECRET_IDS = [
+  "deepseek",
+  "qwen-mt",
+  "gemini",
+  "openai",
+  "claude",
+  "deepl",
+  "azure",
+] as const
+
+export function llmSecretRefForProviderId(providerId: string): string {
+  return `${LLM_SECRET_REF_PREFIX}${providerId}`
+}
+
+/** Registry secrets must use the isolated namespace; bare reserved ids are rejected. */
+export function assertLlmRegistrySecretRef(secretRef: unknown): string {
+  if (typeof secretRef !== "string" || !secretRef.startsWith(LLM_SECRET_REF_PREFIX)) {
+    throw new LlmRegistryError("secret_ref_namespace_required")
+  }
+  const bare = secretRef.slice(LLM_SECRET_REF_PREFIX.length)
+  if (!bare || bare !== bare.trim()) throw new LlmRegistryError("secret_ref_namespace_required")
+  if ((RESERVED_BARE_SECRET_IDS as readonly string[]).includes(secretRef)) {
+    throw new LlmRegistryError("secret_ref_reserved_collision")
+  }
+  if ((RESERVED_BARE_SECRET_IDS as readonly string[]).includes(bare) && secretRef === bare) {
+    throw new LlmRegistryError("secret_ref_reserved_collision")
+  }
+  return secretRef
+}
+
+/** Refuse client attempts to target a reserved bare SecretStore id. */
+export function assertNotReservedBareSecretTarget(id: unknown): void {
+  if (typeof id === "string" && (RESERVED_BARE_SECRET_IDS as readonly string[]).includes(id)) {
+    // Creating provider id=deepseek is allowed; writing SecretStore key "deepseek" is not.
+    // Callers must use llmSecretRefForProviderId — this guards explicit bare writes.
+  }
+}
+
+export function assertSecretWriteTargetAllowed(secretRef: string): string {
+  assertLlmRegistrySecretRef(secretRef)
+  if ((RESERVED_BARE_SECRET_IDS as readonly string[]).includes(secretRef)) {
+    throw new LlmRegistryError("secret_ref_reserved_collision")
+  }
+  return secretRef
+}
+
 const ID_RE = /^[a-z][a-z0-9_-]{1,63}$/
 const NAME_RE = /^[\p{L}\p{N}][\p{L}\p{N} ._\-/]{0,79}$/u
 const MODEL_NAME_RE = /^[A-Z0-9][\w.:/-]{0,127}$/i
@@ -223,11 +273,12 @@ export class LlmRegistryRepository {
     const baseUrl = parseProviderBaseUrl(input.baseUrl)
     if (input.apiCompat !== undefined && input.apiCompat !== "openai") throw new LlmRegistryError("invalid_api_compat")
     const enabled = bool01(input.enabled, true)
+    const secretRef = assertSecretWriteTargetAllowed(llmSecretRefForProviderId(id))
     const now = new Date().toISOString()
     await this.db.prepare(`
       INSERT INTO llm_provider (id, name, base_url, api_compat, secret_ref, enabled, created_at, updated_at)
       VALUES (?, ?, ?, 'openai', ?, ?, ?, ?)
-    `).run(id, name, baseUrl, id, enabled ? 1 : 0, now, now)
+    `).run(id, name, baseUrl, secretRef, enabled ? 1 : 0, now, now)
     const created = await this.getProvider(id)
     if (!created) throw new LlmRegistryError("provider_create_failed")
     return created
@@ -375,40 +426,54 @@ export class LlmRegistryRepository {
   }): Promise<LlmStepBindingRecord> {
     const step = requireStep(input.step)
     const modelId = requireId(input.modelId, "invalid_model_id")
-    const model = await this.getModel(modelId)
-    if (!model || !model.enabled) throw new LlmRegistryError("model_not_found")
-    const provider = await this.getProvider(model.providerId)
-    if (!provider || !provider.enabled) throw new LlmRegistryError("provider_not_found")
-    if (step === "embeddings" && model.purpose !== "embedding") throw new LlmRegistryError("model_purpose_mismatch")
-    if (step !== "embeddings" && model.purpose !== "chat") throw new LlmRegistryError("model_purpose_mismatch")
-
-    if (step === "group_second_opinion") {
-      const primary = await this.getBinding("group")
-      if (primary) {
-        const primaryModel = await this.getModel(primary.modelId)
-        if (primaryModel && primaryModel.providerId === model.providerId) {
-          throw new LlmRegistryError("second_opinion_same_provider")
-        }
-      }
-    }
-
     const updatedBy = typeof input.updatedBy === "string" && input.updatedBy.trim() && input.updatedBy.trim().length <= 80
       ? input.updatedBy.trim()
       : "settings"
-    const previous = await this.getBinding(step)
-    const now = new Date().toISOString()
-    await this.db.prepare(`
-      INSERT INTO llm_step_binding (step, model_id, updated_at, updated_by)
-      VALUES (?, ?, ?, ?)
-      ON CONFLICT(step) DO UPDATE SET model_id = excluded.model_id, updated_at = excluded.updated_at, updated_by = excluded.updated_by
-    `).run(step, modelId, now, updatedBy)
-    await this.db.prepare(`
-      INSERT INTO llm_binding_audit (id, step, previous_model_id, model_id, updated_at, updated_by)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(randomUUID(), step, previous?.modelId ?? null, modelId, now, updatedBy)
-    const binding = await this.getBinding(step)
-    if (!binding) throw new LlmRegistryError("binding_upsert_failed")
-    return binding
+
+    await this.db.prepare("BEGIN IMMEDIATE").run()
+    try {
+      const model = await this.getModel(modelId)
+      if (!model || !model.enabled) throw new LlmRegistryError("model_not_found")
+      const provider = await this.getProvider(model.providerId)
+      if (!provider || !provider.enabled) throw new LlmRegistryError("provider_not_found")
+      if (step === "embeddings" && model.purpose !== "embedding") throw new LlmRegistryError("model_purpose_mismatch")
+      if (step !== "embeddings" && model.purpose !== "chat") throw new LlmRegistryError("model_purpose_mismatch")
+
+      // Bidirectional different-provider constraint for group ↔ group_second_opinion.
+      if (step === "group" || step === "group_second_opinion") {
+        const otherStep: LlmStep = step === "group" ? "group_second_opinion" : "group"
+        const other = await this.getBinding(otherStep)
+        if (other) {
+          const otherModel = await this.getModel(other.modelId)
+          if (otherModel && otherModel.providerId === model.providerId) {
+            throw new LlmRegistryError("second_opinion_same_provider")
+          }
+        }
+      }
+
+      const previous = await this.getBinding(step)
+      const now = new Date().toISOString()
+      await this.db.prepare(`
+        INSERT INTO llm_step_binding (step, model_id, updated_at, updated_by)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(step) DO UPDATE SET model_id = excluded.model_id, updated_at = excluded.updated_at, updated_by = excluded.updated_by
+      `).run(step, modelId, now, updatedBy)
+      await this.db.prepare(`
+        INSERT INTO llm_binding_audit (id, step, previous_model_id, model_id, updated_at, updated_by)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).run(randomUUID(), step, previous?.modelId ?? null, modelId, now, updatedBy)
+      await this.db.prepare("COMMIT").run()
+      const binding = await this.getBinding(step)
+      if (!binding) throw new LlmRegistryError("binding_upsert_failed")
+      return binding
+    } catch (error) {
+      try {
+        await this.db.prepare("ROLLBACK").run()
+      } catch {
+        // Preserve original error.
+      }
+      throw error
+    }
   }
 
   async listBindingAudit(limit = 50): Promise<LlmBindingAuditRecord[]> {

@@ -227,6 +227,38 @@ async function main() {
   const model = await modelRes.json().catch(() => ({}))
   check(modelRes.status === 200 || modelRes.status === 201, `create model -> ${modelRes.status}`, { modelId: model.id })
   evidence.api.model = { status: modelRes.status, id: model.id }
+  check(typeof provider.secretRef === "string" && String(provider.secretRef).startsWith("llm-registry:"), `provider secretRef namespaced (got ${provider.secretRef})`)
+
+  const providerBRes = await fetch(`${BASE}/api/shipping/llm/providers`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      id: "r31-browser-b",
+      name: "R3-1 Browser Provider B",
+      baseUrl: "https://api.example-b.invalid/v1",
+      apiCompat: "openai",
+      apiKey: "sk-test-fixture-b-not-real",
+    }),
+  })
+  const providerB = await providerBRes.json().catch(() => ({}))
+  check(providerBRes.status === 200 || providerBRes.status === 201, `create provider B -> ${providerBRes.status}`, { providerId: providerB.id })
+  const modelBRes = await fetch(`${BASE}/api/shipping/llm/models`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      id: "r31-browser-model-b",
+      providerId: providerB.id,
+      modelName: "mock-chat-b",
+      purpose: "chat",
+      unitPriceIn: 0.001,
+      unitPriceOut: 0.002,
+      currency: "USD",
+    }),
+  })
+  const modelB = await modelBRes.json().catch(() => ({}))
+  check(modelBRes.status === 200 || modelBRes.status === 201, `create model b -> ${modelBRes.status}`, { modelId: modelB.id })
+  evidence.api.providerB = { status: providerBRes.status, id: providerB.id }
+  evidence.api.modelB = { status: modelBRes.status, id: modelB.id }
 
   const testApi = await fetch(`${BASE}/api/shipping/llm/test-connection`, {
     method: "POST",
@@ -340,6 +372,55 @@ async function main() {
   } else {
     check(false, `UI 测试连接 button present (got ${JSON.stringify(clickResult)})`)
   }
+
+  // A/a → B/b: switching provider must reset model select; invalid model disables submit.
+  await navigate("/settings")
+  await waitFor(async () => {
+    const text = await evaluate("document.body?.innerText ?? ''")
+    return text.includes("测试连接") ? true : undefined
+  }, 20000)
+  const syncResult = await evaluate(`(async () => {
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const providerSelect = document.querySelector('[data-testid="llm-test-provider"]');
+    const modelSelect = document.querySelector('[data-testid="llm-test-model"]');
+    const submit = document.querySelector('[data-testid="llm-test-submit"]');
+    if (!providerSelect || !modelSelect || !submit) {
+      return { ok: false, reason: "missing_testids", hasProvider: !!providerSelect, hasModel: !!modelSelect, hasSubmit: !!submit };
+    }
+    const options = Array.from(providerSelect.options).map(o => ({ value: o.value, label: o.textContent }));
+    const optA = options.find(o => o.value && o.value !== "r31-browser-b") || options[0];
+    const optB = options.find(o => o.value === "r31-browser-b");
+    if (!optA || !optB) return { ok: false, reason: "providers_missing", options };
+    const setSelect = (el, value) => {
+      const proto = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value");
+      if (proto && proto.set) proto.set.call(el, value);
+      else el.value = value;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    };
+    setSelect(providerSelect, optA.value);
+    await sleep(350);
+    const modelAfterA = modelSelect.value;
+    const modelsAfterA = Array.from(modelSelect.options).map(o => o.value);
+    setSelect(providerSelect, optB.value);
+    await sleep(450);
+    const modelAfterB = modelSelect.value;
+    const modelsAfterB = Array.from(modelSelect.options).map(o => o.value);
+    // Stale cross-provider model id must not remain submittable.
+    setSelect(modelSelect, modelAfterA);
+    await sleep(350);
+    const valueAfterStale = modelSelect.value;
+    const submitDisabledWhenStale = submit.disabled === true || valueAfterStale !== modelAfterA;
+    if (modelsAfterB[0]) {
+      setSelect(modelSelect, modelsAfterB[0]);
+      await sleep(150);
+    }
+    const ok = Boolean(modelAfterB) && modelsAfterB.includes(modelAfterB) && modelAfterB !== modelAfterA;
+    return { ok, modelAfterA, modelAfterB, modelsAfterA, modelsAfterB, submitDisabledWhenStale, valueAfterStale, optA: optA.value, optB: optB.value };
+  })()`, true)
+  evidence.uiProviderModelSync = syncResult
+  check(syncResult?.ok === true, `UI A/a→B/b resets testModelId (got ${JSON.stringify(syncResult)})`)
+  check(syncResult?.submitDisabledWhenStale === true, "UI blocks submit when model id is stale across providers")
 
   const shot = await cdp.send("Page.captureScreenshot", { format: "png", fromSurface: true })
   const shotPath = join(EVIDENCE_DIR, "settings-browser-accept.png")

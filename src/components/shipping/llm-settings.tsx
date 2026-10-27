@@ -94,8 +94,12 @@ export function LlmSettingsPanel() {
       setBindings(b.items)
       if (!providerIdForModel && p.items[0]) setProviderIdForModel(p.items[0].id)
       if (!testProviderId && p.items[0]) setTestProviderId(p.items[0].id)
-      if (!testModelId && m.items[0]) setTestModelId(m.items[0].id)
       if (!bindModelId && m.items[0]) setBindModelId(m.items[0].id)
+      // Sync testModelId to a model that belongs to the selected provider (do not keep a stale id).
+      const providerForTest = testProviderId || p.items[0]?.id || ""
+      const modelsForProvider = m.items.filter(model => model.providerId === providerForTest)
+      const stillValid = modelsForProvider.some(model => model.id === testModelId)
+      if (!stillValid) setTestModelId(modelsForProvider[0]?.id ?? "")
     } catch (error) {
       setLoadError(apiErrorCode(error))
     }
@@ -104,6 +108,21 @@ export function LlmSettingsPanel() {
   useEffect(() => {
     void reload()
   }, [reload])
+
+  // When the test-connection provider changes (or models refresh), keep testModelId in that provider's set.
+  useEffect(() => {
+    if (!testProviderId) {
+      setTestModelId("")
+      return
+    }
+    const modelsForProvider = models.filter(model => model.providerId === testProviderId)
+    if (!modelsForProvider.some(model => model.id === testModelId)) {
+      setTestModelId(modelsForProvider[0]?.id ?? "")
+    }
+  }, [testProviderId, models, testModelId])
+
+  const testModelsForProvider = models.filter(model => model.providerId === testProviderId)
+  const testModelValid = Boolean(testProviderId && testModelId && testModelsForProvider.some(model => model.id === testModelId))
 
   const addProvider = async () => {
     setBusy(true)
@@ -206,6 +225,7 @@ export function LlmSettingsPanel() {
         按 ADR-007 管理 OpenAI 兼容服务商、模型与步骤绑定。密钥只存 SecretStore 引用，页面仅显示脱敏状态。
         「测试连接」默认走离线 mock，结果必须标为测试结果，不能当作真实服务商已连接。未配置/零预算时零调用。
         翻译默认 DeepSeek 硬绑定仍保留，本片不打断现网翻译。
+        本片 UI 约定能力：创建服务商/模型、步骤绑定、mock 测连；编辑/删除服务商与模型、密钥轮换管理走 API，本页未提供完整管理界面。
       </p>
       {loadError && (
         <p className="mt-3 text-sm text-rose-600">
@@ -359,19 +379,40 @@ export function LlmSettingsPanel() {
         <p className="text-xs op-60">计入共享月预算与 paid_receipt；默认 mock transport。结果是测试结果，不是真实服务商已连接。</p>
         <label className="setting-row">
           <span><strong>服务商</strong></span>
-          <select className="setting-input" value={testProviderId} onChange={e => setTestProviderId(e.target.value)}>
+          <select
+            className="setting-input"
+            data-testid="llm-test-provider"
+            value={testProviderId}
+            onChange={(e) => {
+              const next = e.target.value
+              setTestProviderId(next)
+              const nextModels = models.filter(model => model.providerId === next)
+              setTestModelId(nextModels[0]?.id ?? "")
+            }}
+          >
             {providers.map(provider => <option key={provider.id} value={provider.id}>{provider.name}</option>)}
           </select>
         </label>
         <label className="setting-row">
           <span><strong>模型</strong></span>
-          <select className="setting-input" value={testModelId} onChange={e => setTestModelId(e.target.value)}>
-            {models.filter(model => !testProviderId || model.providerId === testProviderId).map(model => (
+          <select
+            className="setting-input"
+            data-testid="llm-test-model"
+            value={testModelValid ? testModelId : ""}
+            onChange={e => setTestModelId(e.target.value)}
+          >
+            {testModelsForProvider.map(model => (
               <option key={model.id} value={model.id}>{model.modelName}</option>
             ))}
           </select>
         </label>
-        <button type="button" className="btn-gradient" disabled={busy || !testProviderId || !testModelId} onClick={() => void testConnection()}>
+        <button
+          type="button"
+          className="btn-gradient"
+          data-testid="llm-test-submit"
+          disabled={busy || !testModelValid}
+          onClick={() => void testConnection()}
+        >
           测试连接（mock）
         </button>
         {testMessage && <p className="text-sm">{testMessage}</p>}

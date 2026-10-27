@@ -28,6 +28,8 @@ export interface ModelPayloadCandidate {
 /**
  * Decide whether candidate text/blocks may enter an LLM prompt.
  * Pipeline call sites must invoke this before prefilter/extract; this module alone does not call models.
+ * R3-1 STATUS: skeleton only — NOT WIRED into the prefilter/extract/runtime pipeline yet
+ * (call sites still pending a later slice). Unit tests cover the pure gate function.
  */
 export function admitModelPayload(candidate: ModelPayloadCandidate): ModelPayloadGateResult {
   const audit = candidate.clipAudit
