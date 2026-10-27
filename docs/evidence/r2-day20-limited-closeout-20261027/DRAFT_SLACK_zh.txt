@@ -12,6 +12,6 @@
 
 【git】
 - 分支：`codex/shipping-hot-r2-4-gapfill-20261025`
-- commit：`47a88ffacaa8c44163fc85b75175117ffe7a8436`（普通 push；无 force / 无 merge main / 无 deploy）
+- tip：`4474fea5ee4327c37356ef0fea870654f09a657a`（含 `47a88ffacaa8c44163fc85b75175117ffe7a8436`；普通 push；无 force / 无 merge main / 无 deploy）
 
 无新源、无生产启用、无重开 24h、无触 day19、无重验 manual9、无 S7。
