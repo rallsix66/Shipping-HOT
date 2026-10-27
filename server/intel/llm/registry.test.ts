@@ -354,6 +354,20 @@ describe("llm registry repository", () => {
     expect(store._map.has(ref)).toBe(false)
   })
 
+  it("createProviderWithSecret: pre-existing orphan key survives write-before create failure", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const id = "orphan-key-create"
+    const ref = llmSecretRefForProviderId(id)
+    const store = controllableSecrets({ values: { [ref]: "sk-orphan-keep" }, failSet: "before" })
+    await expect(createProviderWithSecret(
+      { repo, secretStore: store },
+      { id, name: "Orphan Keep", baseUrl: "https://api.orphan-keep.example/v1", apiKey: "sk-new-should-not-land" },
+    )).rejects.toMatchObject({ code: "secret_store_failed" })
+    expect(await repo.getProvider(id)).toBeNull()
+    expect(store._map.get(ref)).toBe("sk-orphan-keep")
+  })
+
   it("createProviderWithSecret: write-after failure compensates to both-absent", async () => {
     const { db } = await setup()
     const repo = new LlmRegistryRepository(db)

@@ -74,27 +74,62 @@ async function readSecretMeta(store: SecretStore, secretRef: string): Promise<Pr
   return { configured, source, maskedLast4: undefined }
 }
 
+interface PriorSecretState {
+  keyPresent: boolean
+  keyValue: string | undefined
+}
+
 /**
- * After a failed secret set on create: restore both-absent.
- * If compensate cannot verify both gone, throw provider_secret_inconsistent (never silent success).
+ * After a failed secret set on create: restore prior key/row state.
+ * Do not assume the target was originally both-absent — never delete a pre-existing key.
+ * If compensate cannot verify prior state, throw provider_secret_inconsistent (never silent success).
  */
 async function compensateCreateFailure(
   deps: LlmProviderWriteDeps,
   providerId: string,
   secretRef: string,
   original: unknown,
+  prior: PriorSecretState,
 ): Promise<never> {
-  let keyAbsent = false
+  if (prior.keyPresent) {
+    // Keep / restore the pre-existing secret; do not delete it.
+    try {
+      const current = await deps.secretStore.get(secretRef)
+      if (prior.keyValue !== undefined && current !== prior.keyValue) {
+        await deps.secretStore.set(secretRef, prior.keyValue)
+      }
+    } catch {
+      try {
+        if (prior.keyValue !== undefined) await deps.secretStore.set(secretRef, prior.keyValue)
+      } catch {
+        // verify below
+      }
+    }
+  } else {
+    try {
+      await deps.secretStore.delete(secretRef)
+    } catch {
+      // verify below
+    }
+  }
+
+  let keyOk = false
   let rowAbsent = false
   try {
-    await deps.secretStore.delete(secretRef)
+    const hasKey = await deps.secretStore.has(secretRef)
+    if (prior.keyPresent) {
+      if (!hasKey) {
+        keyOk = false
+      } else if (prior.keyValue === undefined) {
+        keyOk = true
+      } else {
+        keyOk = (await deps.secretStore.get(secretRef)) === prior.keyValue
+      }
+    } else {
+      keyOk = !hasKey
+    }
   } catch {
-    // verify below
-  }
-  try {
-    keyAbsent = !(await deps.secretStore.has(secretRef))
-  } catch {
-    keyAbsent = false
+    keyOk = false
   }
   try {
     await deps.repo.deleteProvider(providerId)
@@ -102,7 +137,7 @@ async function compensateCreateFailure(
   } catch {
     rowAbsent = !(await deps.repo.getProvider(providerId))
   }
-  if (!keyAbsent || !rowAbsent) {
+  if (!keyOk || !rowAbsent) {
     throw new LlmRegistryError("provider_secret_inconsistent")
   }
   if (original instanceof LlmRegistryError) throw original
@@ -124,6 +159,18 @@ export async function createProviderWithSecret(
   assertSecretWriteTargetAllowed(secretRef)
   if (apiKey) await assertNotEnvironmentManaged(deps.secretStore, secretRef)
 
+  // Snapshot prior secret state before any mutation — do not assume both-absent.
+  const prior: PriorSecretState = { keyPresent: false, keyValue: undefined }
+  if (apiKey) {
+    try {
+      prior.keyPresent = await deps.secretStore.has(secretRef)
+      if (prior.keyPresent) prior.keyValue = await deps.secretStore.get(secretRef)
+    } catch {
+      prior.keyPresent = false
+      prior.keyValue = undefined
+    }
+  }
+
   const provider = await deps.repo.createProvider({
     id,
     name: input.name,
@@ -136,7 +183,7 @@ export async function createProviderWithSecret(
     try {
       await deps.secretStore.set(provider.secretRef, apiKey)
     } catch (error) {
-      await compensateCreateFailure(deps, provider.id, provider.secretRef, error)
+      await compensateCreateFailure(deps, provider.id, provider.secretRef, error, prior)
     }
   }
 
