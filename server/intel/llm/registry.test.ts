@@ -76,25 +76,48 @@ function controllableSecrets(options: {
   envIds?: string[]
   failSet?: "before" | "after" | null
   failDelete?: boolean
-} = {}): SecretStore & { _map: Map<string, string> } {
+  /** Throw once on the first has() call (snapshot fail-closed). */
+  failHasOnce?: boolean
+  /** Throw once on the first get() call (snapshot fail-closed). */
+  failGetOnce?: boolean
+} = {}): SecretStore & { _map: Map<string, string>, _setCalls: number, _deleteCalls: number } {
   const map = new Map(Object.entries(options.values ?? {}))
   const env = new Set(options.envIds ?? [])
-  return {
+  let hasFailuresLeft = options.failHasOnce ? 1 : 0
+  let getFailuresLeft = options.failGetOnce ? 1 : 0
+  const store = {
     _map: map,
-    get: async id => (env.has(id) ? "env-value" : map.get(id)),
-    set: async (id, value) => {
+    _setCalls: 0,
+    _deleteCalls: 0,
+    get: async (id: string) => {
+      if (getFailuresLeft > 0) {
+        getFailuresLeft -= 1
+        throw new Error("snapshot_get_fail")
+      }
+      return env.has(id) ? "env-value" : map.get(id)
+    },
+    set: async (id: string, value: string) => {
+      store._setCalls += 1
       if (env.has(id)) throw new Error("managed_by_environment")
       if (options.failSet === "before") throw new Error("write_before_fail")
       map.set(id, value)
       if (options.failSet === "after") throw new Error("write_after_fail")
     },
-    delete: async (id) => {
+    delete: async (id: string) => {
+      store._deleteCalls += 1
       if (options.failDelete) throw new Error("delete_fail")
       map.delete(id)
     },
-    has: async id => env.has(id) || map.has(id),
-    source: async id => (env.has(id) ? "environment" : map.has(id) ? "file" : "missing") as never,
+    has: async (id: string) => {
+      if (hasFailuresLeft > 0) {
+        hasFailuresLeft -= 1
+        throw new Error("snapshot_has_fail")
+      }
+      return env.has(id) || map.has(id)
+    },
+    source: async (id: string) => (env.has(id) ? "environment" : map.has(id) ? "file" : "missing") as never,
   }
+  return store
 }
 
 async function seedTwoProviders(repo: LlmRegistryRepository) {
@@ -366,6 +389,23 @@ describe("llm registry repository", () => {
     )).rejects.toMatchObject({ code: "secret_store_failed" })
     expect(await repo.getProvider(id)).toBeNull()
     expect(store._map.get(ref)).toBe("sk-orphan-keep")
+  })
+
+  it("createProviderWithSecret: snapshot get failure fail-closed leaves orphan key and DB untouched", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const id = "orphan-snapshot-fail"
+    const ref = llmSecretRefForProviderId(id)
+    const store = controllableSecrets({ values: { [ref]: "sk-orphan-snapshot" }, failGetOnce: true })
+    expect(await store.source(ref)).toBe("file")
+    await expect(createProviderWithSecret(
+      { repo, secretStore: store },
+      { id, name: "Orphan Snapshot", baseUrl: "https://api.orphan-snapshot.example/v1", apiKey: "sk-new-must-not-write" },
+    )).rejects.toMatchObject({ code: "secret_store_failed" })
+    expect(await repo.getProvider(id)).toBeNull()
+    expect(store._map.get(ref)).toBe("sk-orphan-snapshot")
+    expect(store._setCalls).toBe(0)
+    expect(store._deleteCalls).toBe(0)
   })
 
   it("createProviderWithSecret: write-after failure compensates to both-absent", async () => {

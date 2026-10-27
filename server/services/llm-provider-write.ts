@@ -160,14 +160,28 @@ export async function createProviderWithSecret(
   if (apiKey) await assertNotEnvironmentManaged(deps.secretStore, secretRef)
 
   // Snapshot prior secret state before any mutation — do not assume both-absent.
+  // has/get failure is unknown, never downgraded to absent: fail-closed with zero writes.
   const prior: PriorSecretState = { keyPresent: false, keyValue: undefined }
   if (apiKey) {
+    let keyPresent: boolean
     try {
-      prior.keyPresent = await deps.secretStore.has(secretRef)
-      if (prior.keyPresent) prior.keyValue = await deps.secretStore.get(secretRef)
+      keyPresent = await deps.secretStore.has(secretRef)
     } catch {
-      prior.keyPresent = false
-      prior.keyValue = undefined
+      throw new LlmRegistryError("secret_store_failed")
+    }
+    if (keyPresent) {
+      let keyValue: string | undefined
+      try {
+        keyValue = await deps.secretStore.get(secretRef)
+      } catch {
+        throw new LlmRegistryError("secret_store_failed")
+      }
+      // has=true but old value unavailable — refuse continue (not absent).
+      if (keyValue === undefined) {
+        throw new LlmRegistryError("secret_store_failed")
+      }
+      prior.keyPresent = true
+      prior.keyValue = keyValue
     }
   }
 
