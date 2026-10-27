@@ -31,6 +31,7 @@ const CONFLICT = new Set([
   "provider_in_use",
   "model_in_use",
   "managed_by_environment",
+  "binding_conflict",
 ])
 
 const NOT_FOUND = new Set([
@@ -38,11 +39,20 @@ const NOT_FOUND = new Set([
   "model_not_found",
 ])
 
+const SERVER = new Set([
+  "provider_secret_inconsistent",
+  "provider_update_after_secret_failed",
+  "secret_store_failed",
+  "binding_upsert_failed",
+  "provider_create_failed",
+])
+
 export function throwLlmRegistryHttpError(error: unknown): never {
   if (error instanceof LlmRegistryError) {
     if (BAD_REQUEST.has(error.code)) throw createError({ statusCode: 400, message: error.code })
     if (CONFLICT.has(error.code)) throw createError({ statusCode: 409, message: error.code })
     if (NOT_FOUND.has(error.code)) throw createError({ statusCode: 404, message: error.code })
+    if (SERVER.has(error.code)) throw createError({ statusCode: 500, message: error.code })
     throw createError({ statusCode: 400, message: error.code })
   }
   throw error

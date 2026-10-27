@@ -247,6 +247,20 @@ function mapBinding(row: BindingRow): LlmStepBindingRecord {
   }
 }
 
+// db0 over one connection cannot nest BEGIN; serialise binding upserts in-process.
+// BEGIN IMMEDIATE still covers other connections; SQLITE_BUSY / nested-txn map to binding_conflict (409, retryable).
+let bindingUpsertChain: Promise<unknown> = Promise.resolve()
+function serialiseBindingUpsert<T>(work: () => Promise<T>): Promise<T> {
+  const next = bindingUpsertChain.then(work, work)
+  bindingUpsertChain = next.catch(() => undefined)
+  return next
+}
+
+function isBindingBusyError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error ?? "")
+  return /SQLITE_BUSY|database is locked|cannot start a transaction within a transaction|transaction within a transaction/i.test(message)
+}
+
 export class LlmRegistryRepository {
   constructor(private readonly db: Database) {}
 
@@ -430,50 +444,65 @@ export class LlmRegistryRepository {
       ? input.updatedBy.trim()
       : "settings"
 
-    await this.db.prepare("BEGIN IMMEDIATE").run()
-    try {
-      const model = await this.getModel(modelId)
-      if (!model || !model.enabled) throw new LlmRegistryError("model_not_found")
-      const provider = await this.getProvider(model.providerId)
-      if (!provider || !provider.enabled) throw new LlmRegistryError("provider_not_found")
-      if (step === "embeddings" && model.purpose !== "embedding") throw new LlmRegistryError("model_purpose_mismatch")
-      if (step !== "embeddings" && model.purpose !== "chat") throw new LlmRegistryError("model_purpose_mismatch")
+    return serialiseBindingUpsert(async () => {
+      try {
+        await this.db.prepare("BEGIN IMMEDIATE").run()
+      } catch (error) {
+        if (isBindingBusyError(error)) throw new LlmRegistryError("binding_conflict")
+        throw error
+      }
+      try {
+        const model = await this.getModel(modelId)
+        if (!model || !model.enabled) throw new LlmRegistryError("model_not_found")
+        const provider = await this.getProvider(model.providerId)
+        if (!provider || !provider.enabled) throw new LlmRegistryError("provider_not_found")
+        if (step === "embeddings" && model.purpose !== "embedding") throw new LlmRegistryError("model_purpose_mismatch")
+        if (step !== "embeddings" && model.purpose !== "chat") throw new LlmRegistryError("model_purpose_mismatch")
 
-      // Bidirectional different-provider constraint for group ↔ group_second_opinion.
-      if (step === "group" || step === "group_second_opinion") {
-        const otherStep: LlmStep = step === "group" ? "group_second_opinion" : "group"
-        const other = await this.getBinding(otherStep)
-        if (other) {
-          const otherModel = await this.getModel(other.modelId)
-          if (otherModel && otherModel.providerId === model.providerId) {
-            throw new LlmRegistryError("second_opinion_same_provider")
+        // Bidirectional different-provider constraint for group -> group_second_opinion.
+        if (step === "group" || step === "group_second_opinion") {
+          const otherStep: LlmStep = step === "group" ? "group_second_opinion" : "group"
+          const other = await this.getBinding(otherStep)
+          if (other) {
+            const otherModel = await this.getModel(other.modelId)
+            if (otherModel && otherModel.providerId === model.providerId) {
+              throw new LlmRegistryError("second_opinion_same_provider")
+            }
           }
         }
-      }
 
-      const previous = await this.getBinding(step)
-      const now = new Date().toISOString()
-      await this.db.prepare(`
+        const previous = await this.getBinding(step)
+        const now = new Date().toISOString()
+        await this.db.prepare(`
         INSERT INTO llm_step_binding (step, model_id, updated_at, updated_by)
         VALUES (?, ?, ?, ?)
         ON CONFLICT(step) DO UPDATE SET model_id = excluded.model_id, updated_at = excluded.updated_at, updated_by = excluded.updated_by
       `).run(step, modelId, now, updatedBy)
-      await this.db.prepare(`
+        await this.db.prepare(`
         INSERT INTO llm_binding_audit (id, step, previous_model_id, model_id, updated_at, updated_by)
         VALUES (?, ?, ?, ?, ?, ?)
       `).run(randomUUID(), step, previous?.modelId ?? null, modelId, now, updatedBy)
-      await this.db.prepare("COMMIT").run()
-      const binding = await this.getBinding(step)
-      if (!binding) throw new LlmRegistryError("binding_upsert_failed")
-      return binding
-    } catch (error) {
-      try {
-        await this.db.prepare("ROLLBACK").run()
-      } catch {
-        // Preserve original error.
+
+        // Snapshot inside the transaction; return it after COMMIT (do not re-read post-commit).
+        const snapshot: LlmStepBindingRecord = {
+          step,
+          modelId,
+          updatedAt: now,
+          updatedBy,
+        }
+        await this.db.prepare("COMMIT").run()
+        return snapshot
+      } catch (error) {
+        try {
+          await this.db.prepare("ROLLBACK").run()
+        } catch {
+          // Preserve original error.
+        }
+        if (error instanceof LlmRegistryError) throw error
+        if (isBindingBusyError(error)) throw new LlmRegistryError("binding_conflict")
+        throw error
       }
-      throw error
-    }
+    })
   }
 
   async listBindingAudit(limit = 50): Promise<LlmBindingAuditRecord[]> {

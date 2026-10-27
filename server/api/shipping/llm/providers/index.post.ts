@@ -1,14 +1,9 @@
 import process from "node:process"
 import { throwLlmRegistryHttpError } from "../_errors"
-import { FileSecretStore, SecretManagedByEnvironmentError } from "#/secrets/file-secret-store"
+import { FileSecretStore } from "#/secrets/file-secret-store"
 import { initShippingTables } from "#/database/shipping"
-import {
-  LlmRegistryError,
-  LlmRegistryRepository,
-  assertSecretWriteTargetAllowed,
-  llmSecretRefForProviderId,
-  parseProviderBaseUrl,
-} from "#/database/llm-registry"
+import { LlmRegistryError, LlmRegistryRepository } from "#/database/llm-registry"
+import { createProviderWithSecret } from "#/services/llm-provider-write"
 
 function parseSecret(body: Record<string, unknown>): string | undefined {
   if (!("apiKey" in body)) return undefined
@@ -32,43 +27,21 @@ export default defineEventHandler(async (event) => {
   await initShippingTables(database, dataMode)
   const repo = new LlmRegistryRepository(database)
   try {
-    // Validate full request (including optional apiKey) BEFORE any DB/secret write.
     const apiKey = parseSecret(body)
-    parseProviderBaseUrl(body.baseUrl)
-    if (body.apiCompat !== undefined && body.apiCompat !== "openai") throw new LlmRegistryError("invalid_api_compat")
-    // Pre-compute namespaced ref; reject reserved bare collision targets.
-    if (typeof body.id === "string" && body.id) {
-      assertSecretWriteTargetAllowed(llmSecretRefForProviderId(body.id))
-    }
-
-    const provider = await repo.createProvider({
-      id: body.id,
-      name: body.name,
-      baseUrl: body.baseUrl,
-      apiCompat: body.apiCompat,
-      enabled: body.enabled,
-    })
-    const store = new FileSecretStore()
-    if (apiKey) {
-      try {
-        assertSecretWriteTargetAllowed(provider.secretRef)
-        await store.set(provider.secretRef, apiKey)
-      } catch (error) {
-        // Compensate: registry row must not remain if secret write failed.
-        try {
-          await repo.deleteProvider(provider.id)
-        } catch {
-          // best-effort compensate
-        }
-        if (error instanceof LlmRegistryError) throw error
-        if (error instanceof SecretManagedByEnvironmentError) throw createError({ statusCode: 409, message: "managed_by_environment" })
-        throw createError({ statusCode: 500, message: "secret_store_failed" })
-      }
-    }
-    const secret = await store.redacted(provider.secretRef)
+    const result = await createProviderWithSecret(
+      { repo, secretStore: new FileSecretStore() },
+      {
+        id: body.id,
+        name: body.name,
+        baseUrl: body.baseUrl,
+        apiCompat: body.apiCompat,
+        enabled: body.enabled,
+        apiKey,
+      },
+    )
     return {
-      ...provider,
-      secret: { configured: secret.configured, source: secret.source, maskedLast4: secret.maskedLast4 },
+      ...result.provider,
+      secret: result.secret,
     }
   } catch (error) {
     throwLlmRegistryHttpError(error)

@@ -1,13 +1,9 @@
 import process from "node:process"
 import { throwLlmRegistryHttpError } from "../_errors"
-import { FileSecretStore, SecretManagedByEnvironmentError } from "#/secrets/file-secret-store"
+import { FileSecretStore } from "#/secrets/file-secret-store"
 import { initShippingTables } from "#/database/shipping"
-import {
-  LlmRegistryError,
-  LlmRegistryRepository,
-  assertSecretWriteTargetAllowed,
-  parseProviderBaseUrl,
-} from "#/database/llm-registry"
+import { LlmRegistryError, LlmRegistryRepository } from "#/database/llm-registry"
+import { patchProviderWithSecret } from "#/services/llm-provider-write"
 
 function parseSecret(body: Record<string, unknown>): string | undefined {
   if (!("apiKey" in body)) return undefined
@@ -32,30 +28,20 @@ export default defineEventHandler(async (event) => {
   await initShippingTables(database, dataMode)
   const repo = new LlmRegistryRepository(database)
   try {
-    // Validate full request before any DB/secret mutation.
     const apiKey = parseSecret(body)
-    if (body.baseUrl !== undefined) parseProviderBaseUrl(body.baseUrl)
-    const existing = await repo.getProvider(id)
-    if (!existing) throw new LlmRegistryError("provider_not_found")
-    assertSecretWriteTargetAllowed(existing.secretRef)
-
-    const provider = await repo.updateProvider(id, {
-      name: body.name,
-      baseUrl: body.baseUrl,
-      enabled: body.enabled,
-    })
-    if (apiKey) {
-      try {
-        await new FileSecretStore().set(provider.secretRef, apiKey)
-      } catch (error) {
-        if (error instanceof SecretManagedByEnvironmentError) throw createError({ statusCode: 409, message: "managed_by_environment" })
-        throw createError({ statusCode: 500, message: "secret_store_failed" })
-      }
-    }
-    const secret = await new FileSecretStore().redacted(provider.secretRef)
+    const result = await patchProviderWithSecret(
+      { repo, secretStore: new FileSecretStore() },
+      id,
+      {
+        name: body.name,
+        baseUrl: body.baseUrl,
+        enabled: body.enabled,
+        apiKey,
+      },
+    )
     return {
-      ...provider,
-      secret: { configured: secret.configured, source: secret.source, maskedLast4: secret.maskedLast4 },
+      ...result.provider,
+      secret: result.secret,
     }
   } catch (error) {
     throwLlmRegistryHttpError(error)

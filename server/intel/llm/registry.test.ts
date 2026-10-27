@@ -13,6 +13,7 @@ import {
   LlmRegistryRepository,
   llmSecretRefForProviderId,
 } from "#/database/llm-registry"
+import { createProviderWithSecret, patchProviderWithSecret } from "#/services/llm-provider-write"
 import { BudgetAggregateError, aggregatePaidMonthSpend } from "#/intel/llm/budget-aggregate"
 import { admitModelPayload } from "#/intel/llm/model-payload-gate"
 import { resolveStepBinding } from "#/intel/llm/registry"
@@ -67,6 +68,32 @@ function secrets(values: Record<string, string> = {}): SecretStore {
     delete: async id => void map.delete(id),
     has: async id => map.has(id),
     source: async id => (map.has(id) ? "file" : "missing") as never,
+  }
+}
+
+function controllableSecrets(options: {
+  values?: Record<string, string>
+  envIds?: string[]
+  failSet?: "before" | "after" | null
+  failDelete?: boolean
+} = {}): SecretStore & { _map: Map<string, string> } {
+  const map = new Map(Object.entries(options.values ?? {}))
+  const env = new Set(options.envIds ?? [])
+  return {
+    _map: map,
+    get: async id => (env.has(id) ? "env-value" : map.get(id)),
+    set: async (id, value) => {
+      if (env.has(id)) throw new Error("managed_by_environment")
+      if (options.failSet === "before") throw new Error("write_before_fail")
+      map.set(id, value)
+      if (options.failSet === "after") throw new Error("write_after_fail")
+    },
+    delete: async (id) => {
+      if (options.failDelete) throw new Error("delete_fail")
+      map.delete(id)
+    },
+    has: async id => env.has(id) || map.has(id),
+    source: async id => (env.has(id) ? "environment" : map.has(id) ? "file" : "missing") as never,
   }
 }
 
@@ -296,6 +323,148 @@ describe("llm registry repository", () => {
       ["mdl-chat-b", "mdl-chat-a", "b"],
       ["mdl-chat-a", null, "a"],
     ])
+  })
+
+  it("createProviderWithSecret: env reject leaves no DB row and no key", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const id = "env-reject-create"
+    const ref = llmSecretRefForProviderId(id)
+    const store = controllableSecrets({ envIds: [ref] })
+    await expect(createProviderWithSecret(
+      { repo, secretStore: store },
+      { id, name: "Env Reject", baseUrl: "https://api.env-reject.example/v1", apiKey: "sk-test-create" },
+    )).rejects.toMatchObject({ code: "managed_by_environment" })
+    expect(await repo.getProvider(id)).toBeNull()
+    expect(store._map.has(ref)).toBe(false)
+    expect(await store.source(ref)).toBe("environment")
+  })
+
+  it("createProviderWithSecret: write-before failure leaves no DB row and no key", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const id = "write-before-create"
+    const ref = llmSecretRefForProviderId(id)
+    const store = controllableSecrets({ failSet: "before" })
+    await expect(createProviderWithSecret(
+      { repo, secretStore: store },
+      { id, name: "Before Fail", baseUrl: "https://api.before-fail.example/v1", apiKey: "sk-before" },
+    )).rejects.toMatchObject({ code: "secret_store_failed" })
+    expect(await repo.getProvider(id)).toBeNull()
+    expect(store._map.has(ref)).toBe(false)
+  })
+
+  it("createProviderWithSecret: write-after failure compensates to both-absent", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const id = "write-after-create"
+    const ref = llmSecretRefForProviderId(id)
+    const store = controllableSecrets({ failSet: "after" })
+    await expect(createProviderWithSecret(
+      { repo, secretStore: store },
+      { id, name: "After Fail", baseUrl: "https://api.after-fail.example/v1", apiKey: "sk-after" },
+    )).rejects.toMatchObject({ code: "secret_store_failed" })
+    expect(await repo.getProvider(id)).toBeNull()
+    expect(store._map.has(ref)).toBe(false)
+  })
+
+  it("createProviderWithSecret: compensate delete failure surfaces inconsistent (not silent success)", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const id = "inconsistent-create"
+    const ref = llmSecretRefForProviderId(id)
+    const store = controllableSecrets({ failSet: "after", failDelete: true })
+    await expect(createProviderWithSecret(
+      { repo, secretStore: store },
+      { id, name: "Inconsistent", baseUrl: "https://api.inconsistent.example/v1", apiKey: "sk-bad" },
+    )).rejects.toMatchObject({ code: "provider_secret_inconsistent" })
+    // Key may remain; row must not be claimed successful. Row compensate may still run.
+    expect(store._map.has(ref)).toBe(true)
+  })
+
+  it("patchProviderWithSecret: env reject leaves DB unchanged and writes no key", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const created = await repo.createProvider({
+      id: "patch-env",
+      name: "Patch Env",
+      baseUrl: "https://api.patch-env.example/v1",
+    })
+    const store = controllableSecrets({ envIds: [created.secretRef] })
+    const before = await repo.getProvider(created.id)
+    await expect(patchProviderWithSecret(
+      { repo, secretStore: store },
+      created.id,
+      { name: "Should Not Apply", apiKey: "sk-patch" },
+    )).rejects.toMatchObject({ code: "managed_by_environment" })
+    const after = await repo.getProvider(created.id)
+    expect(after?.name).toBe(before?.name)
+    expect(after?.updatedAt).toBe(before?.updatedAt)
+    expect(store._map.has(created.secretRef)).toBe(false)
+  })
+
+  it("patchProviderWithSecret: write-before failure leaves DB unchanged", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const created = await repo.createProvider({
+      id: "patch-before",
+      name: "Patch Before",
+      baseUrl: "https://api.patch-before.example/v1",
+    })
+    const store = controllableSecrets({ failSet: "before" })
+    await expect(patchProviderWithSecret(
+      { repo, secretStore: store },
+      created.id,
+      { name: "Renamed", apiKey: "sk-before" },
+    )).rejects.toMatchObject({ code: "secret_store_failed" })
+    const after = await repo.getProvider(created.id)
+    expect(after?.name).toBe("Patch Before")
+    expect(store._map.has(created.secretRef)).toBe(false)
+  })
+
+  it("patchProviderWithSecret: write-after failure does not update DB metadata", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const created = await repo.createProvider({
+      id: "patch-after",
+      name: "Patch After",
+      baseUrl: "https://api.patch-after.example/v1",
+    })
+    const store = controllableSecrets({ failSet: "after" })
+    await expect(patchProviderWithSecret(
+      { repo, secretStore: store },
+      created.id,
+      { name: "Renamed After", apiKey: "sk-after" },
+    )).rejects.toMatchObject({ code: "provider_secret_inconsistent" })
+    const after = await repo.getProvider(created.id)
+    expect(after?.name).toBe("Patch After")
+    // Key may have persisted; metadata must not claim success via rename.
+    expect(store._map.get(created.secretRef)).toBe("sk-after")
+  })
+
+  it("promise.all concurrent binding upserts succeed serially with consistent audit", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const seeded = await seedTwoProviders(repo)
+    const results = await Promise.all([
+      repo.upsertBinding({ step: "extract", modelId: seeded.chatModel.id, updatedBy: "c1" }),
+      repo.upsertBinding({ step: "extract", modelId: seeded.chatModelB.id, updatedBy: "c2" }),
+    ])
+    expect(results).toHaveLength(2)
+    expect(results.map(r => r.updatedBy).sort()).toEqual(["c1", "c2"])
+    const binding = await repo.getBinding("extract")
+    expect(binding).toBeTruthy()
+    expect([seeded.chatModel.id, seeded.chatModelB.id]).toContain(binding!.modelId)
+    // Returned snapshots match their own writes (no post-commit re-read race).
+    for (const snap of results) {
+      expect(snap.step).toBe("extract")
+      expect([seeded.chatModel.id, seeded.chatModelB.id]).toContain(snap.modelId)
+      expect(["c1", "c2"]).toContain(snap.updatedBy)
+    }
+    const audit = await repo.listBindingAudit()
+    expect(audit).toHaveLength(2)
+    expect(audit.map(a => a.updatedBy).sort()).toEqual(["c1", "c2"])
+    expect(new Set(audit.map(a => a.modelId))).toEqual(new Set([seeded.chatModel.id, seeded.chatModelB.id]))
   })
 
   it("rejects invalid provider URLs and does not silent-fallback missing bindings", async () => {
