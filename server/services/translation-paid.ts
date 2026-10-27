@@ -6,6 +6,11 @@
  * Reservation ownership stays on paid_receipt (BEGIN IMMEDIATE); this module
  * does not invent a second ledger. Search/Fetch omit sharedBudget (ADR-011).
  *
+ * Billing branches:
+ * - Clear unpaid reject (auth/entitlement/forbidden/rate_limit) -> ProviderRejected -> 0-cost release, retryable.
+ * - HTTP success with usage but business validation fail -> book usage/cost, rejectReceived (no free release, no auto-resend of same received body).
+ * - Ambiguous / no usage on post-call failure -> unknown, keep reservation.
+ *
  * Usage: paidRequest records provider_usage once on success/unknown/reject.
  * Callers that still pass a finalize providerUsage patch must use request:false
  * and estimatedCost 0 (characters metadata only) to avoid double-billing.
@@ -20,10 +25,15 @@ import {
   ReceiptBusyError,
   ReceiptUnknownError,
   paidRequest,
+  rejectReceivedResponse,
 } from "#/intel/llm/receipts"
 import { resolveSharedLlmBudgetFromTranslation } from "#/intel/llm/shared-budget"
 import { TranslationValidationError, protectTranslationText, restoreAndValidateProtectedTranslation } from "#/services/translation-protection"
-import type { PreparedTranslationSource, TranslationExecutionResult } from "#/services/translation-service"
+import {
+  type PreparedTranslationSource,
+  type TranslationExecutionResult,
+  hasExplicitTranslationWrapper,
+} from "#/services/translation-service"
 import {
   TRANSLATION_CAPABILITY,
   TRANSLATION_CURRENCY,
@@ -40,10 +50,28 @@ class TranslationPaidReject extends ProviderRejectedError {
   }
 }
 
-const WRAPPER_RE = /^\s*Translated text\s*:\s*/i
+/** Business validation failed after the provider returned, but usage was absent — billing unknown. */
+class TranslationBusinessUnknownError extends Error {
+  readonly translationCode: string
+  constructor(code: string, message: string) {
+    super(message)
+    this.name = "TranslationBusinessUnknownError"
+    this.translationCode = code
+  }
+}
 
-function hasExplicitTranslationWrapper(text: string): boolean {
-  return WRAPPER_RE.test(text)
+/** Explicit unpaid / not-accepted rejects only — model output quality is never this. */
+const UNPAID_PROVIDER_REJECT_CODES = new Set([
+  "auth_failed",
+  "entitlement_missing",
+  "provider_forbidden",
+  "rate_limited",
+])
+
+interface TranslationPaidResponse {
+  translatedText: string
+  usage?: TranslationUsage
+  businessFailure?: { code: string, message: string }
 }
 
 export interface PaidTranslationOptions {
@@ -57,6 +85,8 @@ export interface PaidTranslationOptions {
   estimatedCost: number
   now?: () => Date
   timeoutMs?: number
+  /** Distinguishes diagnostic retries from durable cache receipts (paidRequest logical key). */
+  attemptTag?: string
 }
 
 export type PaidTranslationResult = TranslationExecutionResult & {
@@ -65,6 +95,10 @@ export type PaidTranslationResult = TranslationExecutionResult & {
   /** True when paidRequest already wrote provider_usage (skip cost on finalize). */
   usageRecordedByPaidRequest: boolean
   paidGateCode?: string
+}
+
+function unpaidProviderReject(error: ProviderError): boolean {
+  return UNPAID_PROVIDER_REJECT_CODES.has(error.code)
 }
 
 /**
@@ -110,6 +144,7 @@ export async function executeTranslationViaPaidRequest(options: PaidTranslationO
           sourceChars: source.sourceText.length,
         },
         estimatedCost: options.estimatedCost,
+        attemptTag: options.attemptTag,
       },
       async (_apiKey) => {
         const protectedSource = protectTranslationText(source.sourceText, source.protectedTerms)
@@ -125,66 +160,100 @@ export async function executeTranslationViaPaidRequest(options: PaidTranslationO
             maxTokens: source.maxTokens,
           })
         } catch (error) {
-          if (error instanceof ProviderError) {
-            const rejected = error.code === "auth_failed"
-              || error.code === "entitlement_missing"
-              || error.code === "provider_forbidden"
-              || error.code === "rate_limited"
-              || error.code === "provider_contract_changed"
-            if (rejected) {
-              throw new TranslationPaidReject(
-                error.code,
-                error.message,
-                error.code === "rate_limited" ? 429 : (error.status ?? 400),
-                error.code === "rate_limited",
-              )
-            }
+          if (error instanceof ProviderError && unpaidProviderReject(error)) {
+            throw new TranslationPaidReject(
+              error.code,
+              error.message,
+              error.code === "rate_limited" ? 429 : (error.status ?? 400),
+              error.code === "rate_limited",
+            )
           }
-          if (error instanceof TranslationValidationError) {
-            throw new TranslationPaidReject(error.code, error.message, 422, false)
-          }
+          // Timeouts, 5xx, contract-parse failures without a usable body, etc.:
+          // billing may already have happened -> unknown (keep reservation).
           throw error
         }
-        if (!result.translatedText.trim()) {
-          throw new TranslationPaidReject("provider_contract_changed", "translation_provider_empty_result", 422, false)
-        }
-        if (hasExplicitTranslationWrapper(result.translatedText)) {
-          throw new TranslationPaidReject("provider_contract_changed", "translation_provider_wrapper_output", 422, false)
-        }
-        let translatedText: string
-        try {
-          translatedText = restoreAndValidateProtectedTranslation(
-            protectedSource,
-            result.translatedText,
-            source.protectedTerms ?? [],
-          )
-        } catch (error) {
-          if (error instanceof TranslationValidationError) {
-            throw new TranslationPaidReject(error.code, error.message, 422, false)
-          }
-          throw error
-        }
+
         const usage = result.usage
         const estimated = estimateDeepSeekCost(usage, clock())
+        const usagePayload = usage
+          ? { tokensIn: usage.promptTokens, tokensOut: usage.completionTokens }
+          : undefined
+        const costPayload = usage && estimated > 0
+          ? { amount: estimated, currency: TRANSLATION_CURRENCY, basis: "estimated" as const }
+          : undefined
+
+        let businessFailure: { code: string, message: string } | undefined
+        let translatedText = result.translatedText
+        if (!result.translatedText.trim()) {
+          businessFailure = { code: "provider_contract_changed", message: "translation_provider_empty_result" }
+        } else if (hasExplicitTranslationWrapper(result.translatedText)) {
+          businessFailure = { code: "provider_contract_changed", message: "translation_provider_wrapper_output" }
+        } else {
+          try {
+            translatedText = restoreAndValidateProtectedTranslation(
+              protectedSource,
+              result.translatedText,
+              source.protectedTerms ?? [],
+            )
+          } catch (error) {
+            if (error instanceof TranslationValidationError) {
+              businessFailure = { code: error.code, message: error.message }
+            } else {
+              throw error
+            }
+          }
+        }
+
+        if (businessFailure) {
+          // With usage: book real cost then mark received unusable (no free release).
+          // Without usage: cannot tell if billed -> unknown, keep reservation.
+          if (!usage) {
+            throw new TranslationBusinessUnknownError(businessFailure.code, businessFailure.message)
+          }
+          return {
+            response: {
+              translatedText: source.sourceText,
+              usage,
+              businessFailure,
+            } satisfies TranslationPaidResponse,
+            usage: usagePayload,
+            cost: costPayload ?? { amount: options.estimatedCost, currency: TRANSLATION_CURRENCY, basis: "estimated" },
+          }
+        }
+
         const outcome: {
-          response: { translatedText: string, usage?: TranslationUsage }
+          response: TranslationPaidResponse
           usage?: { tokensIn?: number, tokensOut?: number }
           cost?: { amount: number, currency: string, basis: "estimated" }
         } = {
           response: { translatedText, usage },
-          usage: usage
-            ? { tokensIn: usage.promptTokens, tokensOut: usage.completionTokens }
-            : undefined,
+          usage: usagePayload,
         }
-        // Prefer real usage-based estimate when present; otherwise keep the reserved estimate.
-        if (usage && estimated > 0) {
-          outcome.cost = { amount: estimated, currency: TRANSLATION_CURRENCY, basis: "estimated" }
-        }
+        if (costPayload) outcome.cost = costPayload
         return outcome
       },
     )
 
-    const payload = paid.response as { translatedText?: string, usage?: TranslationUsage } | null
+    const payload = paid.response as TranslationPaidResponse | null
+    if (payload?.businessFailure) {
+      if (!paid.reused) {
+        await rejectReceivedResponse(options.db, paid.receiptId, payload.businessFailure.message, clock())
+      }
+      return {
+        sourceText: source.sourceText,
+        translatedText: source.sourceText,
+        sourceHash: source.sourceHash,
+        status: "failed",
+        errorCode: payload.businessFailure.code,
+        errorMessage: payload.businessFailure.message,
+        usage: payload.usage,
+        providerCalled: !paid.reused,
+        receiptId: paid.receiptId,
+        reused: paid.reused,
+        usageRecordedByPaidRequest: true,
+      }
+    }
+
     const translatedText = typeof payload?.translatedText === "string" ? payload.translatedText : source.sourceText
     return {
       sourceText: source.sourceText,
@@ -261,18 +330,41 @@ export async function executeTranslationViaPaidRequest(options: PaidTranslationO
         usageRecordedByPaidRequest: true,
       }
     }
-    const errorCode = error instanceof ProviderError
-      ? error.code
-      : error && typeof error === "object" && "code" in error && typeof (error as { code?: unknown }).code === "string"
-        ? (error as { code: string }).code
-        : "provider_unavailable"
+    if (error instanceof ProviderError) {
+      return {
+        sourceText: source.sourceText,
+        translatedText: source.sourceText,
+        sourceHash: source.sourceHash,
+        status: "failed",
+        errorCode: error.code,
+        errorMessage: error.message,
+        providerCalled: true,
+        usageRecordedByPaidRequest: true,
+      }
+    }
+    if (error instanceof TranslationBusinessUnknownError) {
+      return {
+        sourceText: source.sourceText,
+        translatedText: source.sourceText,
+        sourceHash: source.sourceHash,
+        status: "failed",
+        errorCode: error.translationCode,
+        errorMessage: error.message,
+        providerCalled: true,
+        usageRecordedByPaidRequest: true,
+      }
+    }
+    const message = error instanceof Error ? error.message : String(error)
+    const errorCode = error && typeof error === "object" && "code" in error && typeof (error as { code?: unknown }).code === "string"
+      ? (error as { code: string }).code
+      : "provider_unavailable"
     return {
       sourceText: source.sourceText,
       translatedText: source.sourceText,
       sourceHash: source.sourceHash,
       status: "failed",
       errorCode,
-      errorMessage: error instanceof Error ? error.message : String(error),
+      errorMessage: message,
       providerCalled: true,
       usageRecordedByPaidRequest: true,
     }

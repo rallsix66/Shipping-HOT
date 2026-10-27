@@ -1,5 +1,10 @@
 ## 2026-10-27 — day20 events 连续性离线统计（dots 1793072775.334919）
 
+## R3-1 billing + translation-test paid path (2026-10-27)
+
+- REQUEST CHANGES: unpaid-only ProviderRejected; HTTP200+usage+validation fail books cost via rejectReceived; `POST /shipping/translation/test` on paidRequest+sharedBudget; wrappers reused from TranslationService; Promise.all race + unknown startup assert.
+- Evidence: `.tmp/r3-1-llm-registry-20261027/request-changes-billing-test-validation/`.
+- S7 / Settings UI: NOT_REQUIRED this slice.
 ## R3-1 shared LLM budget + translation (2026-10-27, isolation)
 
 - Post tip `ccd32fee` (Settings UI P2 limited accept): same-currency shared atomic reserve for registry chat/embedding + translation via `paidRequest(sharedBudget)`; Search/Fetch independent (ADR-011).

@@ -142,16 +142,17 @@ function errorMessage(error: unknown): string {
   return message.replace(/\b(?:api[-_ ]?key|authorization|bearer|token|secret)\b[^\r\n]{0,256}/gi, "[redacted]").slice(0, 500)
 }
 
-const explicitTranslationWrappers = [
+/** Shared with translation-paid bridge — do not shrink this list in callers. */
+export const EXPLICIT_TRANSLATION_WRAPPERS = [
   /^\s*Translation\s*:\s*/i,
   /^\s*Here is (?:the )?translation\s*:\s*/i,
   /^\s*Translated text\s*:\s*/i,
   /^\s*翻译如下[:：]\s*/,
   /^\s*译文[:：]\s*/,
-]
+] as const
 
-function hasExplicitTranslationWrapper(value: string): boolean {
-  return explicitTranslationWrappers.some(pattern => pattern.test(value))
+export function hasExplicitTranslationWrapper(value: string): boolean {
+  return EXPLICIT_TRANSLATION_WRAPPERS.some(pattern => pattern.test(value))
 }
 
 function emptyOutcome(sourceText: string, sourceHash: string, status: Exclude<TranslationOutcomeStatus, "succeeded">): TranslationOutcome {

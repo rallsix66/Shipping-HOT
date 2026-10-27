@@ -1,6 +1,13 @@
 # R3-1 REQUEST CHANGES notes (2026-10-27)
 
-## Shared LLM budget + translation path (this slice, post ccd32fee)
+## Billing classification + translation test entrance (post 7920f1dd)
+
+- **P1 billing**: unpaid reject only `auth_failed` / `entitlement_missing` / `provider_forbidden` / `rate_limited` → ProviderRejected / 0-cost. HTTP success + usage + wrapper/empty/protected validation fail → book usage/cost then `rejectReceivedResponse` (no free release). No usage on business fail → unknown (keep reservation). Reuses exported `hasExplicitTranslationWrapper` (full wrapper list).
+- **P1 leak**: `POST /shipping/translation/test` → `runTranslationTest` → `executeTranslationViaPaidRequest` (paidRequest + sharedBudget). Diagnostic return shape kept; no dedicated Settings shared-pool field.
+- **Tests**: fake HTTP200+tokens+bad output; registry-full → diagnostic zero-call; `Promise.all` start-barrier race for last unit; unknown exclusive-startup assert (three recovery shapes still owned by `receipts.test.ts`).
+- Evidence: `.tmp/r3-1-llm-registry-20261027/request-changes-billing-test-validation/`.
+
+## Shared LLM budget + translation path (prior tip 7920f1dd / 46a79db)
 
 - **Wiring**: `translation-sync` calls `executeTranslationViaPaidRequest` -> `paidRequest` with `sharedBudget` from `resolveSharedLlmBudgetFromTranslation(translation.monthlyBudget, USD)`.
 - **Gate**: when `PaidRequestContext.sharedBudget` is set, `checkBudget` runs `assertSharedLlmBudgetInTransaction` inside BEGIN IMMEDIATE (same receipt claim). Search/Fetch omit `sharedBudget` (ADR-011).
