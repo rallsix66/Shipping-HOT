@@ -442,6 +442,28 @@ describe("llm registry repository", () => {
     expect(store._map.get(created.secretRef)).toBe("sk-after")
   })
 
+  it("patchProviderWithSecret: invalid name with new apiKey rejects before any secret write", async () => {
+    const { db } = await setup()
+    const repo = new LlmRegistryRepository(db)
+    const created = await repo.createProvider({
+      id: "patch-precheck",
+      name: "Patch Precheck",
+      baseUrl: "https://api.patch-precheck.example/v1",
+    })
+    const store = controllableSecrets()
+    store._map.set(created.secretRef, "sk-existing")
+    const before = await repo.getProvider(created.id)
+    await expect(patchProviderWithSecret(
+      { repo, secretStore: store },
+      created.id,
+      { name: "", apiKey: "sk-fake-new" },
+    )).rejects.toMatchObject({ code: "invalid_name" })
+    const after = await repo.getProvider(created.id)
+    expect(after?.name).toBe(before?.name)
+    expect(after?.updatedAt).toBe(before?.updatedAt)
+    expect(store._map.get(created.secretRef)).toBe("sk-existing")
+  })
+
   it("promise.all concurrent binding upserts succeed serially with consistent audit", async () => {
     const { db } = await setup()
     const repo = new LlmRegistryRepository(db)

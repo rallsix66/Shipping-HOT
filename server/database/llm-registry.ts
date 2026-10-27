@@ -125,9 +125,13 @@ function requireId(value: unknown, code = "invalid_id"): string {
   return value
 }
 
-function requireName(value: unknown): string {
+export function parseProviderName(value: unknown): string {
   if (typeof value !== "string" || !NAME_RE.test(value.trim())) throw new LlmRegistryError("invalid_name")
   return value.trim()
+}
+
+function requireName(value: unknown): string {
+  return parseProviderName(value)
 }
 
 /** Strict OpenAI-compatible HTTPS base URL (no credentials, no fragment, path may end with /v1). */
@@ -172,11 +176,15 @@ function requireModelName(value: unknown): string {
   return value
 }
 
-function bool01(value: unknown, fallback = true): boolean {
+export function parseProviderEnabled(value: unknown, fallback = true): boolean {
   if (value === undefined) return fallback
   if (typeof value === "boolean") return value
   if (value === 0 || value === 1) return value === 1
   throw new LlmRegistryError("invalid_enabled")
+}
+
+function bool01(value: unknown, fallback = true): boolean {
+  return parseProviderEnabled(value, fallback)
 }
 
 interface ProviderRow {

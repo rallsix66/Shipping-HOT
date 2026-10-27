@@ -1,12 +1,16 @@
 import { randomUUID } from "node:crypto"
 import type { ProviderSecret, SecretStore } from "#/providers/contracts"
-import type {
-  type LlmProviderRecord,
+import {
   LlmRegistryError,
-  LlmRegistryRepository,
   assertSecretWriteTargetAllowed,
   llmSecretRefForProviderId,
   parseProviderBaseUrl,
+  parseProviderEnabled,
+  parseProviderName,
+} from "#/database/llm-registry"
+import type {
+  LlmProviderRecord,
+  LlmRegistryRepository,
 } from "#/database/llm-registry"
 
 export interface LlmProviderWriteDeps {
@@ -148,7 +152,10 @@ export async function patchProviderWithSecret(
   input: PatchProviderWithSecretInput,
 ): Promise<ProviderWithSecretMeta> {
   const apiKey = parseOptionalApiKey(input.apiKey)
+  // Full field validation before any secret/DB write (do not rely on updateProvider for early reject).
+  if (input.name !== undefined) parseProviderName(input.name)
   if (input.baseUrl !== undefined) parseProviderBaseUrl(input.baseUrl)
+  if (input.enabled !== undefined) parseProviderEnabled(input.enabled)
 
   const existing = await deps.repo.getProvider(id)
   if (!existing) throw new LlmRegistryError("provider_not_found")
