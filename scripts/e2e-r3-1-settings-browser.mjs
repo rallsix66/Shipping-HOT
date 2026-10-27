@@ -556,6 +556,8 @@ async function main() {
   check(syncResult?.submitDisabledWhenStale === true, "UI blocks submit when model id is stale across providers")
 
   // --- UI manage path ---
+  const countersBeforeBrowse = await readDbCounters()
+  evidence.countersBeforeBrowse = countersBeforeBrowse
   await navigate("/settings")
   await waitFor(async () => {
     const text = await evaluate("document.body?.innerText ?? ''")
@@ -594,7 +596,10 @@ async function main() {
     + `    click('[data-testid="llm-provider-edit-save"]');\n`
     + `    await sleep(900);\n`
     + `    out.steps.push('edit_provider');\n`
-    + `    out.afterEdit = textOf().includes('R3-1 UI Edited Provider') || textOf().includes('\u672A\u63D0\u4EA4\u5BC6\u94A5') || textOf().includes('\u5DF2\u66F4\u65B0');\n`
+    + `    const providerRow = q('[data-testid="llm-provider-row-' + providerId + '"]');\n`
+    + `    out.afterEditRowText = providerRow ? (providerRow.textContent || '') : '';\n`
+    + `    out.editFormClosedAfterSave = !q('[data-testid="llm-provider-edit-form-' + providerId + '"]');\n`
+    + `    out.afterEdit = Boolean(providerRow && out.afterEditRowText.includes('R3-1 UI Edited Provider') && out.editFormClosedAfterSave);\n`
     + `    if (!click('[data-testid="llm-provider-edit-' + providerId + '"]')) return { ok: false, reason: 'edit_btn_missing_2', ...out };\n`
     + `    await sleep(200);\n`
     + `    setInput('[data-testid="llm-provider-edit-name"]', 'R3-1 UI Edited Provider');\n`
@@ -605,19 +610,42 @@ async function main() {
     + `    out.secretFailShowsError = afterFail.includes('secret_too_long') || afterFail.includes('\u66F4\u65B0\u5931\u8D25');\n`
     + `    out.secretFailNoFakeSuccess = !afterFail.includes('\u5BC6\u94A5\u5DF2\u66F4\u6362');\n`
     + `    out.formRetained = !!q('[data-testid="llm-provider-edit-form-' + providerId + '"]');\n`
+    + `    const keyInput = q('[data-testid="llm-provider-edit-apikey"]');\n`
+    + `    out.secretFieldRetained = keyInput ? String(keyInput.value || '').length === 600 : false;\n`
     + `    out.steps.push('secret_fail');\n`
     + `    click('[data-testid="llm-provider-edit-cancel"]');\n`
     + `    await sleep(200);\n`
+    + `    // Model edit form: price / currency / purpose (real form path, not API-only).\n`
+    + `    if (!click('[data-testid="llm-model-edit-' + modelId + '"]')) return { ok: false, reason: 'model_edit_btn_missing', ...out };\n`
+    + `    await sleep(200);\n`
+    + `    setInput('[data-testid="llm-model-edit-name"]', 'mock-chat-fixture-ui-edited');\n`
+    + `    setSelect('[data-testid="llm-model-edit-purpose"]', 'chat');\n`
+    + `    setInput('[data-testid="llm-model-edit-price-in"]', '0.003');\n`
+    + `    setInput('[data-testid="llm-model-edit-price-out"]', '0.004');\n`
+    + `    setInput('[data-testid="llm-model-edit-currency"]', 'USD');\n`
+    + `    click('[data-testid="llm-model-edit-save"]');\n`
+    + `    await sleep(900);\n`
+    + `    out.steps.push('edit_model');\n`
+    + `    const modelRow = q('[data-testid="llm-model-row-' + modelId + '"]');\n`
+    + `    out.modelEditRowText = modelRow ? (modelRow.textContent || '') : '';\n`
+    + `    out.modelEditFormClosed = !q('[data-testid="llm-model-edit-form-' + modelId + '"]');\n`
+    + `    out.modelEditOk = Boolean(modelRow && out.modelEditRowText.includes('mock-chat-fixture-ui-edited') && out.modelEditRowText.includes('chat') && out.modelEditFormClosed);\n`
     + `    setSelect('[data-testid="llm-binding-step"]', 'extract');\n`
     + `    setSelect('[data-testid="llm-binding-model"]', modelId);\n`
     + `    click('[data-testid="llm-binding-save"]');\n`
     + `    await sleep(900);\n`
     + `    out.steps.push('bind');\n`
-    + `    out.bindOk = textOf().includes('\u5DF2\u7ED1\u5B9A') || textOf().includes(modelId);\n`
+    + `    const bindStatusEl = q('[data-testid="llm-binding-status-extract"]');\n`
+    + `    out.bindStatusText = bindStatusEl ? (bindStatusEl.textContent || '') : '';\n`
+    + `    out.bindOk = Boolean(bindStatusEl && out.bindStatusText.includes(modelId) && out.bindStatusText.includes('\u6709\u6548'));\n`
     + `    if (!click('[data-testid="llm-model-toggle-' + modelId + '"]')) return { ok: false, reason: 'model_toggle_missing', ...out };\n`
     + `    await sleep(800);\n`
     + `    out.steps.push('disable');\n`
-    + `    out.disableVisible = textOf().includes('\u5DF2\u7981\u7528') || textOf().includes('\u5931\u6548');\n`
+    + `    const statusAfterDisable = q('[data-testid="llm-binding-status-extract"]');\n`
+    + `    out.disableStatusText = statusAfterDisable ? (statusAfterDisable.textContent || '') : '';\n`
+    + `    out.disableVisible = Boolean(out.disableStatusText.includes('\u5931\u6548') || out.disableStatusText.includes('\u5DF2\u7981\u7528'));\n`
+    + `    const modelRowDisabled = q('[data-testid="llm-model-row-' + modelId + '"]');\n`
+    + `    out.disableRowShowsDisabled = Boolean(modelRowDisabled && (modelRowDisabled.textContent || '').includes('\u5DF2\u7981\u7528'));\n`
     + `    if (!click('[data-testid="llm-model-delete-' + modelId + '"]')) return { ok: false, reason: 'model_delete_missing', ...out };\n`
     + `    await sleep(200);\n`
     + `    out.confirmShown = !!q('[data-testid="llm-delete-confirm"]');\n`
@@ -637,27 +665,205 @@ async function main() {
     + `    click('[data-testid="llm-delete-confirm-yes"]');\n`
     + `    await sleep(900);\n`
     + `    out.steps.push('delete_model');\n`
-    + `    out.modelDeleted = textOf().includes('\u5DF2\u5220\u9664') || !q('[data-testid="llm-model-row-' + modelId + '"]');\n`
+    + `    out.modelRowGone = !q('[data-testid="llm-model-row-' + modelId + '"]');\n`
+    + `    out.modelDeleted = out.modelRowGone || textOf().includes('\u5DF2\u5220\u9664');\n`
     + `    const statusEl = q('[data-testid="llm-binding-status-extract"]');\n`
     + `    out.bindingStatusText = statusEl ? statusEl.textContent : '';\n`
     + `    const body = textOf();\n`
     + `    out.hasConfirmCopy = body.includes('\u786E\u8BA4\u5220\u9664') || out.confirmShown;\n`
     + `    out.hasRetainCopy = body.includes('SecretStore') && (body.includes('\u4FDD\u7559') || body.includes('\u672A\u6E05\u7406') || body.includes('\u4E0D\u4F1A\u6E05\u7406'));\n`
     + `    out.hasMaskCopy = body.includes('\u8131\u654F') || body.includes('\u672A\u914D\u7F6E\u5BC6\u94A5') || body.includes('\u5DF2\u914D\u7F6E');\n`
-    + `    out.ok = Boolean(out.afterEdit && out.secretFailShowsError && out.secretFailNoFakeSuccess && out.formRetained && out.bindOk && out.blockedMsg && out.modelDeleted && out.hasConfirmCopy && out.hasRetainCopy);\n`
+    + `    out.ok = Boolean(out.afterEdit && out.secretFailShowsError && out.secretFailNoFakeSuccess && out.formRetained && out.secretFieldRetained && out.modelEditOk && out.bindOk && out.disableVisible && out.blockedMsg && out.modelDeleted && out.modelRowGone && out.hasConfirmCopy && out.hasRetainCopy);\n`
     + `    return out;\n`
     + `  })()`, true)
   evidence.uiManage = manageUi
-  check(manageUi?.afterEdit === true, `UI edit provider (got ${JSON.stringify(manageUi?.afterEdit)})`)
+  check(manageUi?.afterEdit === true, `UI edit provider row persisted (got ${JSON.stringify({ afterEdit: manageUi?.afterEdit, row: manageUi?.afterEditRowText, formClosed: manageUi?.editFormClosedAfterSave })})`)
   check(manageUi?.secretFailShowsError === true, "UI secret failure shows real error")
   check(manageUi?.secretFailNoFakeSuccess === true, "UI secret failure has no fake success")
   check(manageUi?.formRetained === true, "UI secret failure retains edit form")
-  check(manageUi?.bindOk === true, `UI bind step (got ${JSON.stringify(manageUi?.bindOk)})`)
+  check(manageUi?.secretFieldRetained === true, `UI secret failure retains overlong field value (got ${JSON.stringify(manageUi?.secretFieldRetained)})`)
+  check(manageUi?.modelEditOk === true, `UI model edit form price/purpose (got ${JSON.stringify({ ok: manageUi?.modelEditOk, row: manageUi?.modelEditRowText })})`)
+  check(manageUi?.bindOk === true, `UI bind step status row (got ${JSON.stringify(manageUi?.bindStatusText)})`)
+  check(manageUi?.disableVisible === true, `UI disable shows invalid binding status (got ${JSON.stringify(manageUi?.disableStatusText)})`)
+  check(manageUi?.disableRowShowsDisabled === true, "UI model row shows 已禁用 after toggle")
   check(manageUi?.blockedMsg === true, "UI blocked delete shows model_in_use / blocked")
   check(manageUi?.confirmShown === true, "UI delete shows explicit confirm")
-  check(manageUi?.modelDeleted === true, "UI deletes unbound test model after rebind")
+  check(manageUi?.modelDeleted === true && manageUi?.modelRowGone === true, `UI deletes unbound test model row (got ${JSON.stringify({ deleted: manageUi?.modelDeleted, rowGone: manageUi?.modelRowGone })})`)
   check(manageUi?.hasRetainCopy === true, "UI copy states SecretStore retain semantics")
   check(manageUi?.ok === true, `UI manage flow aggregate ok (got ${JSON.stringify(manageUi)})`)
+
+  // Persist checks vs list GET after manage UI (no GET-by-id routes)
+  const getModelsListAfterUi = await (await fetch(`${BASE}/api/shipping/llm/models`)).json().catch(() => ({ items: [] }))
+  check(!((getModelsListAfterUi.items || []).some(m => m.id === modelForConn.id)), "API models list excludes deleted modelForConn")
+  const editedModelGoneOrAbsent = !((getModelsListAfterUi.items || []).some(m => m.id === modelForConn.id))
+  check(editedModelGoneOrAbsent && manageUi?.modelRowGone === true, "deleted model absent in UI row and API list")
+  const getBindingsAfterUi = await (await fetch(`${BASE}/api/shipping/llm/bindings`)).json().catch(() => ({ items: [] }))
+  const extractBinding = (getBindingsAfterUi.items || []).find(b => b.step === "extract")
+  check(extractBinding?.modelId === modelB.id, `GET binding extract persists modelB (got ${JSON.stringify(extractBinding)})`)
+  check(
+    typeof manageUi?.bindingStatusText === "string"
+    && manageUi.bindingStatusText.includes(modelB.id)
+    && manageUi.bindingStatusText.includes("\u6709\u6548"),
+    `binding status text matches GET (got ${JSON.stringify(manageUi?.bindingStatusText)})`,
+  )
+  const getProvidersAfterEdit = await (await fetch(`${BASE}/api/shipping/llm/providers`)).json().catch(() => ({ items: [] }))
+  const providerAfterEdit = (getProvidersAfterEdit.items || []).find(p => p.id === provider.id)
+  check(providerAfterEdit?.name === "R3-1 UI Edited Provider", `GET providers list name matches UI edit (got ${JSON.stringify(providerAfterEdit?.name)})`)
+  const modelForConnEdited = (getModelsListAfterUi.items || []).find(m => m.id === modelForConn.id)
+  // modelForConn deleted above; price/purpose edit verified via modelEditOk row text before delete.
+  void modelForConnEdited
+
+  // Purpose mismatch: edit bound modelB chat -> embedding via form; status must invalidate; restore.
+  const purposeUi = await evaluate(`(async () => {\n`
+    + `    const sleep = (ms) => new Promise(r => setTimeout(r, ms));\n`
+    + `    const q = (sel) => document.querySelector(sel);\n`
+    + `    const click = (sel) => { const el = q(sel); if (!el) return false; el.click(); return true; };\n`
+    + `    const setSelect = (sel, value) => {\n`
+    + `      const el = q(sel); if (!el) return false;\n`
+    + `      const proto = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value');\n`
+    + `      if (proto && proto.set) proto.set.call(el, value); else el.value = value;\n`
+    + `      el.dispatchEvent(new Event('input', { bubbles: true }));\n`
+    + `      el.dispatchEvent(new Event('change', { bubbles: true }));\n`
+    + `      return true;\n`
+    + `    };\n`
+    + `    const out = {};\n`
+    + `    const modelBId = ${JSON.stringify(modelB.id)};\n`
+    + `    if (!click('[data-testid="llm-model-edit-' + modelBId + '"]')) return { ok: false, reason: 'edit_missing' };\n`
+    + `    await sleep(200);\n`
+    + `    if (!setSelect('[data-testid="llm-model-edit-purpose"]', 'embedding')) return { ok: false, reason: 'purpose_select_missing' };\n`
+    + `    click('[data-testid="llm-model-edit-save"]');\n`
+    + `    await sleep(1000);\n`
+    + `    const statusEl = q('[data-testid="llm-binding-status-extract"]');\n`
+    + `    out.statusAfterMismatch = statusEl ? (statusEl.textContent || '') : '';\n`
+    + `    out.mismatchInvalid = out.statusAfterMismatch.includes('\u5931\u6548') && out.statusAfterMismatch.includes('\u7528\u9014');\n`
+    + `    if (!click('[data-testid="llm-model-edit-' + modelBId + '"]')) return { ...out, ok: false, reason: 'edit_missing_restore' };\n`
+    + `    await sleep(200);\n`
+    + `    setSelect('[data-testid="llm-model-edit-purpose"]', 'chat');\n`
+    + `    click('[data-testid="llm-model-edit-save"]');\n`
+    + `    await sleep(1000);\n`
+    + `    const statusRestore = q('[data-testid="llm-binding-status-extract"]');\n`
+    + `    out.statusAfterRestore = statusRestore ? (statusRestore.textContent || '') : '';\n`
+    + `    out.restoredValid = out.statusAfterRestore.includes('\u6709\u6548') && !out.statusAfterRestore.includes('\u5931\u6548');\n`
+    + `    out.ok = Boolean(out.mismatchInvalid && out.restoredValid);\n`
+    + `    return out;\n`
+    + `  })()`, true)
+  evidence.uiPurpose = purposeUi
+  check(purposeUi?.mismatchInvalid === true, `UI purpose mismatch invalidates extract (got ${JSON.stringify(purposeUi)})`)
+  check(purposeUi?.restoredValid === true, `UI purpose restore returns 有效 (got ${JSON.stringify(purposeUi?.statusAfterRestore)})`)
+  const modelsAfterPurpose = await (await fetch(`${BASE}/api/shipping/llm/models`)).json().catch(() => ({ items: [] }))
+  const modelBPurposeGet = (modelsAfterPurpose.items || []).find(m => m.id === modelB.id)
+  check(modelBPurposeGet?.purpose === "chat", `GET modelB purpose restored chat (got ${JSON.stringify(modelBPurposeGet?.purpose)})`)
+
+  // Delete currently selected provider A without page refresh; then create+test under B.
+  const deleteProviderUi = await evaluate(`(async () => {\n`
+    + `    const sleep = (ms) => new Promise(r => setTimeout(r, ms));\n`
+    + `    const q = (sel) => document.querySelector(sel);\n`
+    + `    const click = (sel) => { const el = q(sel); if (!el) return false; el.click(); return true; };\n`
+    + `    const setInput = (sel, value) => {\n`
+    + `      const el = q(sel); if (!el) return false;\n`
+    + `      const proto = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');\n`
+    + `      if (proto && proto.set) proto.set.call(el, value); else el.value = value;\n`
+    + `      el.dispatchEvent(new Event('input', { bubbles: true }));\n`
+    + `      el.dispatchEvent(new Event('change', { bubbles: true }));\n`
+    + `      return true;\n`
+    + `    };\n`
+    + `    const setSelect = (sel, value) => {\n`
+    + `      const el = q(sel); if (!el) return false;\n`
+    + `      const proto = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value');\n`
+    + `      if (proto && proto.set) proto.set.call(el, value); else el.value = value;\n`
+    + `      el.dispatchEvent(new Event('input', { bubbles: true }));\n`
+    + `      el.dispatchEvent(new Event('change', { bubbles: true }));\n`
+    + `      return true;\n`
+    + `    };\n`
+    + `    const out = {};\n`
+    + `    const providerA = ${JSON.stringify(provider.id)};\n`
+    + `    const providerB = ${JSON.stringify(providerB.id)};\n`
+    + `    const modelBId = ${JSON.stringify(modelB.id)};\n`
+    + `    // Select A in create + test dropdowns so stale A is the current selection.\n`
+    + `    setSelect('[data-testid="llm-model-create-provider"]', providerA);\n`
+    + `    setSelect('[data-testid="llm-test-provider"]', providerA);\n`
+    + `    await sleep(300);\n`
+    + `    out.createProviderBefore = q('[data-testid="llm-model-create-provider"]')?.value || '';\n`
+    + `    out.testProviderBefore = q('[data-testid="llm-test-provider"]')?.value || '';\n`
+    + `    if (!click('[data-testid="llm-provider-delete-' + providerA + '"]')) return { ok: false, reason: 'delete_btn_missing', ...out };\n`
+    + `    await sleep(200);\n`
+    + `    out.confirmShown = !!q('[data-testid="llm-delete-confirm"]');\n`
+    + `    click('[data-testid="llm-delete-confirm-yes"]');\n`
+    + `    await sleep(1100);\n`
+    + `    out.providerRowGone = !q('[data-testid="llm-provider-row-' + providerA + '"]');\n`
+    + `    const createSel = q('[data-testid="llm-model-create-provider"]');\n`
+    + `    const testSel = q('[data-testid="llm-test-provider"]');\n`
+    + `    out.createProviderAfter = createSel ? createSel.value : '';\n`
+    + `    out.testProviderAfter = testSel ? testSel.value : '';\n`
+    + `    out.createOptions = createSel ? Array.from(createSel.options).map(o => o.value) : [];\n`
+    + `    out.testOptions = testSel ? Array.from(testSel.options).map(o => o.value) : [];\n`
+    + `    out.noGhostCreateA = out.createProviderAfter !== providerA && !out.createOptions.includes(providerA);\n`
+    + `    out.noGhostTestA = out.testProviderAfter !== providerA && !out.testOptions.includes(providerA);\n`
+    + `    // Without page refresh: create model under B and run mock test with B/modelB.\n`
+    + `    setSelect('[data-testid="llm-model-create-provider"]', providerB);\n`
+    + `    await sleep(200);\n`
+    + `    setInput('[data-testid="llm-model-create-name"]', 'mock-after-delete-a');\n`
+    + `    setSelect('[data-testid="llm-model-create-purpose"]', 'chat');\n`
+    + `    setInput('[data-testid="llm-model-create-price-in"]', '0.001');\n`
+    + `    setInput('[data-testid="llm-model-create-price-out"]', '0.002');\n`
+    + `    setInput('[data-testid="llm-model-create-currency"]', 'USD');\n`
+    + `    const createSubmit = q('[data-testid="llm-model-create-submit"]');\n`
+    + `    out.createSubmitEnabled = createSubmit ? createSubmit.disabled === false : false;\n`
+    + `    click('[data-testid="llm-model-create-submit"]');\n`
+    + `    await sleep(1100);\n`
+    + `    out.createAction = (q('[data-testid="llm-action-message"]')?.textContent || '');\n`
+    + `    out.createdUnderB = out.createAction.includes('\u5DF2\u4FDD\u5B58') || !!Array.from(document.querySelectorAll('[data-testid^="llm-model-row-"]')).find(el => (el.textContent || '').includes('mock-after-delete-a'));\n`
+    + `    setSelect('[data-testid="llm-test-provider"]', providerB);\n`
+    + `    await sleep(350);\n`
+    + `    setSelect('[data-testid="llm-test-model"]', modelBId);\n`
+    + `    await sleep(200);\n`
+    + `    const testSubmit = q('[data-testid="llm-test-submit"]');\n`
+    + `    out.testSubmitEnabled = testSubmit ? testSubmit.disabled === false : false;\n`
+    + `    click('[data-testid="llm-test-submit"]');\n`
+    + `    await sleep(1200);\n`
+    + `    out.testMessage = q('[data-testid="llm-test-message"]')?.textContent || '';\n`
+    + `    out.testOk = out.testMessage.includes('\u6D4B\u8BD5\u7ED3\u679C') || out.testMessage.includes('mock');\n`
+    + `    out.ok = Boolean(out.providerRowGone && out.noGhostCreateA && out.noGhostTestA && out.createdUnderB && out.testOk && out.testSubmitEnabled);\n`
+    + `    return out;\n`
+    + `  })()`, true)
+  evidence.uiDeleteProvider = deleteProviderUi
+  check(deleteProviderUi?.providerRowGone === true, `UI provider A row gone after delete (got ${JSON.stringify(deleteProviderUi?.providerRowGone)})`)
+  check(deleteProviderUi?.noGhostCreateA === true, `create provider select cleared of A (got ${JSON.stringify({ after: deleteProviderUi?.createProviderAfter, options: deleteProviderUi?.createOptions })})`)
+  check(deleteProviderUi?.noGhostTestA === true, `test provider select cleared of A (got ${JSON.stringify({ after: deleteProviderUi?.testProviderAfter, options: deleteProviderUi?.testOptions })})`)
+  check(deleteProviderUi?.createdUnderB === true, `create model under B without refresh (got ${JSON.stringify(deleteProviderUi?.createAction)})`)
+  check(deleteProviderUi?.testOk === true, `mock test under B without refresh (got ${JSON.stringify(deleteProviderUi?.testMessage)})`)
+  check(deleteProviderUi?.ok === true, `delete-A then B create/test aggregate (got ${JSON.stringify(deleteProviderUi)})`)
+
+  const providersAfterDelete = await (await fetch(`${BASE}/api/shipping/llm/providers`)).json().catch(() => ({ items: [] }))
+  check(!((providersAfterDelete.items || []).some(p => p.id === provider.id)), "API providers list excludes deleted A")
+  const modelsAfterDelete = await (await fetch(`${BASE}/api/shipping/llm/models`)).json().catch(() => ({ items: [] }))
+  check(!((modelsAfterDelete.items || []).some(m => m.providerId === provider.id)), "API models list has no orphan rows under deleted A")
+  const createdUnderB = (modelsAfterDelete.items || []).find(m => m.modelName === "mock-after-delete-a")
+  check(createdUnderB?.providerId === providerB.id, `API created model belongs to B (got ${JSON.stringify(createdUnderB)})`)
+
+  // Settings browse + refresh: receipt/usage must stay flat across real UI navigations (not only three GETs).
+  // Capture AFTER any mock test-connection so this window isolates browse/refresh itself.
+  const countersBeforeRefresh = await readDbCounters()
+  evidence.countersBeforeBrowse = countersBeforeBrowse
+  evidence.countersBeforeRefresh = countersBeforeRefresh
+  await navigate("/settings")
+  await waitFor(async () => {
+    const text = await evaluate("document.body?.innerText ?? ''")
+    return text.includes("\u6D4B\u8BD5\u8FDE\u63A5") ? true : undefined
+  }, 20000)
+  await navigate("/settings")
+  await waitFor(async () => {
+    const text = await evaluate("document.body?.innerText ?? ''")
+    return text.includes("\u6D4B\u8BD5\u8FDE\u63A5") ? true : undefined
+  }, 20000)
+  const countersAfterBrowse = await readDbCounters()
+  evidence.countersAfterBrowse = countersAfterBrowse
+  check(
+    countersAfterBrowse.usage === countersBeforeRefresh.usage
+    && countersAfterBrowse.receipts === countersBeforeRefresh.receipts
+    && countersAfterBrowse.attempts === countersBeforeRefresh.attempts,
+    `Settings browse/refresh: no receipt/usage increment (before=${JSON.stringify(countersBeforeRefresh)} after=${JSON.stringify(countersAfterBrowse)})`,
+  )
 
   const shot = await cdp.send("Page.captureScreenshot", { format: "png", fromSurface: true })
   const shotPath = join(EVIDENCE_DIR, "settings-browser-accept.png")

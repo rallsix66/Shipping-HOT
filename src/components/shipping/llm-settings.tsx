@@ -70,6 +70,13 @@ function bindingStatus(
   const provider = providers.find(item => item.id === model.providerId)
   if (!provider) return { label: "失效（服务商不存在）", invalid: true }
   if (!provider.enabled) return { label: "失效（服务商已禁用）", invalid: true }
+  // Mirror resolveStepBinding purpose/step constraints (no silent "有效").
+  if (binding.step === "embeddings" && model.purpose !== "embedding") {
+    return { label: "失效（用途不匹配）", invalid: true }
+  }
+  if (binding.step !== "embeddings" && model.purpose !== "chat") {
+    return { label: "失效（用途不匹配）", invalid: true }
+  }
   return { label: "有效", invalid: false }
 }
 
@@ -122,12 +129,18 @@ export function LlmSettingsPanel() {
       setProviders(p.items)
       setModels(m.items)
       setBindings(b.items)
-      if (!providerIdForModel && p.items[0]) setProviderIdForModel(p.items[0].id)
-      if (!testProviderId && p.items[0]) setTestProviderId(p.items[0].id)
+      // Drop deleted/stale provider selections; never keep a ghost id that can still submit.
+      const nextProviderIdForModel = p.items.some(item => item.id === providerIdForModel)
+        ? providerIdForModel
+        : (p.items[0]?.id ?? "")
+      const nextTestProviderId = p.items.some(item => item.id === testProviderId)
+        ? testProviderId
+        : (p.items[0]?.id ?? "")
+      setProviderIdForModel(nextProviderIdForModel)
+      setTestProviderId(nextTestProviderId)
       // Keep bindModelId as-is even if invalid — never silent swap.
       if (!bindModelId && m.items[0]) setBindModelId(m.items[0].id)
-      const providerForTest = testProviderId || p.items[0]?.id || ""
-      const modelsForProvider = m.items.filter(model => model.providerId === providerForTest)
+      const modelsForProvider = m.items.filter(model => model.providerId === nextTestProviderId)
       const stillValid = modelsForProvider.some(model => model.id === testModelId)
       if (!stillValid) setTestModelId(modelsForProvider[0]?.id ?? "")
     } catch (error) {
@@ -151,7 +164,9 @@ export function LlmSettingsPanel() {
   }, [testProviderId, models, testModelId])
 
   const testModelsForProvider = models.filter(model => model.providerId === testProviderId)
-  const testModelValid = Boolean(testProviderId && testModelId && testModelsForProvider.some(model => model.id === testModelId))
+  const providerIdForModelValid = Boolean(providerIdForModel && providers.some(item => item.id === providerIdForModel))
+  const testProviderValid = Boolean(testProviderId && providers.some(item => item.id === testProviderId))
+  const testModelValid = Boolean(testProviderValid && testModelId && testModelsForProvider.some(model => model.id === testModelId))
   const bindModelExists = models.some(model => model.id === bindModelId)
 
   const bindingViews = useMemo(
@@ -248,6 +263,10 @@ export function LlmSettingsPanel() {
     setBusy(true)
     setActionMessage(undefined)
     try {
+      if (!providers.some(item => item.id === providerIdForModel)) {
+        setActionMessage("模型保存失败：provider_missing（请重新选择有效服务商）")
+        return
+      }
       await myFetch("/shipping/llm/models", {
         method: "POST",
         body: {
@@ -369,6 +388,10 @@ export function LlmSettingsPanel() {
       setConfirmDelete(null)
       if (editingProviderId === target.id) setEditingProviderId(undefined)
       if (editingModelId === target.id) setEditingModelId(undefined)
+      if (target.kind === "provider") {
+        if (providerIdForModel === target.id) setProviderIdForModel("")
+        if (testProviderId === target.id) setTestProviderId("")
+      }
       await reload()
     } catch (error) {
       const code = apiErrorCode(error)
@@ -702,7 +725,10 @@ export function LlmSettingsPanel() {
         <strong>添加模型</strong>
         <label className="setting-row">
           <span><strong>服务商</strong></span>
-          <select className="setting-input" data-testid="llm-model-create-provider" value={providerIdForModel} onChange={e => setProviderIdForModel(e.target.value)}>
+          <select className="setting-input" data-testid="llm-model-create-provider" value={providerIdForModelValid ? providerIdForModel : ""} onChange={e => setProviderIdForModel(e.target.value)}>
+            {!providerIdForModelValid
+              ? <option value="">（请选择有效服务商）</option>
+              : null}
             {providers.map(provider => <option key={provider.id} value={provider.id}>{provider.name}</option>)}
           </select>
         </label>
@@ -725,7 +751,7 @@ export function LlmSettingsPanel() {
             <input className="setting-input" data-testid="llm-model-create-currency" value={currency} onChange={e => setCurrency(e.target.value.toUpperCase())} />
           </span>
         </label>
-        <button type="button" className="btn-gradient" data-testid="llm-model-create-submit" disabled={busy || !providerIdForModel || !modelName.trim()} onClick={() => void addModel()}>
+        <button type="button" className="btn-gradient" data-testid="llm-model-create-submit" disabled={busy || !providerIdForModelValid || !modelName.trim()} onClick={() => void addModel()}>
           添加模型
         </button>
       </div>
@@ -788,7 +814,7 @@ export function LlmSettingsPanel() {
           <select
             className="setting-input"
             data-testid="llm-test-provider"
-            value={testProviderId}
+            value={testProviderValid ? testProviderId : ""}
             onChange={(e) => {
               const next = e.target.value
               setTestProviderId(next)
@@ -796,6 +822,9 @@ export function LlmSettingsPanel() {
               setTestModelId(nextModels[0]?.id ?? "")
             }}
           >
+            {!testProviderValid
+              ? <option value="">（请选择有效服务商）</option>
+              : null}
             {providers.map(provider => <option key={provider.id} value={provider.id}>{provider.name}</option>)}
           </select>
         </label>
