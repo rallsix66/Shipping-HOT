@@ -5,6 +5,7 @@ import type { ArticleBlock, ArticleCompletenessStatus, ArticleTranslationBlockSo
 import { type CalendarEvent, calendarCountries, daysUntilCalendarEvent } from "@shared/calendar"
 import { type FeedItem, type Severity as SeverityValue, type ShippingEvent, type WeatherDetail, defaultTranslationSettings } from "@shared/shipping"
 import { ErrorState, LoadingState, Severity, ShippingShell, StatusBadge } from "./app"
+import { LlmSettingsPanel } from "./llm-settings"
 import { type ShippingResponse, type TranslationStatusResponse, useFeedArticle, useShipping, useTranslationSecret, useTranslationStatus, useTropicalCyclones } from "./data"
 import { PortWeatherPanelSection } from "./port-weather"
 import { FeedItemDisplayText } from "./feed-display"
@@ -1757,6 +1758,7 @@ export function SettingsPage() {
         )}
         {testState === "error" && <p className="mt-2 text-sm text-rose-600 dark:text-rose-300">{translationErrorLabel(testError)}</p>}
       </section>
+      <LlmSettingsPanel />
     </ShippingShell>
   )
 }

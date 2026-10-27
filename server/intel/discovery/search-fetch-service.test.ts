@@ -650,33 +650,54 @@ describe("runDeepSeekFetch (offline)", () => {
     expect(state.hits).toBe(1)
   })
 
-  it("search and fetch budgets are separate (not one shared pool)", async () => {
+  it("search and fetch share the ADR-007 monthly aggregate pool", async () => {
     const { db } = await setup()
     const { state, fetcher } = mockFetcher(async (url) => {
       if (url.endsWith("/v1/tools/search")) return jsonResponse(200, searchHitBody)
       return jsonResponse(200, fetchBody)
     })
-    const cfg = baseConfig(db, {
+    // Unit budget each: after search books one unit into the shared pool, fetch is exhausted
+    // even though monthlyBudgetFetch still looks "fresh" — spend is cross-capability.
+    const tight = baseConfig(db, {
       monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
       monthlyBudgetFetch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY,
       fetcher,
     })
-    await runDeepSeekSearch(cfg, { query: "sep-s", purpose: "slice1_test", subject: "sep-s" })
-    await runDeepSeekFetch(cfg, {
+    await runDeepSeekSearch(tight, { query: "sep-s", purpose: "slice1_test", subject: "sep-s" })
+    await expect(runDeepSeekFetch(tight, {
       url: "https://example.com/sep-f",
       purpose: "slice1_test",
       subject: "sep-f",
       persistence: "full",
+    })).rejects.toMatchObject({ code: "paid_budget_exhausted" })
+    expect(state.hits).toBe(1)
+
+    // 2× unit shared headroom: one search + one fetch both succeed; a third call is blocked.
+    const { db: db2 } = await setup()
+    const { state: state2, fetcher: fetcher2 } = mockFetcher(async (url) => {
+      if (url.endsWith("/v1/tools/search")) return jsonResponse(200, searchHitBody)
+      return jsonResponse(200, fetchBody)
     })
-    expect(state.hits).toBe(2)
-    // Exhaust search — fetch still has its own unit already spent; another search blocked, another fetch blocked independently.
-    await expect(runDeepSeekSearch(cfg, { query: "sep-s2", purpose: "slice1_test", subject: "sep-s2" }))
-      .rejects
-      .toMatchObject({ code: "paid_budget_exhausted" })
-    await expect(runDeepSeekFetch(cfg, {
+    const room = baseConfig(db2, {
+      monthlyBudgetSearch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY * 2,
+      monthlyBudgetFetch: DEEPSEEK_SEARCH_FETCH_UNIT_COST_CNY * 2,
+      fetcher: fetcher2,
+    })
+    await runDeepSeekSearch(room, { query: "sep-s2", purpose: "slice1_test", subject: "sep-s2" })
+    await runDeepSeekFetch(room, {
       url: "https://example.com/sep-f2",
       purpose: "slice1_test",
       subject: "sep-f2",
+      persistence: "full",
+    })
+    expect(state2.hits).toBe(2)
+    await expect(runDeepSeekSearch(room, { query: "sep-s3", purpose: "slice1_test", subject: "sep-s3" }))
+      .rejects
+      .toMatchObject({ code: "paid_budget_exhausted" })
+    await expect(runDeepSeekFetch(room, {
+      url: "https://example.com/sep-f3",
+      purpose: "slice1_test",
+      subject: "sep-f3",
       persistence: "full",
     })).rejects.toMatchObject({ code: "paid_budget_exhausted" })
   })

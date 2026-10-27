@@ -13,7 +13,8 @@ import { createHash, randomUUID } from "node:crypto"
 import type { Database } from "db0"
 import type { SecretStore } from "#/providers/contracts"
 import { recordProviderUsageInTransaction } from "#/database/runtime-jobs"
-import { type PaidBudgetCode, decidePaidBudget, paidBudgetWindow } from "#/services/paid-budget"
+import { type PaidBudgetCode, decidePaidBudget } from "#/services/paid-budget"
+import { aggregatePaidMonthSpend } from "#/intel/llm/budget-aggregate"
 
 export type PaidGateCode = `paid_${PaidBudgetCode}` | "paid_secret_missing"
 
@@ -167,17 +168,11 @@ async function immediate<T>(db: Database, work: () => Promise<T>): Promise<T> {
  * (pending, or unknown with usage_recorded = 0 for rows written before migration 025).
  * Every attempt that may have been billed is booked into provider_usage exactly once (usage_recorded = 1).
  */
-async function monthSpend(db: Database, req: ReceiptRequest, now: Date): Promise<number> {
-  const window = paidBudgetWindow(now)
-  const usage = await db.prepare(`
-    SELECT COALESCE(SUM(estimated_cost), 0) AS spend FROM provider_usage
-    WHERE provider_id = ? AND capability = ? AND window_start >= ? AND window_start < ?
-  `).get(req.providerId, req.capability, window.from, window.to) as { spend: number }
-  const pending = await db.prepare(`
-    SELECT COALESCE(SUM(estimated_cost), 0) AS spend FROM paid_receipt_attempt
-    WHERE provider_id = ? AND capability = ? AND usage_recorded = 0 AND status IN ('pending', 'unknown') AND started_at >= ? AND started_at < ?
-  `).get(req.providerId, req.capability, window.from, window.to) as { spend: number }
-  return Number(usage.spend) + Number(pending.spend)
+async function monthSpend(db: Database, _req: ReceiptRequest, now: Date): Promise<number> {
+  // R3-1 / ADR-007: shared UTC-month aggregate across all providers × capabilities,
+  // including pending/unknown reservations (never auto-released).
+  const agg = await aggregatePaidMonthSpend(db, now)
+  return agg.total
 }
 
 async function checkBudget(ctx: PaidRequestContext, req: ReceiptRequest, now: Date): Promise<void> {

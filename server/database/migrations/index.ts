@@ -29,6 +29,7 @@ import { intelJsonListMigration } from "#/database/migrations/027-intel-json-lis
 import { intelManualMigration } from "#/database/migrations/028-intel-manual"
 import { manualClipMigration } from "#/database/migrations/029-manual-clip"
 import { manualScope20261026Migration } from "#/database/migrations/030-manual-scope-r2-20261026"
+import { llmRegistryMigration } from "#/database/migrations/031-llm-registry"
 
 export interface ShippingMigration {
   readonly version: number
@@ -71,6 +72,7 @@ export const shippingMigrations: readonly ShippingMigration[] = [
   intelManualMigration,
   manualClipMigration,
   manualScope20261026Migration,
+  llmRegistryMigration,
 ]
 
 export const latestShippingSchemaVersion = shippingMigrations[shippingMigrations.length - 1].version
