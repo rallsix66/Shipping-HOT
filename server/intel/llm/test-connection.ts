@@ -12,7 +12,10 @@ import { MOCK_TRANSPORT_LABEL, createMockOpenAiTransport } from "#/intel/llm/ope
 import { createOpenAiCompatibleClient } from "#/intel/llm/openai-compatible"
 import { estimateTokenCost } from "#/intel/llm/registry"
 import { resolveSharedLlmBudgetGate } from "#/intel/llm/shared-budget"
-import { resolveSharedLlmBudgetFromSettings } from "#/services/shared-llm-budget-settings"
+import {
+  createPaidClaimBudgetResolver,
+  resolveSharedLlmBudgetFromSettings,
+} from "#/services/shared-llm-budget-settings"
 
 export type TestConnectionResult =
   | {
@@ -67,17 +70,30 @@ export async function runLlmTestConnection(options: TestConnectionOptions): Prom
   const estimatedCost = estimateTokenCost(model, estimateTokensIn, estimateTokensOut)
 
   try {
-    const sharedBudget = options.sharedPoolMonthlyBudget !== undefined
+    const sharedBudgetHint = options.sharedPoolMonthlyBudget !== undefined
       ? resolveSharedLlmBudgetGate(options.sharedPoolMonthlyBudget, options.sharedPoolCurrency ?? model.currency)
       : resolveSharedLlmBudgetFromSettings(options.sharedLlmBudget)
+    const resolveClaimConfig = options.sharedPoolMonthlyBudget !== undefined
+      ? createPaidClaimBudgetResolver({
+          mode: "registry",
+          overridePool: resolveSharedLlmBudgetGate(
+            options.sharedPoolMonthlyBudget,
+            options.sharedPoolCurrency ?? model.currency,
+          ),
+        })
+      : createPaidClaimBudgetResolver({
+          mode: "registry",
+          fallbackPool: options.sharedLlmBudget,
+        })
     const result = await paidRequest(
       {
         db: options.db,
         secretStore: options.secretStore,
-        // Registry test: no translation sub-limit — only the shared pool.
+        // Registry test: no translation sub-limit — only the shared pool (omit = undefined).
         monthlyBudget: undefined,
         currency: model.currency,
-        sharedBudget,
+        sharedBudget: sharedBudgetHint,
+        resolveClaimConfig,
         now: options.now,
       },
       {

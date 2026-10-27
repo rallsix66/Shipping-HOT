@@ -155,6 +155,10 @@ export function LlmSettingsPanel() {
       if (budgetStatus.configured && budgetStatus.monthlyBudget != null && budgetStatus.currency) {
         setSharedBudgetInput(String(budgetStatus.monthlyBudget))
         setSharedCurrencyInput(budgetStatus.currency)
+      } else {
+        // Cleared / unconfigured pool: sync inputs so prior positive amounts do not linger.
+        setSharedBudgetInput("")
+        setSharedCurrencyInput("USD")
       }
       setProviders(p.items)
       setModels(m.items)
@@ -441,6 +445,32 @@ export function LlmSettingsPanel() {
     }
   }
 
+  const refreshSharedBudgetStatus = async () => {
+    try {
+      const status = await myFetch<{
+        configured: boolean
+        monthlyBudget: number | null
+        currency: string | null
+        estimatedUsage: number
+        pendingUnknownReserve: number
+        estimatedTotal: number
+        state: string
+        rejectionReason?: string
+        notAHardInvoiceCap?: boolean
+      }>("/shipping/llm/shared-budget")
+      setSharedBudgetStatus(status)
+      if (status.configured && status.monthlyBudget != null && status.currency) {
+        setSharedBudgetInput(String(status.monthlyBudget))
+        setSharedCurrencyInput(status.currency)
+      } else {
+        setSharedBudgetInput("")
+        setSharedCurrencyInput("USD")
+      }
+    } catch {
+      // Status refresh is best-effort; keep last known panel state.
+    }
+  }
+
   const testConnection = async () => {
     setBusy(true)
     setTestMessage(undefined)
@@ -463,8 +493,11 @@ export function LlmSettingsPanel() {
       } else {
         setTestMessage(`${result.note ?? "测试结果（mock）拒绝"} · ${result.code}`)
       }
+      // Refresh pool usage/ready after mock call so the panel does not keep pre-call figures.
+      await refreshSharedBudgetStatus()
     } catch (error) {
       setTestMessage(`测试结果（非真实连接）：${apiErrorCode(error)}`)
+      await refreshSharedBudgetStatus()
     } finally {
       setBusy(false)
     }
@@ -496,6 +529,9 @@ export function LlmSettingsPanel() {
       if (status.configured && status.monthlyBudget != null && status.currency) {
         setSharedBudgetInput(String(status.monthlyBudget))
         setSharedCurrencyInput(status.currency)
+      } else {
+        setSharedBudgetInput("")
+        setSharedCurrencyInput("USD")
       }
       setSharedBudgetMessage(`共享 LLM 总池已保存（回读 ${status.monthlyBudget ?? "—"} ${status.currency ?? ""} · 状态 ${status.state}）`)
     } catch (error) {

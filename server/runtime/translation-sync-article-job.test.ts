@@ -60,6 +60,7 @@ function settings(monthlyBudget = 1): ShippingSettings {
     eventThresholds: { anchoredHours: 24, delayMinutes: 120, congestionLevel: "high" },
     retentionDays: 30,
     translation: { enabled: true, providerId: "deepseek", model: "deepseek-v4-flash", targetLanguage: "zh-CN", monthlyBudget },
+    sharedLlmBudget: { monthlyBudget: 10, currency: "USD" },
   }
 }
 

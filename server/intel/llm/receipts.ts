@@ -15,8 +15,9 @@ import type { SecretStore } from "#/providers/contracts"
 import { recordProviderUsageInTransaction } from "#/database/runtime-jobs"
 import { type PaidBudgetCode, decidePaidBudget, paidBudgetWindow } from "#/services/paid-budget"
 import { SharedBudgetGateError, type SharedLlmBudgetGate, assertSharedLlmBudgetInTransaction } from "#/intel/llm/shared-budget"
+import type { PaidClaimBudgetConfig } from "#/services/shared-llm-budget-settings"
 
-export type PaidGateCode = `paid_${PaidBudgetCode}` | "paid_secret_missing" | "paid_budget_currency_mismatch" | "paid_budget_currency_mixed" | "paid_budget_currency_unknown" | "paid_budget_scope_invalid"
+export type PaidGateCode = `paid_${PaidBudgetCode}` | "paid_secret_missing" | "paid_capability_disabled" | "paid_budget_currency_mismatch" | "paid_budget_currency_mixed" | "paid_budget_currency_unknown" | "paid_budget_scope_invalid"
 
 /** No request was sent: budget or credential gate. */
 export class PaidGateError extends Error {
@@ -110,8 +111,17 @@ export interface PaidRequestContext {
    * Translation also passes monthlyBudget as a stricter sub-limit in the same claim.
    * Search/Fetch must omit this (ADR-011 independent budgets).
    * aggregatePaidMonthSpend alone is never an execution gate -- only this path is.
+   *
+   * Prefer resolveClaimConfig for production paths: outer sharedBudget/monthlyBudget
+   * are snapshots that can go stale across SecretStore await + claim queue.
    */
   sharedBudget?: SharedLlmBudgetGate
+  /**
+   * Controlled config resolver run INSIDE BEGIN IMMEDIATE (same atomic claim).
+   * Re-reads authoritative shared pool + translation sub-limit (+ enabled).
+   * When present, its result replaces outer sharedBudget/monthlyBudget for the gate.
+   */
+  resolveClaimConfig?: (db: Database) => Promise<PaidClaimBudgetConfig>
 }
 
 export interface ReceiptResult {
@@ -202,10 +212,15 @@ function mapSharedBudgetError(error: SharedBudgetGateError): PaidGateError {
   return new PaidGateError(`paid_${error.code}`)
 }
 
-async function checkBudget(ctx: PaidRequestContext, req: ReceiptRequest, now: Date): Promise<void> {
-  if (ctx.sharedBudget) {
+async function checkBudget(ctx: PaidRequestContext, req: ReceiptRequest, now: Date, claimConfig?: PaidClaimBudgetConfig): Promise<void> {
+  const sharedBudget = claimConfig?.sharedBudget ?? ctx.sharedBudget
+  const monthlyBudget = claimConfig ? claimConfig.monthlyBudget : ctx.monthlyBudget
+  if (claimConfig?.enabled === false) {
+    throw new PaidGateError("paid_capability_disabled")
+  }
+  if (sharedBudget) {
     try {
-      await assertSharedLlmBudgetInTransaction(ctx.db, ctx.sharedBudget, ctx.currency, req.estimatedCost, now)
+      await assertSharedLlmBudgetInTransaction(ctx.db, sharedBudget, ctx.currency, req.estimatedCost, now)
     } catch (error) {
       if (error instanceof SharedBudgetGateError) throw mapSharedBudgetError(error)
       throw error
@@ -214,14 +229,14 @@ async function checkBudget(ctx: PaidRequestContext, req: ReceiptRequest, now: Da
     // inside the same BEGIN IMMEDIATE claim. Shared pool must never relax it.
     // Registry chat/embedding omit monthlyBudget (undefined) so only the pool applies.
     // Explicit null still fail-closes as unconfigured for the sub-limit.
-    if (ctx.monthlyBudget !== undefined) {
-      const sub = decidePaidBudget(ctx.monthlyBudget, await monthSpend(ctx.db, req, now), req.estimatedCost)
+    if (monthlyBudget !== undefined) {
+      const sub = decidePaidBudget(monthlyBudget, await monthSpend(ctx.db, req, now), req.estimatedCost)
       if (sub) throw new PaidGateError(`paid_${sub}`)
     }
     return
   }
   // ADR-011 default: per provider_id x capability (Search/Fetch independent).
-  const code = decidePaidBudget(ctx.monthlyBudget, await monthSpend(ctx.db, req, now), req.estimatedCost)
+  const code = decidePaidBudget(monthlyBudget, await monthSpend(ctx.db, req, now), req.estimatedCost)
   if (code) throw new PaidGateError(`paid_${code}`)
 }
 
@@ -290,6 +305,9 @@ export async function paidRequest(ctx: PaidRequestContext, req: ReceiptRequest, 
   const claimed: Claim = await immediate(ctx.db, async () => {
     const now = clock()
     const nowIso = now.toISOString()
+    // Claim-time authority: re-resolve pool/sub-limit/enabled inside the same BEGIN IMMEDIATE
+    // so SecretStore await + claim queue cannot observe a stale outer snapshot.
+    const claimConfig = ctx.resolveClaimConfig ? await ctx.resolveClaimConfig(ctx.db) : undefined
     const existing = await ctx.db.prepare("SELECT id, status, response, updated_at FROM paid_receipt WHERE logical_key = ?").get(logicalKey) as ReceiptRow | undefined
     if (existing) {
       if (existing.status === "received" || existing.status === "completed") return { kind: "reuse", row: existing }
@@ -301,13 +319,13 @@ export async function paidRequest(ctx: PaidRequestContext, req: ReceiptRequest, 
       if (existing.status === "unknown") return { kind: "unknown", row: existing }
       // failed: the provider did not take the request, or its answer was unusable; a new attempt is allowed.
       if (!apiKey) throw new PaidGateError("paid_secret_missing")
-      await checkBudget(ctx, req, now)
+      await checkBudget(ctx, req, now, claimConfig)
       await ctx.db.prepare("UPDATE paid_receipt SET status = 'pending', attempts = attempts + 1, error = NULL, updated_at = ? WHERE id = ?").run(nowIso, existing.id)
       const { attempts } = await ctx.db.prepare("SELECT attempts FROM paid_receipt WHERE id = ?").get(existing.id) as { attempts: number }
       return { kind: "call", id: existing.id, attemptId: await startAttempt(ctx.db, existing.id, attempts, req, nowIso) }
     }
     if (!apiKey) throw new PaidGateError("paid_secret_missing")
-    await checkBudget(ctx, req, now)
+    await checkBudget(ctx, req, now, claimConfig)
     const id = randomUUID()
     await ctx.db.prepare(`
       INSERT INTO paid_receipt (id, logical_key, provider_id, capability, model, purpose, subject, status, request, estimated_cost, currency, attempts, created_at, updated_at)

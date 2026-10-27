@@ -59,6 +59,8 @@ function settings(translation: ShippingSettings["translation"] = { enabled: true
     eventThresholds: { anchoredHours: 24, delayMinutes: 120, congestionLevel: "high" },
     retentionDays: 30,
     translation,
+    // Dual-gate claim requires a configured shared pool (not invented from translation.monthlyBudget).
+    sharedLlmBudget: { monthlyBudget: 10, currency: "USD" },
   }
 }
 

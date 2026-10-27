@@ -14,6 +14,7 @@ import { resolveSharedLlmBudgetGate } from "#/intel/llm/shared-budget"
 import { createMockOpenAiTransport } from "#/intel/llm/openai-compatible.mock"
 import { runLlmTestConnection } from "#/intel/llm/test-connection"
 import {
+  createPaidClaimBudgetResolver,
   readSharedLlmBudgetSettings,
   readSharedLlmBudgetStatus,
   resolveSharedLlmBudgetFromSettings,
@@ -144,10 +145,11 @@ describe("shared LLM pool Settings (dedicated field)", () => {
     expect(() => validateSharedLlmBudgetForSave({ monthlyBudget: 1, currency: "usd" })).toThrow(/currency/)
     expect(() => validateSharedLlmBudgetForSave({ monthlyBudget: -1, currency: "USD" })).toThrow(/monthlyBudget/)
     expect(validateSharedLlmBudgetForSave({ monthlyBudget: 0, currency: "USD" })).toEqual({ monthlyBudget: 0, currency: "USD" })
-    expect(validateSharedLlmBudgetForSave({ currency: "EUR" }, { monthlyBudget: 3, currency: "USD" })).toEqual({
+    expect(validateSharedLlmBudgetForSave({ currency: "CNY" }, { monthlyBudget: 3, currency: "USD" })).toEqual({
       monthlyBudget: 3,
-      currency: "EUR",
+      currency: "CNY",
     })
+    expect(() => validateSharedLlmBudgetForSave({ monthlyBudget: 1, currency: "ZZZ" })).toThrow(/currency|supported/)
   })
 
   it("fail-closed: missing / zero / bad currency pool blocks registry test with zero transport", async () => {
@@ -349,5 +351,256 @@ describe("shared LLM pool Settings (dedicated field)", () => {
     const again = await repo.getModel("fixture-chat-model")
     expect(again?.unitPriceIn).toBe(0.0000015)
     expect(again?.unitPriceOut).toBe(0.0000025)
+  })
+})
+
+describe("r3-1 REQUEST CHANGES: currency lock + claim authority + supported FX", () => {
+  it("cNY pool + USD translation fail-closed with zero provider / zero attempt", async () => {
+    const { db } = await setup()
+    const fake = new FakeTranslationProvider({
+      providerId: TRANSLATION_PROVIDER_ID,
+      model: TRANSLATION_MODEL,
+      translateText: () => "不应调用",
+    })
+    const denied = await executeTranslationViaPaidRequest({
+      db,
+      secretStore: secrets(),
+      monthlyBudget: 5,
+      sharedPoolMonthlyBudget: 5,
+      sharedPoolCurrency: "CNY",
+      provider: fake,
+      source: prepared("cny-pool-usd-call"),
+      estimatedCost: 0.01,
+      now: () => T0,
+    })
+    expect(denied.providerCalled).toBe(false)
+    expect(denied.paidGateCode).toMatch(/currency/)
+    expect(fake.calls).toHaveLength(0)
+    const attempts = await db.prepare("SELECT COUNT(*) AS n FROM paid_receipt_attempt").get() as { n: number }
+    expect(Number(attempts.n)).toBe(0)
+
+    const ok = await executeTranslationViaPaidRequest({
+      db,
+      secretStore: secrets(),
+      monthlyBudget: 5,
+      sharedPoolMonthlyBudget: 5,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
+      provider: fake,
+      source: prepared("usd-pool-ok"),
+      estimatedCost: 0.01,
+      now: () => T0,
+    })
+    expect(ok.status).toBe("succeeded")
+    expect(fake.calls).toHaveLength(1)
+  })
+
+  it("zZZ and legacy bad JSON are rejected on save/read/status", async () => {
+    expect(() => validateSharedLlmBudgetForSave({ monthlyBudget: 2, currency: "ZZZ" })).toThrow()
+    const viewed = readSharedLlmBudgetSettings({ monthlyBudget: 2, currency: "ZZZ" })
+    expect(viewed.configured).toBe(false)
+    const { db } = await setup()
+    const status = await readSharedLlmBudgetStatus(db, {
+      ...structuredClone(defaultShippingSettings),
+      sharedLlmBudget: { monthlyBudget: 2, currency: "ZZZ" },
+    }, T0)
+    expect(status.state).toBe("currency_invalid")
+    expect(status.configured).toBe(false)
+  })
+
+  it("translation missing sub-limit is null-reject; registry omits sub-limit", async () => {
+    const { db } = await setup()
+    const fake = new FakeTranslationProvider({
+      providerId: TRANSLATION_PROVIDER_ID,
+      model: TRANSLATION_MODEL,
+      translateText: () => "不应调用",
+    })
+    // Explicit null sub-limit => unconfigured reject for translation entry.
+    const denied = await executeTranslationViaPaidRequest({
+      db,
+      secretStore: secrets(),
+      monthlyBudget: null,
+      sharedPoolMonthlyBudget: 5,
+      sharedPoolCurrency: TRANSLATION_CURRENCY,
+      provider: fake,
+      source: prepared("null-sub"),
+      estimatedCost: 0.01,
+      now: () => T0,
+    })
+    expect(denied.providerCalled).toBe(false)
+    expect(denied.paidGateCode).toBe("paid_budget_unconfigured")
+    expect(fake.calls).toHaveLength(0)
+
+    await seedChatModel(db)
+    const transport = createMockOpenAiTransport()
+    // Registry omits monthlyBudget (undefined) — pool alone is enough.
+    const ok = await runLlmTestConnection({
+      db,
+      secretStore: secrets(),
+      sharedPoolMonthlyBudget: 5,
+      sharedPoolCurrency: "USD",
+      providerId: "fixture-chat",
+      modelId: "fixture-chat-model",
+      transport,
+      now: () => T0,
+    })
+    expect(ok.ok).toBe(true)
+    expect(transport.state.chatHits).toBe(1)
+  })
+
+  it("claim-time barrier: pool zeroed during SecretStore wait yields zero attempt / zero provider", async () => {
+    const { db } = await setup()
+    await seedChatModel(db)
+    // Seed a ready pool in the settings row (claim resolver authority).
+    await db.prepare("UPDATE settings SET data = ?, updated_at = ? WHERE id = 'default'").run(
+      JSON.stringify({
+        ...structuredClone(defaultShippingSettings),
+        sharedLlmBudget: { monthlyBudget: 5, currency: "USD" },
+      }),
+      T0.toISOString(),
+    )
+
+    let releaseSecret!: () => void
+    const secretGate = new Promise<void>((resolve) => {
+      releaseSecret = resolve
+    })
+    let enteredSecret!: () => void
+    const secretEntered = new Promise<void>((resolve) => {
+      enteredSecret = resolve
+    })
+    const map = new Map<string, string>([
+      ["deepseek", "test-placeholder"],
+      [llmSecretRefForProviderId("fixture-chat"), "test-placeholder"],
+      ["fixture-chat", "test-placeholder"],
+    ])
+    const delayedSecrets: SecretStore = {
+      get: async (id) => {
+        enteredSecret()
+        await secretGate
+        return map.get(id)
+      },
+      set: async (id, value) => void map.set(id, value),
+      delete: async id => void map.delete(id),
+      has: async id => map.has(id),
+      source: async id => (map.has(id) ? "file" : "missing") as never,
+    }
+
+    let providerHits = 0
+    const pending = paidRequest(
+      {
+        db,
+        secretStore: delayedSecrets,
+        monthlyBudget: undefined,
+        currency: "USD",
+        sharedBudget: resolveSharedLlmBudgetGate(5, "USD"),
+        resolveClaimConfig: createPaidClaimBudgetResolver({ mode: "registry" }),
+        now: () => T0,
+      },
+      {
+        providerId: "fixture-chat",
+        capability: "llm_test_chat",
+        model: "fixture-chat-model",
+        purpose: "barrier-zero",
+        subject: "barrier-1",
+        identity: { subject: "barrier-1", kind: "chat" },
+        estimatedCost: 0.01,
+      },
+      async () => {
+        providerHits += 1
+        return { response: { ok: true }, usage: { tokensIn: 1, tokensOut: 1 } }
+      },
+    )
+
+    await secretEntered
+    // Zero the pool while the call is still waiting on SecretStore (before claim).
+    await db.prepare("UPDATE settings SET data = ?, updated_at = ? WHERE id = 'default'").run(
+      JSON.stringify({
+        ...structuredClone(defaultShippingSettings),
+        sharedLlmBudget: { monthlyBudget: 0, currency: "USD" },
+      }),
+      T0.toISOString(),
+    )
+    releaseSecret()
+    await expect(pending).rejects.toMatchObject({ name: "PaidGateError", code: "paid_budget_zero" })
+    expect(providerHits).toBe(0)
+    const attempts = await db.prepare("SELECT COUNT(*) AS n FROM paid_receipt_attempt").get() as { n: number }
+    expect(Number(attempts.n)).toBe(0)
+  })
+
+  it("claim-time barrier: translation disabled during SecretStore wait yields zero attempt / zero provider", async () => {
+    const { db } = await setup()
+    await db.prepare("UPDATE settings SET data = ?, updated_at = ? WHERE id = 'default'").run(
+      JSON.stringify({
+        ...structuredClone(defaultShippingSettings),
+        translation: {
+          enabled: true,
+          providerId: "deepseek",
+          model: "deepseek-v4-flash",
+          targetLanguage: "zh-CN",
+          monthlyBudget: 5,
+        },
+        sharedLlmBudget: { monthlyBudget: 5, currency: "USD" },
+      }),
+      T0.toISOString(),
+    )
+
+    let releaseSecret!: () => void
+    const secretGate = new Promise<void>((resolve) => {
+      releaseSecret = resolve
+    })
+    let enteredSecret!: () => void
+    const secretEntered = new Promise<void>((resolve) => {
+      enteredSecret = resolve
+    })
+    const map = new Map<string, string>([["deepseek", "test-placeholder"]])
+    const delayedSecrets: SecretStore = {
+      get: async (id) => {
+        enteredSecret()
+        await secretGate
+        return map.get(id)
+      },
+      set: async (id, value) => void map.set(id, value),
+      delete: async id => void map.delete(id),
+      has: async id => map.has(id),
+      source: async id => (map.has(id) ? "file" : "missing") as never,
+    }
+    const fake = new FakeTranslationProvider({
+      providerId: TRANSLATION_PROVIDER_ID,
+      model: TRANSLATION_MODEL,
+      translateText: () => "不应调用",
+    })
+
+    const pending = executeTranslationViaPaidRequest({
+      db,
+      secretStore: delayedSecrets,
+      monthlyBudget: 5,
+      sharedLlmBudget: { monthlyBudget: 5, currency: "USD" },
+      provider: fake,
+      source: prepared("disable-barrier"),
+      estimatedCost: 0.01,
+      now: () => T0,
+    })
+
+    await secretEntered
+    await db.prepare("UPDATE settings SET data = ?, updated_at = ? WHERE id = 'default'").run(
+      JSON.stringify({
+        ...structuredClone(defaultShippingSettings),
+        translation: {
+          enabled: false,
+          providerId: "deepseek",
+          model: "deepseek-v4-flash",
+          targetLanguage: "zh-CN",
+          monthlyBudget: 5,
+        },
+        sharedLlmBudget: { monthlyBudget: 5, currency: "USD" },
+      }),
+      T0.toISOString(),
+    )
+    releaseSecret()
+    const denied = await pending
+    expect(denied.providerCalled).toBe(false)
+    expect(denied.paidGateCode).toBe("paid_capability_disabled")
+    expect(fake.calls).toHaveLength(0)
+    const attempts = await db.prepare("SELECT COUNT(*) AS n FROM paid_receipt_attempt").get() as { n: number }
+    expect(Number(attempts.n)).toBe(0)
   })
 })

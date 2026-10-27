@@ -226,6 +226,13 @@ async function main() {
   })
   check(badCurrency.status === 400, `sharedLlmBudget bad currency rejected -> ${badCurrency.status}`)
 
+  const zzzCurrency = await fetch(`${BASE}/api/shipping/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ sharedLlmBudget: { monthlyBudget: 5, currency: "ZZZ" } }),
+  })
+  check(zzzCurrency.status === 400, `sharedLlmBudget ZZZ unsupported rejected -> ${zzzCurrency.status}`)
+
   // Translation sub-limit + enable (must NOT invent shared pool authorization).
   const patch = await fetch(`${BASE}/api/shipping/settings`, {
     method: "POST",

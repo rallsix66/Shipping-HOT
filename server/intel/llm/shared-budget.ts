@@ -23,6 +23,18 @@ import { type PaidBudgetCode, decidePaidBudget } from "#/services/paid-budget"
 
 const CURRENCY_RE = /^[A-Z]{3}$/
 
+/**
+ * Offline product-supported LLM currencies (no FX network).
+ * Covers translation (USD) and common CN vendor pricing (CNY).
+ * Used by save / read / claim gate — ZZZ and other codes fail-closed.
+ */
+export const SUPPORTED_LLM_CURRENCIES = ["USD", "CNY"] as const
+export type SupportedLlmCurrency = (typeof SUPPORTED_LLM_CURRENCIES)[number]
+
+export function isSupportedLlmCurrency(value: unknown): value is SupportedLlmCurrency {
+  return typeof value === "string" && (SUPPORTED_LLM_CURRENCIES as readonly string[]).includes(value)
+}
+
 /** Capabilities that share one monthly pool when sharedBudget is attached to paidRequest. */
 export const SHARED_LLM_BUDGET_CAPABILITIES = [
   "translation",
@@ -91,7 +103,7 @@ export async function assertSharedLlmBudgetInTransaction(
   nextEstimate: number,
   now: Date = new Date(),
 ): Promise<void> {
-  if (typeof callCurrency !== "string" || !CURRENCY_RE.test(callCurrency)) {
+  if (typeof callCurrency !== "string" || !CURRENCY_RE.test(callCurrency) || !isSupportedLlmCurrency(callCurrency)) {
     throw new SharedBudgetGateError("budget_currency_unknown", `call currency invalid: ${String(callCurrency)}`)
   }
   // Unconfigured/zero fail-closed before currency completeness: missing Settings
@@ -100,7 +112,7 @@ export async function assertSharedLlmBudgetInTransaction(
   if (early === "budget_unconfigured" || early === "budget_zero") {
     throw new SharedBudgetGateError(early)
   }
-  if (typeof gate.currency !== "string" || !CURRENCY_RE.test(gate.currency)) {
+  if (typeof gate.currency !== "string" || !CURRENCY_RE.test(gate.currency) || !isSupportedLlmCurrency(gate.currency)) {
     throw new SharedBudgetGateError("budget_currency_unknown", `shared budget currency invalid: ${String(gate.currency)}`)
   }
   if (gate.currency !== callCurrency) {

@@ -17,10 +17,15 @@ import {
   SHARED_LLM_BUDGET_CAPABILITIES,
   type SharedBudgetGateCode,
   type SharedLlmBudgetGate,
+  isSupportedLlmCurrency,
 } from "#/intel/llm/shared-budget"
 import { decidePaidBudget, paidBudgetWindow } from "#/services/paid-budget"
 
 const CURRENCY_RE = /^[A-Z]{3}$/
+
+function currencyOk(value: unknown): value is string {
+  return typeof value === "string" && CURRENCY_RE.test(value) && isSupportedLlmCurrency(value)
+}
 
 export class SharedLlmBudgetSettingsError extends Error {
   readonly code: "shared_llm_budget_invalid"
@@ -46,7 +51,7 @@ export function readSharedLlmBudgetSettings(
   if (typeof monthlyBudget !== "number" || !Number.isFinite(monthlyBudget) || monthlyBudget < 0) {
     return { configured: false, monthlyBudget: null, currency: null }
   }
-  if (typeof currency !== "string" || !CURRENCY_RE.test(currency)) {
+  if (!currencyOk(currency)) {
     return { configured: false, monthlyBudget: null, currency: null }
   }
   return { configured: true, monthlyBudget, currency }
@@ -71,8 +76,8 @@ export function validateSharedLlmBudgetForSave(
   if (typeof merged.monthlyBudget !== "number" || !Number.isFinite(merged.monthlyBudget) || merged.monthlyBudget < 0) {
     throw new SharedLlmBudgetSettingsError("sharedLlmBudget.monthlyBudget must be a finite number >= 0")
   }
-  if (typeof merged.currency !== "string" || !CURRENCY_RE.test(merged.currency)) {
-    throw new SharedLlmBudgetSettingsError("sharedLlmBudget.currency must be ISO 4217 (A-Z x3)")
+  if (!currencyOk(merged.currency)) {
+    throw new SharedLlmBudgetSettingsError("sharedLlmBudget.currency must be a supported ISO 4217 code (USD|CNY)")
   }
   return { monthlyBudget: merged.monthlyBudget, currency: merged.currency }
 }
@@ -145,7 +150,7 @@ export async function readSharedLlmBudgetStatus(
       && typeof raw === "object"
       && "currency" in raw
       && raw.currency != null
-      && (typeof raw.currency !== "string" || !CURRENCY_RE.test(raw.currency)),
+      && !currencyOk(raw.currency),
     )
     if (currencyLooksBad) {
       return {
@@ -264,5 +269,119 @@ export async function readSharedLlmBudgetStatus(
     pendingUnknownReserve,
     estimatedTotal,
     state: "ready",
+  }
+}
+
+/**
+ * Raw settings row read for claim-time authority (SELECT only; safe inside BEGIN IMMEDIATE).
+ * Does not invent defaults for missing sharedLlmBudget / translation.monthlyBudget.
+ */
+export async function readShippingSettingsData(db: Database): Promise<ShippingSettings | undefined> {
+  const row = await db.prepare("SELECT data FROM settings WHERE id = 'default'").get() as { data?: string } | undefined
+  if (!row?.data || typeof row.data !== "string") return undefined
+  try {
+    const parsed = JSON.parse(row.data) as ShippingSettings
+    return parsed && typeof parsed === "object" ? parsed : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** Claim-time budget authority resolved inside paidRequest BEGIN IMMEDIATE. */
+export interface PaidClaimBudgetConfig {
+  sharedBudget: SharedLlmBudgetGate
+  /**
+   * Registry omits (undefined) so only the pool applies.
+   * Translation missing sub-limit must be null (unconfigured reject), never undefined.
+   */
+  monthlyBudget: number | null | undefined
+  /** Translation enable; false fail-closes before attempt. Registry leaves undefined/true. */
+  enabled?: boolean
+}
+
+export type PaidClaimBudgetMode = "registry" | "translation"
+
+/**
+ * Controlled claim-config resolver (no new scheduler/table).
+ * Prefer the settings row inside the claim; optional overrides support isolated fakes.
+ */
+export function createPaidClaimBudgetResolver(input: {
+  mode: PaidClaimBudgetMode
+  /** Test-only explicit pool (skips DB pool field). */
+  overridePool?: SharedLlmBudgetGate
+  /** Test-only explicit translation sub-limit (including null). */
+  overrideSubLimit?: number | null
+  /** Test-only explicit enabled. */
+  overrideEnabled?: boolean
+  /** Fallback pool when DB field absent (unit tests without writing settings). */
+  fallbackPool?: SharedLlmBudgetSettings | null
+  /** Fallback sub-limit when DB translation.monthlyBudget absent. */
+  fallbackSubLimit?: number | null
+}): (db: Database) => Promise<PaidClaimBudgetConfig> {
+  return async (db) => {
+    if (input.overridePool) {
+      return {
+        sharedBudget: input.overridePool,
+        monthlyBudget: input.mode === "registry"
+          ? undefined
+          : (input.overrideSubLimit !== undefined ? input.overrideSubLimit : (input.fallbackSubLimit !== undefined ? input.fallbackSubLimit : null)),
+        enabled: input.mode === "translation"
+          ? (input.overrideEnabled !== undefined ? input.overrideEnabled : true)
+          : true,
+      }
+    }
+    const settings = await readShippingSettingsData(db)
+    const poolRaw = settings?.sharedLlmBudget ?? input.fallbackPool
+    const sharedBudget = resolveSharedLlmBudgetFromSettings(poolRaw)
+
+    if (input.mode === "registry") {
+      return { sharedBudget, monthlyBudget: undefined, enabled: true }
+    }
+
+    const translationRaw = settings?.translation
+    let monthlyBudget: number | null
+    if (input.overrideSubLimit !== undefined) {
+      monthlyBudget = input.overrideSubLimit
+    } else if (translationRaw && Object.prototype.hasOwnProperty.call(translationRaw, "monthlyBudget")) {
+      const v = translationRaw.monthlyBudget
+      const fromDb = typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : null
+      // Bootstrap seed is enabled:false + monthlyBudget:0. Prefer caller fallback for
+      // in-memory unit tests that never wrote settings; real saves / mid-flight zeros
+      // are not seed-like and stay claim-time DB authority.
+      const seedLike = translationRaw.enabled === false && fromDb === 0
+      if (seedLike && input.fallbackSubLimit !== undefined) {
+        monthlyBudget = input.fallbackSubLimit
+      } else {
+        monthlyBudget = fromDb
+      }
+    } else if (input.fallbackSubLimit !== undefined) {
+      monthlyBudget = input.fallbackSubLimit
+    } else {
+      monthlyBudget = null
+    }
+
+    let enabled: boolean
+    if (input.overrideEnabled !== undefined) {
+      enabled = input.overrideEnabled
+    } else if (translationRaw && Object.prototype.hasOwnProperty.call(translationRaw, "enabled")) {
+      // Claim-time DB authority: explicit enable/disable after pool is configured must
+      // fail-close even mid SecretStore/queue. Seed defaults are enabled:false with no
+      // sharedLlmBudget — those must not block unit-test fallback injection.
+      const dbHasPool = Boolean(settings?.sharedLlmBudget)
+      const callerDrives = input.fallbackPool !== undefined || input.fallbackSubLimit !== undefined
+      if (translationRaw.enabled === true) {
+        enabled = true
+      } else if (dbHasPool || !callerDrives) {
+        enabled = false
+      } else {
+        enabled = true
+      }
+    } else if (input.fallbackPool !== undefined || input.fallbackSubLimit !== undefined) {
+      enabled = true
+    } else {
+      enabled = false
+    }
+
+    return { sharedBudget, monthlyBudget, enabled }
   }
 }

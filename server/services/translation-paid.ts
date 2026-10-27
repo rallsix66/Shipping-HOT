@@ -30,7 +30,10 @@ import {
   paidRequest,
 } from "#/intel/llm/receipts"
 import { resolveSharedLlmBudgetGate } from "#/intel/llm/shared-budget"
-import { resolveSharedLlmBudgetFromSettings } from "#/services/shared-llm-budget-settings"
+import {
+  createPaidClaimBudgetResolver,
+  resolveSharedLlmBudgetFromSettings,
+} from "#/services/shared-llm-budget-settings"
 import { TranslationValidationError, protectTranslationText, restoreAndValidateProtectedTranslation } from "#/services/translation-protection"
 import {
   type PreparedTranslationSource,
@@ -91,6 +94,11 @@ export interface PaidTranslationOptions {
   /** Test-only explicit pool override (isolated fake amounts). */
   sharedPoolMonthlyBudget?: number | null
   sharedPoolCurrency?: string
+  /**
+   * Test-only translation enable override for claim-time barrier.
+   * Production paths re-read ShippingSettings.translation.enabled inside the claim.
+   */
+  translationEnabled?: boolean
   provider: TranslationProvider
   source: PreparedTranslationSource
   /** Pre-call reserve; must be finite >= 0. */
@@ -121,7 +129,30 @@ export async function executeTranslationViaPaidRequest(options: PaidTranslationO
   const clock = options.now ?? (() => new Date())
   const source = options.source
   const provider = options.provider
-  const sharedBudget = options.sharedPoolMonthlyBudget !== undefined
+  // Call currency is always the real translation currency (USD). Pool mismatch fail-closes
+  // inside the claim — never rewrite the call label to pretend FX happened.
+  const callCurrency = TRANSLATION_CURRENCY
+  // Translation entry: missing sub-limit => null (unconfigured reject). Never undefined
+  // (undefined would skip the sub-gate, which is reserved for registry).
+  const translationSubLimit: number | null = options.monthlyBudget === undefined ? null : options.monthlyBudget
+  const resolveClaimConfig = options.sharedPoolMonthlyBudget !== undefined
+    ? createPaidClaimBudgetResolver({
+        mode: "translation",
+        overridePool: resolveSharedLlmBudgetGate(
+          options.sharedPoolMonthlyBudget,
+          options.sharedPoolCurrency ?? TRANSLATION_CURRENCY,
+        ),
+        overrideSubLimit: translationSubLimit,
+        overrideEnabled: options.translationEnabled,
+      })
+    : createPaidClaimBudgetResolver({
+        mode: "translation",
+        fallbackPool: options.sharedLlmBudget,
+        fallbackSubLimit: translationSubLimit,
+        overrideEnabled: options.translationEnabled,
+      })
+  // Outer sharedBudget is a non-authoritative hint only; claim resolver is the gate.
+  const sharedBudgetHint = options.sharedPoolMonthlyBudget !== undefined
     ? resolveSharedLlmBudgetGate(options.sharedPoolMonthlyBudget, options.sharedPoolCurrency ?? TRANSLATION_CURRENCY)
     : resolveSharedLlmBudgetFromSettings(options.sharedLlmBudget)
 
@@ -130,10 +161,11 @@ export async function executeTranslationViaPaidRequest(options: PaidTranslationO
       {
         db: options.db,
         secretStore: options.secretStore,
-        // Sub-limit: translation.monthlyBudget (dual gate with shared pool inside claim).
-        monthlyBudget: options.monthlyBudget,
-        currency: sharedBudget.currency || TRANSLATION_CURRENCY,
-        sharedBudget,
+        // Sub-limit hint; authoritative value comes from resolveClaimConfig inside claim.
+        monthlyBudget: translationSubLimit,
+        currency: callCurrency,
+        sharedBudget: sharedBudgetHint,
+        resolveClaimConfig,
         now: clock,
         timeoutMs: options.timeoutMs,
       },
