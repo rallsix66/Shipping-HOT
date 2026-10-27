@@ -116,6 +116,18 @@ async function connect(wsUrl) {
   return new Cdp(ws)
 }
 
+async function readDbCounters() {
+  const Database = (await import("better-sqlite3")).default
+  const db = new Database(DB_PATH, { readonly: true, fileMustExist: true })
+  try {
+    const usage = db.prepare("SELECT COALESCE(SUM(request_count),0) AS n FROM provider_usage").get().n
+    const receipts = db.prepare("SELECT COUNT(*) AS n FROM paid_receipt").get().n
+    const attempts = db.prepare("SELECT COUNT(*) AS n FROM paid_receipt_attempt").get().n
+    return { usage: Number(usage), receipts: Number(receipts), attempts: Number(attempts) }
+  } finally {
+    db.close()
+  }
+}
 const checks = []
 function check(ok, label, detail = {}) {
   checks.push({ ok: Boolean(ok), label, ...detail })
@@ -168,7 +180,7 @@ async function main() {
   if (!chrome) throw new Error("No Chrome/Edge; set E2E_CHROME")
 
   const evidence = {
-    tip: "r3-1-settings-browser",
+    tip: "r3-1-settings-manage-ui",
     baseUrl: BASE,
     runDir: RUN_DIR.replaceAll("\\", "/"),
     evidenceDir: EVIDENCE_DIR.replaceAll("\\", "/"),
@@ -260,10 +272,131 @@ async function main() {
   evidence.api.providerB = { status: providerBRes.status, id: providerB.id }
   evidence.api.modelB = { status: modelBRes.status, id: modelB.id }
 
+  // --- Manage-UI API prelude ---
+  const countersBeforeGet = await readDbCounters()
+  evidence.countersBeforeGet = countersBeforeGet
+  const getProviders = await fetch(`${BASE}/api/shipping/llm/providers`)
+  const getModels = await fetch(`${BASE}/api/shipping/llm/models`)
+  const getBindings = await fetch(`${BASE}/api/shipping/llm/bindings`)
+  check(getProviders.status === 200, `GET providers -> ${getProviders.status}`)
+  check(getModels.status === 200, `GET models -> ${getModels.status}`)
+  check(getBindings.status === 200, `GET bindings -> ${getBindings.status}`)
+  const countersAfterGet = await readDbCounters()
+  evidence.countersAfterGet = countersAfterGet
+  check(
+    countersAfterGet.usage === countersBeforeGet.usage
+    && countersAfterGet.receipts === countersBeforeGet.receipts
+    && countersAfterGet.attempts === countersBeforeGet.attempts,
+    `GET llm registry: no receipt/usage increment (before=${JSON.stringify(countersBeforeGet)} after=${JSON.stringify(countersAfterGet)})`,
+  )
+
+  const blankOmit = await fetch(`${BASE}/api/shipping/llm/providers/${provider.id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name: "R3-1 Settings Accept Mock Edited" }),
+  })
+  const blankOmitBody = await blankOmit.json().catch(() => ({}))
+  check(blankOmit.status === 200 || blankOmit.status === 201, `PATCH provider omit apiKey -> ${blankOmit.status}`)
+  check(blankOmitBody.secret?.configured === true, "omit apiKey keeps secret configured")
+  const blankEmpty = await fetch(`${BASE}/api/shipping/llm/providers/${provider.id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ apiKey: "   " }),
+  })
+  const blankEmptyBody = await blankEmpty.json().catch(() => ({}))
+  check(blankEmpty.status === 400, `PATCH blank apiKey rejected -> ${blankEmpty.status}`)
+  check(JSON.stringify(blankEmptyBody).includes("secret_required"), `blank apiKey error is secret_required (body=${JSON.stringify(blankEmptyBody).slice(0, 200)})`)
+  const tooLong = await fetch(`${BASE}/api/shipping/llm/providers/${provider.id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ apiKey: "x".repeat(600) }),
+  })
+  const tooLongBody = await tooLong.json().catch(() => ({}))
+  check(tooLong.status === 400, `PATCH overlong apiKey rejected -> ${tooLong.status}`)
+  check(JSON.stringify(tooLongBody).includes("secret_too_long"), "overlong error secret_too_long")
+
+  const rotate = await fetch(`${BASE}/api/shipping/llm/providers/${provider.id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ apiKey: "sk-test-fixture-rotated-1111" }),
+  })
+  const rotateBody = await rotate.json().catch(() => ({}))
+  check(rotate.status === 200 || rotate.status === 201, `PATCH rotate fake key -> ${rotate.status}`)
+  check(rotateBody.secret?.configured === true, "rotated secret still configured/redacted")
+  check(!JSON.stringify(rotateBody).includes("sk-test-fixture-rotated-1111"), "response never echoes raw key")
+
+  const modelPatch = await fetch(`${BASE}/api/shipping/llm/models/${model.id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ purpose: "chat", unitPriceIn: 0.01, unitPriceOut: 0.02, currency: "USD", modelName: "mock-chat-fixture-v2" }),
+  })
+  const modelPatched = await modelPatch.json().catch(() => ({}))
+  check(modelPatch.status === 200 || modelPatch.status === 201, `PATCH model price/purpose -> ${modelPatch.status}`)
+  check(modelPatched.unitPriceIn === 0.01 && modelPatched.currency === "USD", "model price/currency persisted")
+
+  const bindRes = await fetch(`${BASE}/api/shipping/llm/bindings`, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ step: "extract", modelId: model.id, updatedBy: "e2e-r3-1-settings" }),
+  })
+  check(bindRes.status === 200 || bindRes.status === 201, `PUT binding extract -> ${bindRes.status}`)
+
+  const disableModel = await fetch(`${BASE}/api/shipping/llm/models/${model.id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ enabled: false }),
+  })
+  check(disableModel.status === 200 || disableModel.status === 201, `PATCH disable bound model -> ${disableModel.status}`)
+
+  const delBlockedModel = await fetch(`${BASE}/api/shipping/llm/models/${model.id}`, { method: "DELETE" })
+  const delBlockedModelBody = await delBlockedModel.json().catch(() => ({}))
+  check(delBlockedModel.status === 409, `DELETE bound model blocked -> ${delBlockedModel.status}`)
+  check(JSON.stringify(delBlockedModelBody).includes("model_in_use"), "blocked delete code model_in_use")
+  const delBlockedProvider = await fetch(`${BASE}/api/shipping/llm/providers/${provider.id}`, { method: "DELETE" })
+  const delBlockedProviderBody = await delBlockedProvider.json().catch(() => ({}))
+  check(delBlockedProvider.status === 409, `DELETE provider with bound model blocked -> ${delBlockedProvider.status}`)
+  check(JSON.stringify(delBlockedProviderBody).includes("provider_in_use"), "blocked delete code provider_in_use")
+
+  const rebind = await fetch(`${BASE}/api/shipping/llm/bindings`, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ step: "extract", modelId: modelB.id, updatedBy: "e2e-r3-1-settings" }),
+  })
+  check(rebind.status === 200 || rebind.status === 201, `PUT rebind extract -> modelB -> ${rebind.status}`)
+  await fetch(`${BASE}/api/shipping/llm/models/${model.id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ enabled: true }),
+  })
+  const delModel = await fetch(`${BASE}/api/shipping/llm/models/${model.id}`, { method: "DELETE" })
+  check(delModel.status === 200 || delModel.status === 201, `DELETE unbound test model -> ${delModel.status}`)
+  const model2Res = await fetch(`${BASE}/api/shipping/llm/models`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      providerId: provider.id,
+      modelName: "mock-chat-fixture-ui",
+      purpose: "chat",
+      unitPriceIn: 0.001,
+      unitPriceOut: 0.002,
+      currency: "USD",
+    }),
+  })
+  const model2 = await model2Res.json().catch(() => ({}))
+  check(model2Res.status === 200 || model2Res.status === 201, `recreate UI model -> ${model2Res.status}`, { modelId: model2.id })
+  evidence.api.modelUi = { status: model2Res.status, id: model2.id }
+  await fetch(`${BASE}/api/shipping/llm/providers/${provider.id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name: "R3-1 Settings Accept Mock" }),
+  })
+  const modelForConn = model2
+  evidence.api.managePrelude = { ok: true }
+
   const testApi = await fetch(`${BASE}/api/shipping/llm/test-connection`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ providerId: provider.id, modelId: model.id }),
+    body: JSON.stringify({ providerId: provider.id, modelId: modelForConn.id }),
   })
   const testBody = await testApi.json().catch(() => ({}))
   evidence.api.testConnection = { status: testApi.status, body: testBody }
@@ -275,7 +408,7 @@ async function main() {
   const liveAttempt = await fetch(`${BASE}/api/shipping/llm/test-connection`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ providerId: provider.id, modelId: model.id, live: true }),
+    body: JSON.stringify({ providerId: provider.id, modelId: modelForConn.id, live: true }),
   })
   check(liveAttempt.status === 400, `live transport refused -> ${liveAttempt.status}`)
 
@@ -421,6 +554,110 @@ async function main() {
   evidence.uiProviderModelSync = syncResult
   check(syncResult?.ok === true, `UI A/a→B/b resets testModelId (got ${JSON.stringify(syncResult)})`)
   check(syncResult?.submitDisabledWhenStale === true, "UI blocks submit when model id is stale across providers")
+
+  // --- UI manage path ---
+  await navigate("/settings")
+  await waitFor(async () => {
+    const text = await evaluate("document.body?.innerText ?? ''")
+    return (text.includes("\u5DF2\u767B\u8BB0\u670D\u52A1\u5546") || text.includes("\u7F16\u8F91")) ? true : undefined
+  }, 20000)
+
+  const manageUi = await evaluate(`(async () => {\n`
+    + `    const sleep = (ms) => new Promise(r => setTimeout(r, ms));\n`
+    + `    const q = (sel) => document.querySelector(sel);\n`
+    + `    const textOf = () => document.body?.innerText ?? '';\n`
+    + `    const click = (sel) => { const el = q(sel); if (!el) return false; el.click(); return true; };\n`
+    + `    const setInput = (sel, value) => {\n`
+    + `      const el = q(sel); if (!el) return false;\n`
+    + `      const proto = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');\n`
+    + `      if (proto && proto.set) proto.set.call(el, value); else el.value = value;\n`
+    + `      el.dispatchEvent(new Event('input', { bubbles: true }));\n`
+    + `      el.dispatchEvent(new Event('change', { bubbles: true }));\n`
+    + `      return true;\n`
+    + `    };\n`
+    + `    const setSelect = (sel, value) => {\n`
+    + `      const el = q(sel); if (!el) return false;\n`
+    + `      const proto = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value');\n`
+    + `      if (proto && proto.set) proto.set.call(el, value); else el.value = value;\n`
+    + `      el.dispatchEvent(new Event('input', { bubbles: true }));\n`
+    + `      el.dispatchEvent(new Event('change', { bubbles: true }));\n`
+    + `      return true;\n`
+    + `    };\n`
+    + `    const out = { steps: [] };\n`
+    + `    const providerId = ${JSON.stringify(provider.id)};\n`
+    + `    const modelId = ${JSON.stringify(modelForConn.id)};\n`
+    + `    const modelBId = ${JSON.stringify(modelB.id)};\n`
+    + `    if (!click('[data-testid="llm-provider-edit-' + providerId + '"]')) return { ok: false, reason: 'edit_btn_missing', ...out };\n`
+    + `    await sleep(200);\n`
+    + `    if (!setInput('[data-testid="llm-provider-edit-name"]', 'R3-1 UI Edited Provider')) return { ok: false, reason: 'edit_name_missing', ...out };\n`
+    + `    setInput('[data-testid="llm-provider-edit-apikey"]', '');\n`
+    + `    click('[data-testid="llm-provider-edit-save"]');\n`
+    + `    await sleep(900);\n`
+    + `    out.steps.push('edit_provider');\n`
+    + `    out.afterEdit = textOf().includes('R3-1 UI Edited Provider') || textOf().includes('\u672A\u63D0\u4EA4\u5BC6\u94A5') || textOf().includes('\u5DF2\u66F4\u65B0');\n`
+    + `    if (!click('[data-testid="llm-provider-edit-' + providerId + '"]')) return { ok: false, reason: 'edit_btn_missing_2', ...out };\n`
+    + `    await sleep(200);\n`
+    + `    setInput('[data-testid="llm-provider-edit-name"]', 'R3-1 UI Edited Provider');\n`
+    + `    setInput('[data-testid="llm-provider-edit-apikey"]', 'y'.repeat(600));\n`
+    + `    click('[data-testid="llm-provider-edit-save"]');\n`
+    + `    await sleep(1000);\n`
+    + `    const afterFail = textOf();\n`
+    + `    out.secretFailShowsError = afterFail.includes('secret_too_long') || afterFail.includes('\u66F4\u65B0\u5931\u8D25');\n`
+    + `    out.secretFailNoFakeSuccess = !afterFail.includes('\u5BC6\u94A5\u5DF2\u66F4\u6362');\n`
+    + `    out.formRetained = !!q('[data-testid="llm-provider-edit-form-' + providerId + '"]');\n`
+    + `    out.steps.push('secret_fail');\n`
+    + `    click('[data-testid="llm-provider-edit-cancel"]');\n`
+    + `    await sleep(200);\n`
+    + `    setSelect('[data-testid="llm-binding-step"]', 'extract');\n`
+    + `    setSelect('[data-testid="llm-binding-model"]', modelId);\n`
+    + `    click('[data-testid="llm-binding-save"]');\n`
+    + `    await sleep(900);\n`
+    + `    out.steps.push('bind');\n`
+    + `    out.bindOk = textOf().includes('\u5DF2\u7ED1\u5B9A') || textOf().includes(modelId);\n`
+    + `    if (!click('[data-testid="llm-model-toggle-' + modelId + '"]')) return { ok: false, reason: 'model_toggle_missing', ...out };\n`
+    + `    await sleep(800);\n`
+    + `    out.steps.push('disable');\n`
+    + `    out.disableVisible = textOf().includes('\u5DF2\u7981\u7528') || textOf().includes('\u5931\u6548');\n`
+    + `    if (!click('[data-testid="llm-model-delete-' + modelId + '"]')) return { ok: false, reason: 'model_delete_missing', ...out };\n`
+    + `    await sleep(200);\n`
+    + `    out.confirmShown = !!q('[data-testid="llm-delete-confirm"]');\n`
+    + `    click('[data-testid="llm-delete-confirm-yes"]');\n`
+    + `    await sleep(900);\n`
+    + `    out.steps.push('blocked_delete');\n`
+    + `    out.blockedMsg = textOf().includes('model_in_use') || textOf().includes('\u53D7\u963B');\n`
+    + `    setSelect('[data-testid="llm-binding-step"]', 'extract');\n`
+    + `    setSelect('[data-testid="llm-binding-model"]', modelBId);\n`
+    + `    click('[data-testid="llm-binding-save"]');\n`
+    + `    await sleep(900);\n`
+    + `    out.steps.push('rebind');\n`
+    + `    click('[data-testid="llm-model-toggle-' + modelId + '"]');\n`
+    + `    await sleep(700);\n`
+    + `    click('[data-testid="llm-model-delete-' + modelId + '"]');\n`
+    + `    await sleep(200);\n`
+    + `    click('[data-testid="llm-delete-confirm-yes"]');\n`
+    + `    await sleep(900);\n`
+    + `    out.steps.push('delete_model');\n`
+    + `    out.modelDeleted = textOf().includes('\u5DF2\u5220\u9664') || !q('[data-testid="llm-model-row-' + modelId + '"]');\n`
+    + `    const statusEl = q('[data-testid="llm-binding-status-extract"]');\n`
+    + `    out.bindingStatusText = statusEl ? statusEl.textContent : '';\n`
+    + `    const body = textOf();\n`
+    + `    out.hasConfirmCopy = body.includes('\u786E\u8BA4\u5220\u9664') || out.confirmShown;\n`
+    + `    out.hasRetainCopy = body.includes('SecretStore') && (body.includes('\u4FDD\u7559') || body.includes('\u672A\u6E05\u7406') || body.includes('\u4E0D\u4F1A\u6E05\u7406'));\n`
+    + `    out.hasMaskCopy = body.includes('\u8131\u654F') || body.includes('\u672A\u914D\u7F6E\u5BC6\u94A5') || body.includes('\u5DF2\u914D\u7F6E');\n`
+    + `    out.ok = Boolean(out.afterEdit && out.secretFailShowsError && out.secretFailNoFakeSuccess && out.formRetained && out.bindOk && out.blockedMsg && out.modelDeleted && out.hasConfirmCopy && out.hasRetainCopy);\n`
+    + `    return out;\n`
+    + `  })()`, true)
+  evidence.uiManage = manageUi
+  check(manageUi?.afterEdit === true, `UI edit provider (got ${JSON.stringify(manageUi?.afterEdit)})`)
+  check(manageUi?.secretFailShowsError === true, "UI secret failure shows real error")
+  check(manageUi?.secretFailNoFakeSuccess === true, "UI secret failure has no fake success")
+  check(manageUi?.formRetained === true, "UI secret failure retains edit form")
+  check(manageUi?.bindOk === true, `UI bind step (got ${JSON.stringify(manageUi?.bindOk)})`)
+  check(manageUi?.blockedMsg === true, "UI blocked delete shows model_in_use / blocked")
+  check(manageUi?.confirmShown === true, "UI delete shows explicit confirm")
+  check(manageUi?.modelDeleted === true, "UI deletes unbound test model after rebind")
+  check(manageUi?.hasRetainCopy === true, "UI copy states SecretStore retain semantics")
+  check(manageUi?.ok === true, `UI manage flow aggregate ok (got ${JSON.stringify(manageUi)})`)
 
   const shot = await cdp.send("Page.captureScreenshot", { format: "png", fromSurface: true })
   const shotPath = join(EVIDENCE_DIR, "settings-browser-accept.png")
