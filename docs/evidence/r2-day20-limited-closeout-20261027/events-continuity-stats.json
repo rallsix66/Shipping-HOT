@@ -1,0 +1,304 @@
+{
+  "schema": "r2-day20-events-continuity-stats-v1",
+  "writtenAtAsiaShanghai": "2026-10-27 11:53:30.036 Asia/Shanghai",
+  "dotsTs": "1793072775.334919",
+  "mode": "offline_read_only",
+  "eventsFile": {
+    "absolutePath": "D:/try one/Shipping HOT/.tmp/worktrees/r2-compat/.tmp/r2-intel-observe-day20-20261026a/events.jsonl",
+    "sha256": "0983d4ec5c7aff5c4ee06484a451f3a7f820f73da8a490a902a8340866c8bfe9",
+    "sizeBytes": 907761,
+    "lineCount": 4830,
+    "mutated": false,
+    "note": "SHA computed before any analysis; original file never written"
+  },
+  "timeSpan": {
+    "first": {
+      "sequence": 1,
+      "at": "2026-10-26T02:58:16.438Z",
+      "atAsiaShanghai": "2026-10-26 10:58:16.438 Asia/Shanghai",
+      "type": "start"
+    },
+    "last": {
+      "sequence": 4830,
+      "at": "2026-10-27T02:58:21.391Z",
+      "atAsiaShanghai": "2026-10-27 10:58:21.391 Asia/Shanghai",
+      "type": "finished",
+      "reason": "deadline"
+    },
+    "spanSec": 86404.953,
+    "spanHours": 24.0014
+  },
+  "eventTypeCounts": {
+    "source_state": 1805,
+    "dns_started": 488,
+    "dns_completed": 488,
+    "http_reserved": 488,
+    "http_started": 488,
+    "http_completed": 481,
+    "source_run": 464,
+    "job_result": 95,
+    "redirect": 24,
+    "http_failed": 7,
+    "start": 1,
+    "finished": 1
+  },
+  "adjacency": {
+    "timeRegressCount": 0,
+    "adjacentSameTimestampPairs": 2036,
+    "exactDuplicateEventPairs": 0,
+    "sequenceRegressCount": 0,
+    "sequenceDuplicateCount": 0,
+    "maxEventGap": {
+      "prevSeq": 3191,
+      "currSeq": 3192,
+      "prevAt": "2026-10-26T18:36:54.193Z",
+      "currAt": "2026-10-26T18:51:59.164Z",
+      "prevType": "job_result",
+      "currType": "source_state",
+      "deltaSec": 904.971,
+      "prevAtAsiaShanghai": "2026-10-27 02:36:54.193 Asia/Shanghai",
+      "currAtAsiaShanghai": "2026-10-27 02:51:59.164 Asia/Shanghai",
+      "deltaMin": 15.083
+    },
+    "note": "timeRegressCount=adjacent at going backwards; adjacentSameTimestampPairs=consecutive events sharing identical at; exactDuplicateEventPairs=fully identical adjacent records; sequence* = sequence field monotonicity"
+  },
+  "tickProxy": {
+    "chosenType": "job_result",
+    "count": 95,
+    "rationale": "No explicit 'tick'/'schedule' event type exists in events.jsonl. job_result (n=95) marks completion of a scheduler sync cycle and aligns with ~15min cadence expected by observe profile; source_run is per-source (n=464) and denser than the 15min rhythm. Using job_result as tick proxy.",
+    "alternativesConsidered": {
+      "source_run": 464,
+      "source_state": 1805,
+      "dns_started": 488
+    }
+  },
+  "jobResultIntervals": {
+    "count": 95,
+    "intervalCount": 94,
+    "expectedCadenceSec": 900,
+    "statsSec": {
+      "min": 900.045,
+      "max": 940.893,
+      "mean": 907.3273936170212,
+      "median": 901.8199999999999,
+      "p90": 922.4442,
+      "p95": 928.15815,
+      "p99": 935.8124099999999
+    },
+    "statsMin": {
+      "min": 15.001,
+      "max": 15.682,
+      "mean": 15.122,
+      "median": 15.03,
+      "p90": 15.374,
+      "p95": 15.469,
+      "p99": 15.597
+    },
+    "distributionBuckets": {
+      "lt_10min": 0,
+      "10_to_15min": 0,
+      "15_to_20min": 94,
+      "20_to_30min": 0,
+      "30_to_60min": 0,
+      "gte_60min": 0
+    },
+    "maxInterval": {
+      "index": 36,
+      "prevSeq": 1813,
+      "currSeq": 1947,
+      "prevAt": "2026-10-26T12:02:38.672Z",
+      "currAt": "2026-10-26T12:18:19.565Z",
+      "prevAtAsiaShanghai": "2026-10-26 20:02:38.672 Asia/Shanghai",
+      "currAtAsiaShanghai": "2026-10-26 20:18:19.565 Asia/Shanghai",
+      "deltaSec": 940.893,
+      "deltaMin": 15.682,
+      "prevStatus": "success",
+      "currStatus": "success",
+      "explanation": {
+        "kind": "within_expected_cadence",
+        "notes": [
+          "max job_result interval is 15.682min (<20min and <1.5*median=22.545min); not flagged as off-rhythm",
+          "prevStatus=success and currStatus=success",
+          "no failure_recovery inference required"
+        ],
+        "inferable": true,
+        "windowEventTypeCounts": null,
+        "longestSilenceInside": null
+      }
+    },
+    "startToFirstJobResult": {
+      "fromSeq": 1,
+      "toSeq": 141,
+      "fromAt": "2026-10-26T02:58:16.438Z",
+      "toAt": "2026-10-26T03:13:52.871Z",
+      "fromAtAsiaShanghai": "2026-10-26 10:58:16.438 Asia/Shanghai",
+      "toAtAsiaShanghai": "2026-10-26 11:13:52.871 Asia/Shanghai",
+      "deltaSec": 936.433,
+      "note": "start to first job_result (warm-up / first sync delay)"
+    },
+    "lastJobResultToFinished": {
+      "fromSeq": 4829,
+      "toSeq": 4830,
+      "fromAt": "2026-10-27T02:55:21.646Z",
+      "toAt": "2026-10-27T02:58:21.391Z",
+      "fromAtAsiaShanghai": "2026-10-27 10:55:21.646 Asia/Shanghai",
+      "toAtAsiaShanghai": "2026-10-27 10:58:21.391 Asia/Shanghai",
+      "deltaSec": 179.745,
+      "finishedReason": "deadline",
+      "note": "last job_result to finished"
+    },
+    "top5LongestIntervals": [
+      {
+        "index": 36,
+        "prevSeq": 1813,
+        "currSeq": 1947,
+        "prevAt": "2026-10-26T12:02:38.672Z",
+        "currAt": "2026-10-26T12:18:19.565Z",
+        "prevAtAsiaShanghai": "2026-10-26 20:02:38.672 Asia/Shanghai",
+        "currAtAsiaShanghai": "2026-10-26 20:18:19.565 Asia/Shanghai",
+        "deltaSec": 940.893,
+        "deltaMin": 15.682,
+        "prevStatus": "success",
+        "currStatus": "success"
+      },
+      {
+        "index": 40,
+        "prevSeq": 2013,
+        "currSeq": 2147,
+        "prevAt": "2026-10-26T13:03:28.065Z",
+        "currAt": "2026-10-26T13:19:03.495Z",
+        "prevAtAsiaShanghai": "2026-10-26 21:03:28.065 Asia/Shanghai",
+        "currAtAsiaShanghai": "2026-10-26 21:19:03.495 Asia/Shanghai",
+        "deltaSec": 935.43,
+        "deltaMin": 15.59,
+        "prevStatus": "success",
+        "currStatus": "success"
+      },
+      {
+        "index": 44,
+        "prevSeq": 2219,
+        "currSeq": 2353,
+        "prevAt": "2026-10-26T14:04:17.226Z",
+        "currAt": "2026-10-26T14:19:51.243Z",
+        "prevAtAsiaShanghai": "2026-10-26 22:04:17.226 Asia/Shanghai",
+        "currAtAsiaShanghai": "2026-10-26 22:19:51.243 Asia/Shanghai",
+        "deltaSec": 934.017,
+        "deltaMin": 15.567,
+        "prevStatus": "success",
+        "currStatus": "success"
+      },
+      {
+        "index": 52,
+        "prevSeq": 2625,
+        "currSeq": 2759,
+        "prevAt": "2026-10-26T16:05:19.811Z",
+        "currAt": "2026-10-26T16:20:53.767Z",
+        "prevAtAsiaShanghai": "2026-10-27 00:05:19.811 Asia/Shanghai",
+        "currAtAsiaShanghai": "2026-10-27 00:20:53.767 Asia/Shanghai",
+        "deltaSec": 933.956,
+        "deltaMin": 15.566,
+        "prevStatus": "success",
+        "currStatus": "success"
+      },
+      {
+        "index": 8,
+        "prevSeq": 401,
+        "currSeq": 541,
+        "prevAt": "2026-10-26T04:59:20.813Z",
+        "currAt": "2026-10-26T05:14:50.212Z",
+        "prevAtAsiaShanghai": "2026-10-26 12:59:20.813 Asia/Shanghai",
+        "currAtAsiaShanghai": "2026-10-26 13:14:50.212 Asia/Shanghai",
+        "deltaSec": 929.399,
+        "deltaMin": 15.49,
+        "prevStatus": "success",
+        "currStatus": "success"
+      }
+    ],
+    "top5ShortestIntervals": [
+      {
+        "index": 41,
+        "prevSeq": 2147,
+        "currSeq": 2167,
+        "prevAt": "2026-10-26T13:19:03.495Z",
+        "currAt": "2026-10-26T13:34:03.540Z",
+        "prevAtAsiaShanghai": "2026-10-26 21:19:03.495 Asia/Shanghai",
+        "currAtAsiaShanghai": "2026-10-26 21:34:03.540 Asia/Shanghai",
+        "deltaSec": 900.045,
+        "deltaMin": 15.001,
+        "prevStatus": "success",
+        "currStatus": "success"
+      },
+      {
+        "index": 70,
+        "prevSeq": 3591,
+        "currSeq": 3611,
+        "prevAt": "2026-10-26T20:37:43.496Z",
+        "currAt": "2026-10-26T20:52:43.547Z",
+        "prevAtAsiaShanghai": "2026-10-27 04:37:43.496 Asia/Shanghai",
+        "currAtAsiaShanghai": "2026-10-27 04:52:43.547 Asia/Shanghai",
+        "deltaSec": 900.051,
+        "deltaMin": 15.001,
+        "prevStatus": "success",
+        "currStatus": "success"
+      },
+      {
+        "index": 10,
+        "prevSeq": 567,
+        "currSeq": 587,
+        "prevAt": "2026-10-26T05:29:57.582Z",
+        "currAt": "2026-10-26T05:44:57.635Z",
+        "prevAtAsiaShanghai": "2026-10-26 13:29:57.582 Asia/Shanghai",
+        "currAtAsiaShanghai": "2026-10-26 13:44:57.635 Asia/Shanghai",
+        "deltaSec": 900.053,
+        "deltaMin": 15.001,
+        "prevStatus": "success",
+        "currStatus": "success"
+      },
+      {
+        "index": 6,
+        "prevSeq": 361,
+        "currSeq": 381,
+        "prevAt": "2026-10-26T04:29:20.704Z",
+        "currAt": "2026-10-26T04:44:20.758Z",
+        "prevAtAsiaShanghai": "2026-10-26 12:29:20.704 Asia/Shanghai",
+        "currAtAsiaShanghai": "2026-10-26 12:44:20.758 Asia/Shanghai",
+        "deltaSec": 900.054,
+        "deltaMin": 15.001,
+        "prevStatus": "success",
+        "currStatus": "success"
+      },
+      {
+        "index": 58,
+        "prevSeq": 2991,
+        "currSeq": 3011,
+        "prevAt": "2026-10-26T17:36:29.015Z",
+        "currAt": "2026-10-26T17:51:29.069Z",
+        "prevAtAsiaShanghai": "2026-10-27 01:36:29.015 Asia/Shanghai",
+        "currAtAsiaShanghai": "2026-10-27 01:51:29.069 Asia/Shanghai",
+        "deltaSec": 900.054,
+        "deltaMin": 15.001,
+        "prevStatus": "success",
+        "currStatus": "success"
+      }
+    ]
+  },
+  "gapsOff15minRhythm": {
+    "thresholdRule": "flag if deltaSec > 1200s (20min) OR deltaSec > 1.5*median(1352.730s)",
+    "primaryThresholdSec": 1200,
+    "medianSec": 901.8199999999999,
+    "onePointFiveMedianSec": 1352.73,
+    "count": 0,
+    "gaps": [],
+    "summary": "ZERO gaps exceed the off-rhythm threshold. All 94 job_result intervals fall in [15.001, 15.682] minutes (bucket 15_to_20min=94). Median 15.030min ~ expected 15min cadence. Adjacent same-timestamp pairs (2036) are concurrent multi-event bursts sharing identical at, not duplicate records."
+  },
+  "continuityAssessment": {
+    "monotonicTime": true,
+    "noExactDuplicateEvents": true,
+    "sequenceMonotonicStrictlyIncreasing": true,
+    "jobResultCadenceNear15min": true,
+    "offRhythmGapCount": 0,
+    "overallR2PassUnchanged": false,
+    "continuous24hAcceptance": "NOT_GRANTED; continuity stats sealed for independent review; does not auto-grant",
+    "note": "successfulRounds=0 is not a failure basis under this run's config (no stopAfterSuccessfulRounds). exitCode remains unknown. This pack only adds offline continuity evidence for 19-source limited observe."
+  }
+}

@@ -96,6 +96,52 @@ Local absolute pack (PC only; may not exist elsewhere):
 
 `D:/try one/Shipping HOT/.tmp/worktrees/r2-compat/.tmp/r2-intel-observe-day20-20261026a/.tmp/offline-reconcile-1793071080/`
 
+## Continuity offline stats (dots 1793072775.334919) - not a re-run
+
+- **mode**: offline read-only on existing events.jsonl; original **not mutated**
+- **events.jsonl SHA256**: 0983d4ec5c7aff5c4ee06484a451f3a7f820f73da8a490a902a8340866c8bfe9
+- **path**: D:/try one/Shipping HOT/.tmp/worktrees/r2-compat/.tmp/r2-intel-observe-day20-20261026a/events.jsonl
+- **sealed**: events-continuity-stats.json (this directory)
+
+### Span / adjacency
+
+| Field | Value |
+| --- | --- |
+| first | seq 1 start; 2026-10-26 10:58:16.438 Asia/Shanghai |
+| last | seq 4830 finished reason=deadline; 2026-10-27 10:58:21.391 Asia/Shanghai |
+| eventCount | 4830 |
+| spanHours | 24.0014 |
+| timeRegressCount | 0 |
+| exactDuplicateEventPairs | 0 |
+| adjacentSameTimestampPairs | 2036 (concurrent bursts sharing identical at; not duplicate records) |
+| sequenceRegress / seqDup | 0 / 0 |
+| maxEventGap | 15.083 min; seq 3191->3192; job_result->source_state; 2026-10-27 02:36:54.193 Asia/Shanghai -> 2026-10-27 02:51:59.164 Asia/Shanghai |
+
+### Tick proxy = job_result (n=95)
+
+Rationale: no explicit tick/schedule type; job_result marks scheduler cycle completion and matches ~15min cadence. source_run (n=464) is per-source denser than the 15min rhythm.
+
+| Interval stat | minutes |
+| --- | --- |
+| min / median / mean / max | 15.001 / 15.03 / 15.122 / 15.682 |
+| p90 / p95 / p99 | 15.374 / 15.469 / 15.597 |
+| bucket 15-20min | 94 / 94 intervals (all other buckets 0) |
+| max interval locus | seq 1813->1947; 2026-10-26 20:02:38.672 Asia/Shanghai -> 2026-10-26 20:18:19.565 Asia/Shanghai (both status=success) |
+
+### Off-15min gaps (threshold: >20min OR >1.5x median ~22.545min)
+
+**Count = 0.** All 94 adjacent job_result intervals are in [15.001, 15.682] min. No failure-recovery / deadline / lock idle gap exceeds the threshold. Max gap explanation: within_expected_cadence.
+
+- start to first job_result: 15.607 min (warm-up)
+- last job_result to finished(deadline): 2.996 min
+
+### Still held
+
+- **overallR2Pass=false** (unchanged)
+- continuous24hAcceptance string retained NOT_GRANTED for independent review (stats do not auto-grant)
+- successfulRounds=0 not a failure basis (no stopAfterSuccessfulRounds); exitCode=unknown retained
+- journey 32/39 and 26/34 unchanged; no product code; no new 24h
+
 ## Constraints held
 
 - No new sources / prod enable / merge / deploy / force

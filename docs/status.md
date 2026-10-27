@@ -1,3 +1,14 @@
+## 2026-10-27 — day20 events 连续性离线统计（dots 1793072775.334919）
+
+- Isolation: codex/shipping-hot-r2-4-gapfill-20261025 @ worktree .tmp/worktrees/r2-4-gapfill-20261025
+- **模式**：仅对现有 events.jsonl 离线统计；**不**重跑；**不**改原日志；**无**产品代码；**无**新 24h / 网络抓取 / DB 写入
+- events SHA256 0983d4ec5c7aff5c4ee06484a451f3a7f820f73da8a490a902a8340866c8bfe9；n=4830；首尾 2026-10-26 10:58:16.438 Asia/Shanghai → 2026-10-27 10:58:21.391 Asia/Shanghai
+- 相邻时间回退 **0**；精确重复事件对 **0**；同戳并发对 2036；最大事件间隔 **15.083 min**
+- tick 代理 = job_result×95；间隔 median/max **15.03 / 15.682 min**；偏离 15min 空档（>20min 或 >1.5×median）**0**
+- **overallR2Pass=false**；continuous24hAcceptance 仍 NOT_GRANTED（供独立审查，统计不自动授予）；successfulRounds=0 不作失败依据；exit=unknown 保留
+- 证据：[events-continuity-stats.json](evidence/r2-day20-limited-closeout-20261027/events-continuity-stats.json) / [report](evidence/r2-day20-limited-closeout-20261027/report.md)
+
+---
 ## 2026-10-27 — 限定收尾（day20 自然结束 + 人工9；dots `1793071443.735819`）
 
 - Isolation: `codex/shipping-hot-r2-4-gapfill-20261025` @ worktree `.tmp/worktrees/r2-4-gapfill-20261025`
