@@ -943,6 +943,103 @@ async function main() {
   const createdUnderB = (modelsAfterDelete.items || []).find(m => m.modelName === "mock-after-delete-a")
   check(createdUnderB?.providerId === providerB.id, `API created model belongs to B (got ${JSON.stringify(createdUnderB)})`)
 
+  // UI: unsaved shared-budget draft must survive mock test-connection status refresh.
+  await navigate("/settings")
+  await waitFor(async () => {
+    const text = await evaluate("document.body?.innerText ?? ''")
+    return text.includes("\u6D4B\u8BD5\u8FDE\u63A5") ? true : undefined
+  }, 20000)
+  const dirtyDraftUi = await evaluate(`(async () => {
+    const q = (s) => document.querySelector(s)
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms))
+    const setReactValue = (el, value) => {
+      const proto = el instanceof HTMLSelectElement
+        ? window.HTMLSelectElement.prototype
+        : window.HTMLInputElement.prototype
+      const desc = Object.getOwnPropertyDescriptor(proto, "value")
+      desc.set.call(el, value)
+      el.dispatchEvent(new Event("input", { bubbles: true }))
+      el.dispatchEvent(new Event("change", { bubbles: true }))
+    }
+    const budget = q('[data-testid="shared-llm-budget-input"]')
+    const currency = q('[data-testid="shared-llm-budget-currency"]')
+    if (!budget || !currency) return { ok: false, reason: "missing_inputs" }
+    const beforeBudget = budget.value
+    const beforeCurrency = currency.value
+    budget.focus()
+    setReactValue(budget, "99.25")
+    currency.focus()
+    setReactValue(currency, "CNY")
+    await sleep(200)
+    const midBudget = q('[data-testid="shared-llm-budget-input"]')?.value
+    const midCurrency = q('[data-testid="shared-llm-budget-currency"]')?.value
+    if (midBudget !== "99.25" || midCurrency !== "CNY") {
+      return { ok: false, reason: "draft_not_applied", beforeBudget, beforeCurrency, midBudget, midCurrency }
+    }
+    const testSubmit = q('[data-testid="llm-test-submit"]')
+    if (testSubmit && testSubmit.disabled === false) {
+      testSubmit.click()
+      await sleep(1500)
+    }
+    await sleep(400)
+    const afterBudget = q('[data-testid="shared-llm-budget-input"]')?.value
+    const afterCurrency = q('[data-testid="shared-llm-budget-currency"]')?.value
+    const statusState = q('[data-testid="shared-llm-budget-status-state"]')?.textContent || ""
+    return {
+      ok: afterBudget === "99.25" && afterCurrency === "CNY",
+      beforeBudget,
+      beforeCurrency,
+      midBudget,
+      midCurrency,
+      afterBudget,
+      afterCurrency,
+      statusState,
+      testMessage: q('[data-testid="llm-test-message"]')?.textContent || "",
+    }
+  })()`, true)
+
+  evidence.uiDirtyDraftSurvivesMockRefresh = dirtyDraftUi
+  check(dirtyDraftUi?.ok === true, `unsaved budget draft survives mock status refresh (got ${JSON.stringify(dirtyDraftUi)})`)
+
+  // UI: shared-budget status GET failure must show unavailable (not stale ready).
+  const statusFailUi = await evaluate(`(async () => {
+    const q = (s) => document.querySelector(s)
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms))
+    const originalFetch = window.fetch.bind(window)
+    window.fetch = async (input, init) => {
+      const url = typeof input === "string" ? input : (input && input.url) || ""
+      if (String(url).includes("/api/shipping/llm/shared-budget") || String(url).includes("/shipping/llm/shared-budget")) {
+        return new Response(JSON.stringify({ message: "forced_status_failure" }), { status: 500, headers: { "content-type": "application/json" } })
+      }
+      return originalFetch(input, init)
+    }
+    try {
+      const testSubmit = q('[data-testid="llm-test-submit"]')
+      if (testSubmit && testSubmit.disabled === false) {
+        testSubmit.click()
+        await sleep(1500)
+      } else {
+        // Trigger refreshSharedBudgetStatus via a second click attempt / CustomEvent fallback:
+        // re-set a draft and rely on panel's post-test refresh.
+        testSubmit?.click()
+        await sleep(1500)
+      }
+      const stateText = q('[data-testid="shared-llm-budget-status-state"]')?.textContent || ""
+      const rejection = q('[data-testid="shared-llm-budget-rejection"]')?.textContent || ""
+      const draftStill = q('[data-testid="shared-llm-budget-input"]')?.value
+      return {
+        ok: stateText.includes("unavailable") || stateText.includes("\u4E0D\u53EF\u7528") || rejection.includes("status_refresh_failed"),
+        stateText,
+        rejection,
+        draftStill,
+      }
+    } finally {
+      window.fetch = originalFetch
+    }
+  })()`, true)
+  evidence.uiStatusGetFailureUnavailable = statusFailUi
+  check(statusFailUi?.ok === true, `status GET failure shows unavailable (got ${JSON.stringify(statusFailUi)})`)
+
   // Settings browse + refresh: receipt/usage must stay flat across real UI navigations (not only three GETs).
   // Capture AFTER any mock test-connection so this window isolates browse/refresh itself.
   const countersBeforeRefresh = await readDbCounters()

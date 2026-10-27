@@ -41,7 +41,7 @@ export type TestConnectionResult =
 export interface TestConnectionOptions {
   db: Database
   secretStore: SecretStore
-  /** Dedicated shared pool (Settings). Never translation.monthlyBudget. */
+  /** Outer hint only; claim authority is DB via resolveClaimConfig (no production fallback). */
   sharedLlmBudget?: SharedLlmBudgetSettings | null
   /** Test-only explicit pool override. */
   sharedPoolMonthlyBudget?: number | null
@@ -73,6 +73,8 @@ export async function runLlmTestConnection(options: TestConnectionOptions): Prom
     const sharedBudgetHint = options.sharedPoolMonthlyBudget !== undefined
       ? resolveSharedLlmBudgetGate(options.sharedPoolMonthlyBudget, options.sharedPoolCurrency ?? model.currency)
       : resolveSharedLlmBudgetFromSettings(options.sharedLlmBudget)
+    // Production registry test-connection: claim DB only (no fallback snapshot).
+    // Tests inject sharedPoolMonthlyBudget for isolated override pools.
     const resolveClaimConfig = options.sharedPoolMonthlyBudget !== undefined
       ? createPaidClaimBudgetResolver({
           mode: "registry",
@@ -83,7 +85,6 @@ export async function runLlmTestConnection(options: TestConnectionOptions): Prom
         })
       : createPaidClaimBudgetResolver({
           mode: "registry",
-          fallbackPool: options.sharedLlmBudget,
         })
     const result = await paidRequest(
       {

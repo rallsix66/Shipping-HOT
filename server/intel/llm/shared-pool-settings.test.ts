@@ -603,4 +603,201 @@ describe("r3-1 REQUEST CHANGES: currency lock + claim authority + supported FX",
     const attempts = await db.prepare("SELECT COUNT(*) AS n FROM paid_receipt_attempt").get() as { n: number }
     expect(Number(attempts.n)).toBe(0)
   })
+
+  it("claim-time barrier: cleared pool during SecretStore wait does not revive outer positive snapshot", async () => {
+    const { db } = await setup()
+    await seedChatModel(db)
+    await db.prepare("UPDATE settings SET data = ?, updated_at = ? WHERE id = 'default'").run(
+      JSON.stringify({
+        ...structuredClone(defaultShippingSettings),
+        sharedLlmBudget: { monthlyBudget: 5, currency: "USD" },
+      }),
+      T0.toISOString(),
+    )
+
+    let releaseSecret!: () => void
+    const secretGate = new Promise<void>((resolve) => {
+      releaseSecret = resolve
+    })
+    let enteredSecret!: () => void
+    const secretEntered = new Promise<void>((resolve) => {
+      enteredSecret = resolve
+    })
+    const map = new Map<string, string>([
+      ["deepseek", "test-placeholder"],
+      [llmSecretRefForProviderId("fixture-chat"), "test-placeholder"],
+      ["fixture-chat", "test-placeholder"],
+    ])
+    const delayedSecrets: SecretStore = {
+      get: async (id) => {
+        enteredSecret()
+        await secretGate
+        return map.get(id)
+      },
+      set: async (id, value) => void map.set(id, value),
+      delete: async id => void map.delete(id),
+      has: async id => map.has(id),
+      source: async id => (map.has(id) ? "file" : "missing") as never,
+    }
+
+    let providerHits = 0
+    const pending = paidRequest(
+      {
+        db,
+        secretStore: delayedSecrets,
+        monthlyBudget: undefined,
+        currency: "USD",
+        // Outer snapshot stays positive — must NOT revive after DB clear.
+        sharedBudget: resolveSharedLlmBudgetGate(5, "USD"),
+        resolveClaimConfig: createPaidClaimBudgetResolver({ mode: "registry" }),
+        now: () => T0,
+      },
+      {
+        providerId: "fixture-chat",
+        capability: "llm_test_chat",
+        model: "fixture-chat-model",
+        purpose: "barrier-clear-pool",
+        subject: "barrier-clear-1",
+        identity: { subject: "barrier-clear-1", kind: "chat" },
+        estimatedCost: 0.01,
+      },
+      async () => {
+        providerHits += 1
+        return { response: { ok: true }, usage: { tokensIn: 1, tokensOut: 1 } }
+      },
+    )
+
+    await secretEntered
+    // Clear sharedLlmBudget entirely (missing field) while waiting on SecretStore.
+    await db.prepare("UPDATE settings SET data = ?, updated_at = ? WHERE id = 'default'").run(
+      JSON.stringify({
+        ...structuredClone(defaultShippingSettings),
+      }),
+      T0.toISOString(),
+    )
+    releaseSecret()
+    await expect(pending).rejects.toMatchObject({ name: "PaidGateError", code: "paid_budget_unconfigured" })
+    expect(providerHits).toBe(0)
+    const attempts = await db.prepare("SELECT COUNT(*) AS n FROM paid_receipt_attempt").get() as { n: number }
+    expect(Number(attempts.n)).toBe(0)
+  })
+
+  it("claim-time barrier: removed sub-limit / corrupt config during wait yields zero attempt / provider", async () => {
+    const { db } = await setup()
+    await db.prepare("UPDATE settings SET data = ?, updated_at = ? WHERE id = 'default'").run(
+      JSON.stringify({
+        ...structuredClone(defaultShippingSettings),
+        translation: {
+          enabled: true,
+          providerId: "deepseek",
+          model: "deepseek-v4-flash",
+          targetLanguage: "zh-CN",
+          monthlyBudget: 5,
+        },
+        sharedLlmBudget: { monthlyBudget: 5, currency: "USD" },
+      }),
+      T0.toISOString(),
+    )
+
+    let releaseSecret!: () => void
+    const secretGate = new Promise<void>((resolve) => {
+      releaseSecret = resolve
+    })
+    let enteredSecret!: () => void
+    const secretEntered = new Promise<void>((resolve) => {
+      enteredSecret = resolve
+    })
+    const map = new Map<string, string>([["deepseek", "test-placeholder"]])
+    const delayedSecrets: SecretStore = {
+      get: async (id) => {
+        enteredSecret()
+        await secretGate
+        return map.get(id)
+      },
+      set: async (id, value) => void map.set(id, value),
+      delete: async id => void map.delete(id),
+      has: async id => map.has(id),
+      source: async id => (map.has(id) ? "file" : "missing") as never,
+    }
+    const fake = new FakeTranslationProvider({
+      providerId: TRANSLATION_PROVIDER_ID,
+      model: TRANSLATION_MODEL,
+      translateText: () => "不应调用",
+    })
+
+    const pending = executeTranslationViaPaidRequest({
+      db,
+      secretStore: delayedSecrets,
+      // Outer positive sub-limit + pool — must not revive after DB corruption.
+      monthlyBudget: 5,
+      sharedLlmBudget: { monthlyBudget: 5, currency: "USD" },
+      provider: fake,
+      source: prepared("corrupt-barrier"),
+      estimatedCost: 0.01,
+      now: () => T0,
+    })
+
+    await secretEntered
+    // Corrupt / remove translation.monthlyBudget while claim is waiting.
+    await db.prepare("UPDATE settings SET data = ?, updated_at = ? WHERE id = 'default'").run(
+      JSON.stringify({
+        ...structuredClone(defaultShippingSettings),
+        translation: {
+          enabled: true,
+          providerId: "deepseek",
+          model: "deepseek-v4-flash",
+          targetLanguage: "zh-CN",
+          // monthlyBudget omitted => unconfigured sub-limit
+        },
+        sharedLlmBudget: { monthlyBudget: 5, currency: "USD" },
+      }),
+      T0.toISOString(),
+    )
+    releaseSecret()
+    const denied = await pending
+    expect(denied.providerCalled).toBe(false)
+    expect(denied.paidGateCode).toBe("paid_budget_unconfigured")
+    expect(fake.calls).toHaveLength(0)
+    const attempts = await db.prepare("SELECT COUNT(*) AS n FROM paid_receipt_attempt").get() as { n: number }
+    expect(Number(attempts.n)).toBe(0)
+  })
+
+  it("claim-time barrier: enabled:false + 0 is DB authority (not seed override of outer positive)", async () => {
+    const { db } = await setup()
+    await db.prepare("UPDATE settings SET data = ?, updated_at = ? WHERE id = 'default'").run(
+      JSON.stringify({
+        ...structuredClone(defaultShippingSettings),
+        translation: {
+          enabled: false,
+          providerId: "deepseek",
+          model: "deepseek-v4-flash",
+          targetLanguage: "zh-CN",
+          monthlyBudget: 0,
+        },
+        sharedLlmBudget: { monthlyBudget: 5, currency: "USD" },
+      }),
+      T0.toISOString(),
+    )
+    const fake = new FakeTranslationProvider({
+      providerId: TRANSLATION_PROVIDER_ID,
+      model: TRANSLATION_MODEL,
+      translateText: () => "不应调用",
+    })
+    // Outer positive amounts must not override enabled:false+0 in DB.
+    const denied = await executeTranslationViaPaidRequest({
+      db,
+      secretStore: secrets(),
+      monthlyBudget: 5,
+      sharedLlmBudget: { monthlyBudget: 5, currency: "USD" },
+      provider: fake,
+      source: prepared("seedlike-no-override"),
+      estimatedCost: 0.01,
+      now: () => T0,
+    })
+    expect(denied.providerCalled).toBe(false)
+    expect(denied.paidGateCode).toBe("paid_capability_disabled")
+    expect(fake.calls).toHaveLength(0)
+    const attempts = await db.prepare("SELECT COUNT(*) AS n FROM paid_receipt_attempt").get() as { n: number }
+    expect(Number(attempts.n)).toBe(0)
+  })
 })

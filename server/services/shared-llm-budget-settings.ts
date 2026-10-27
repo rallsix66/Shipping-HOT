@@ -307,32 +307,31 @@ export type PaidClaimBudgetMode = "registry" | "translation"
  */
 export function createPaidClaimBudgetResolver(input: {
   mode: PaidClaimBudgetMode
-  /** Test-only explicit pool (skips DB pool field). */
+  /** Test-only explicit pool (skips DB pool field). Never used by production entries. */
   overridePool?: SharedLlmBudgetGate
   /** Test-only explicit translation sub-limit (including null). */
   overrideSubLimit?: number | null
   /** Test-only explicit enabled. */
   overrideEnabled?: boolean
-  /** Fallback pool when DB field absent (unit tests without writing settings). */
-  fallbackPool?: SharedLlmBudgetSettings | null
-  /** Fallback sub-limit when DB translation.monthlyBudget absent. */
-  fallbackSubLimit?: number | null
 }): (db: Database) => Promise<PaidClaimBudgetConfig> {
   return async (db) => {
+    // Test-only full override: isolated fakes without guessing DB seed shape.
     if (input.overridePool) {
       return {
         sharedBudget: input.overridePool,
         monthlyBudget: input.mode === "registry"
           ? undefined
-          : (input.overrideSubLimit !== undefined ? input.overrideSubLimit : (input.fallbackSubLimit !== undefined ? input.fallbackSubLimit : null)),
+          : (input.overrideSubLimit !== undefined ? input.overrideSubLimit : null),
         enabled: input.mode === "translation"
           ? (input.overrideEnabled !== undefined ? input.overrideEnabled : true)
           : true,
       }
     }
+
+    // Production / claim authority: strict DB row inside BEGIN IMMEDIATE.
+    // Missing / corrupt / disabled / zero => reject; never revive an outer snapshot.
     const settings = await readShippingSettingsData(db)
-    const poolRaw = settings?.sharedLlmBudget ?? input.fallbackPool
-    const sharedBudget = resolveSharedLlmBudgetFromSettings(poolRaw)
+    const sharedBudget = resolveSharedLlmBudgetFromSettings(settings?.sharedLlmBudget)
 
     if (input.mode === "registry") {
       return { sharedBudget, monthlyBudget: undefined, enabled: true }
@@ -344,18 +343,7 @@ export function createPaidClaimBudgetResolver(input: {
       monthlyBudget = input.overrideSubLimit
     } else if (translationRaw && Object.prototype.hasOwnProperty.call(translationRaw, "monthlyBudget")) {
       const v = translationRaw.monthlyBudget
-      const fromDb = typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : null
-      // Bootstrap seed is enabled:false + monthlyBudget:0. Prefer caller fallback for
-      // in-memory unit tests that never wrote settings; real saves / mid-flight zeros
-      // are not seed-like and stay claim-time DB authority.
-      const seedLike = translationRaw.enabled === false && fromDb === 0
-      if (seedLike && input.fallbackSubLimit !== undefined) {
-        monthlyBudget = input.fallbackSubLimit
-      } else {
-        monthlyBudget = fromDb
-      }
-    } else if (input.fallbackSubLimit !== undefined) {
-      monthlyBudget = input.fallbackSubLimit
+      monthlyBudget = typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : null
     } else {
       monthlyBudget = null
     }
@@ -364,20 +352,7 @@ export function createPaidClaimBudgetResolver(input: {
     if (input.overrideEnabled !== undefined) {
       enabled = input.overrideEnabled
     } else if (translationRaw && Object.prototype.hasOwnProperty.call(translationRaw, "enabled")) {
-      // Claim-time DB authority: explicit enable/disable after pool is configured must
-      // fail-close even mid SecretStore/queue. Seed defaults are enabled:false with no
-      // sharedLlmBudget — those must not block unit-test fallback injection.
-      const dbHasPool = Boolean(settings?.sharedLlmBudget)
-      const callerDrives = input.fallbackPool !== undefined || input.fallbackSubLimit !== undefined
-      if (translationRaw.enabled === true) {
-        enabled = true
-      } else if (dbHasPool || !callerDrives) {
-        enabled = false
-      } else {
-        enabled = true
-      }
-    } else if (input.fallbackPool !== undefined || input.fallbackSubLimit !== undefined) {
-      enabled = true
+      enabled = translationRaw.enabled === true
     } else {
       enabled = false
     }

@@ -10,7 +10,7 @@ import type { ShippingSettings } from "@shared/shipping"
 import type { SecretStore } from "#/providers/contracts"
 import { ProviderError } from "#/providers/contracts"
 import { FakeTranslationProvider } from "#/providers/translation/fake-provider"
-import { initShippingTables } from "#/database/shipping"
+import { ShippingRepository, initShippingTables } from "#/database/shipping"
 import { LlmRegistryRepository, llmSecretRefForProviderId } from "#/database/llm-registry"
 import { RuntimeRepository } from "#/database/runtime-jobs"
 import {
@@ -687,9 +687,11 @@ describe("translation test entrance shares paidRequest + sharedBudget", () => {
         totalTokens: 15,
       },
     })
+    const settingsFilled = enabledSettings(0.05)
+    await new ShippingRepository(db, "mock").saveSettings(settingsFilled)
     const result = await runTranslationTest({
       database: db,
-      settings: enabledSettings(0.05),
+      settings: settingsFilled,
       secretStore: secrets(),
       now: T0,
       provider: fake,
@@ -731,9 +733,11 @@ describe("translation test entrance shares paidRequest + sharedBudget", () => {
         cost: { amount: unit, currency: "USD", basis: "estimated" },
       }),
     ))
+    const raceSettings = enabledSettings(unit)
+    await new ShippingRepository(db, "mock").saveSettings(raceSettings)
     const diagnosticRace = startBarrier.then(() => runTranslationTest({
       database: db,
-      settings: enabledSettings(unit),
+      settings: raceSettings,
       secretStore: secrets(),
       now: T0,
       provider: fake,

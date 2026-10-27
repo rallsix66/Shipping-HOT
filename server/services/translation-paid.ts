@@ -86,9 +86,9 @@ export interface PaidTranslationOptions {
   /** Translation sub-limit (translation.monthlyBudget). Checked inside the claim; pool cannot relax it. */
   monthlyBudget: number | null | undefined
   /**
-   * Dedicated shared pool from ShippingSettings.sharedLlmBudget.
-   * Required for the pool gate; never invent from translation.monthlyBudget.
-   * Tests may pass an explicit SharedLlmBudgetSettings / gate fields.
+   * Outer non-authoritative hint only (pre-claim UI/estimate).
+   * Claim authority is the DB row via resolveClaimConfig — never a production fallback.
+   * Tests that need isolated fakes must pass sharedPoolMonthlyBudget (override) or seed settings.
    */
   sharedLlmBudget?: SharedLlmBudgetSettings | null
   /** Test-only explicit pool override (isolated fake amounts). */
@@ -135,6 +135,8 @@ export async function executeTranslationViaPaidRequest(options: PaidTranslationO
   // Translation entry: missing sub-limit => null (unconfigured reject). Never undefined
   // (undefined would skip the sub-gate, which is reserved for registry).
   const translationSubLimit: number | null = options.monthlyBudget === undefined ? null : options.monthlyBudget
+  // Production entries pass no override/fallback: claim re-reads DB only.
+  // Tests that need a fake pool use sharedPoolMonthlyBudget (explicit test injection).
   const resolveClaimConfig = options.sharedPoolMonthlyBudget !== undefined
     ? createPaidClaimBudgetResolver({
         mode: "translation",
@@ -143,13 +145,15 @@ export async function executeTranslationViaPaidRequest(options: PaidTranslationO
           options.sharedPoolCurrency ?? TRANSLATION_CURRENCY,
         ),
         overrideSubLimit: translationSubLimit,
-        overrideEnabled: options.translationEnabled,
+        ...(options.translationEnabled !== undefined
+          ? { overrideEnabled: options.translationEnabled }
+          : {}),
       })
     : createPaidClaimBudgetResolver({
         mode: "translation",
-        fallbackPool: options.sharedLlmBudget,
-        fallbackSubLimit: translationSubLimit,
-        overrideEnabled: options.translationEnabled,
+        ...(options.translationEnabled !== undefined
+          ? { overrideEnabled: options.translationEnabled }
+          : {}),
       })
   // Outer sharedBudget is a non-authoritative hint only; claim resolver is the gate.
   const sharedBudgetHint = options.sharedPoolMonthlyBudget !== undefined

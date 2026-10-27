@@ -132,7 +132,22 @@ export function LlmSettingsPanel() {
   }>()
   const [sharedBudgetMessage, setSharedBudgetMessage] = useState<string>()
 
-  const reload = useCallback(async () => {
+  const applySharedBudgetForm = (status: {
+    configured: boolean
+    monthlyBudget: number | null
+    currency: string | null
+  }) => {
+    // Only first load / explicit save success / explicit clear may sync dirty inputs.
+    if (status.configured && status.monthlyBudget != null && status.currency) {
+      setSharedBudgetInput(String(status.monthlyBudget))
+      setSharedCurrencyInput(status.currency)
+    } else {
+      setSharedBudgetInput("")
+      setSharedCurrencyInput("USD")
+    }
+  }
+
+  const reload = useCallback(async (opts?: { syncBudgetForm?: boolean }) => {
     setLoadError(undefined)
     try {
       const [p, m, b, budgetStatus] = await Promise.all([
@@ -152,13 +167,8 @@ export function LlmSettingsPanel() {
         }>("/shipping/llm/shared-budget"),
       ])
       setSharedBudgetStatus(budgetStatus)
-      if (budgetStatus.configured && budgetStatus.monthlyBudget != null && budgetStatus.currency) {
-        setSharedBudgetInput(String(budgetStatus.monthlyBudget))
-        setSharedCurrencyInput(budgetStatus.currency)
-      } else {
-        // Cleared / unconfigured pool: sync inputs so prior positive amounts do not linger.
-        setSharedBudgetInput("")
-        setSharedCurrencyInput("USD")
+      if (opts?.syncBudgetForm) {
+        applySharedBudgetForm(budgetStatus)
       }
       setProviders(p.items)
       setModels(m.items)
@@ -183,7 +193,7 @@ export function LlmSettingsPanel() {
   }, [bindModelId, providerIdForModel, testModelId, testProviderId])
 
   useEffect(() => {
-    void reload()
+    void reload({ syncBudgetForm: true })
   }, [reload])
 
   useEffect(() => {
@@ -458,16 +468,21 @@ export function LlmSettingsPanel() {
         rejectionReason?: string
         notAHardInvoiceCap?: boolean
       }>("/shipping/llm/shared-budget")
+      // Status-only: never overwrite unsaved budget drafts.
       setSharedBudgetStatus(status)
-      if (status.configured && status.monthlyBudget != null && status.currency) {
-        setSharedBudgetInput(String(status.monthlyBudget))
-        setSharedCurrencyInput(status.currency)
-      } else {
-        setSharedBudgetInput("")
-        setSharedCurrencyInput("USD")
-      }
     } catch {
-      // Status refresh is best-effort; keep last known panel state.
+      // Refresh failed: show unavailable / pending refresh — do not keep a stale ready panel.
+      setSharedBudgetStatus({
+        configured: false,
+        monthlyBudget: null,
+        currency: null,
+        estimatedUsage: 0,
+        pendingUnknownReserve: 0,
+        estimatedTotal: 0,
+        state: "unavailable",
+        rejectionReason: "status_refresh_failed",
+        notAHardInvoiceCap: true,
+      })
     }
   }
 
@@ -526,13 +541,7 @@ export function LlmSettingsPanel() {
         notAHardInvoiceCap?: boolean
       }>("/shipping/llm/shared-budget")
       setSharedBudgetStatus(status)
-      if (status.configured && status.monthlyBudget != null && status.currency) {
-        setSharedBudgetInput(String(status.monthlyBudget))
-        setSharedCurrencyInput(status.currency)
-      } else {
-        setSharedBudgetInput("")
-        setSharedCurrencyInput("USD")
-      }
+      applySharedBudgetForm(status)
       setSharedBudgetMessage(`共享 LLM 总池已保存（回读 ${status.monthlyBudget ?? "—"} ${status.currency ?? ""} · 状态 ${status.state}）`)
     } catch (error) {
       setSharedBudgetMessage(`共享 LLM 总池保存失败：${apiErrorCode(error)}`)
@@ -610,8 +619,10 @@ export function LlmSettingsPanel() {
           <dl className="mt-3 grid gap-1 text-xs" data-testid="shared-llm-budget-status">
             <div className="flex justify-between gap-3">
               <dt className="op-60">配置状态</dt>
-              <dd>
-                {sharedBudgetStatus.configured ? "已配置" : "未配置"}
+              <dd data-testid="shared-llm-budget-status-state">
+                {sharedBudgetStatus.state === "unavailable"
+                  ? "状态不可用（待刷新）"
+                  : (sharedBudgetStatus.configured ? "已配置" : "未配置")}
                 {" "}
                 ·
                 {" "}
