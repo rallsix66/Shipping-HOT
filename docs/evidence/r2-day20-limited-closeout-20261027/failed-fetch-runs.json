@@ -1,0 +1,93 @@
+[
+  {
+    "sourceId": "intel:vn-d01",
+    "startedAtUtc": "2026-10-26T05:14:35.647Z",
+    "startedAtShanghai": "2026-10-26 13:14:35 Asia/Shanghai",
+    "finishedAtUtc": "2026-10-26T05:14:35.647Z",
+    "finishedAtShanghai": "2026-10-26 13:14:35 Asia/Shanghai",
+    "status": "failed",
+    "errorCode": "fetch_timeout",
+    "errorMessage": "fetch_timeout",
+    "itemsSeen": 0,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  {
+    "sourceId": "intel:vn-d01",
+    "startedAtUtc": "2026-10-26T07:30:38.848Z",
+    "startedAtShanghai": "2026-10-26 15:30:38 Asia/Shanghai",
+    "finishedAtUtc": "2026-10-26T07:30:38.848Z",
+    "finishedAtShanghai": "2026-10-26 15:30:38 Asia/Shanghai",
+    "status": "failed",
+    "errorCode": "fetch_timeout",
+    "errorMessage": "fetch_timeout",
+    "itemsSeen": 0,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  {
+    "sourceId": "intel:vn-d01",
+    "startedAtUtc": "2026-10-26T13:49:03.580Z",
+    "startedAtShanghai": "2026-10-26 21:49:03 Asia/Shanghai",
+    "finishedAtUtc": "2026-10-26T13:49:03.580Z",
+    "finishedAtShanghai": "2026-10-26 21:49:03 Asia/Shanghai",
+    "status": "failed",
+    "errorCode": "fetch_timeout",
+    "errorMessage": "fetch_timeout",
+    "itemsSeen": 0,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  {
+    "sourceId": "intel:cn-p01",
+    "startedAtUtc": "2026-10-26T14:19:21.501Z",
+    "startedAtShanghai": "2026-10-26 22:19:21 Asia/Shanghai",
+    "finishedAtUtc": "2026-10-26T14:19:21.501Z",
+    "finishedAtShanghai": "2026-10-26 22:19:21 Asia/Shanghai",
+    "status": "failed",
+    "errorCode": "fetch_timeout",
+    "errorMessage": "fetch_timeout",
+    "itemsSeen": 0,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  {
+    "sourceId": "intel:vn-d01",
+    "startedAtUtc": "2026-10-26T15:04:51.831Z",
+    "startedAtShanghai": "2026-10-26 23:04:51 Asia/Shanghai",
+    "finishedAtUtc": "2026-10-26T15:04:51.831Z",
+    "finishedAtShanghai": "2026-10-26 23:04:51 Asia/Shanghai",
+    "status": "failed",
+    "errorCode": "fetch_failed",
+    "errorMessage": "Client network socket disconnected before secure TLS connection was established",
+    "itemsSeen": 0,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  {
+    "sourceId": "intel:vn-d01",
+    "startedAtUtc": "2026-10-26T16:20:38.342Z",
+    "startedAtShanghai": "2026-10-27 00:20:38 Asia/Shanghai",
+    "finishedAtUtc": "2026-10-26T16:20:38.342Z",
+    "finishedAtShanghai": "2026-10-27 00:20:38 Asia/Shanghai",
+    "status": "failed",
+    "errorCode": "fetch_timeout",
+    "errorMessage": "fetch_timeout",
+    "itemsSeen": 0,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  },
+  {
+    "sourceId": "intel:vn-d01",
+    "startedAtUtc": "2026-10-26T16:35:54.030Z",
+    "startedAtShanghai": "2026-10-27 00:35:54 Asia/Shanghai",
+    "finishedAtUtc": "2026-10-26T16:35:54.030Z",
+    "finishedAtShanghai": "2026-10-27 00:35:54 Asia/Shanghai",
+    "status": "failed",
+    "errorCode": "fetch_timeout",
+    "errorMessage": "fetch_timeout",
+    "itemsSeen": 0,
+    "itemsNew": 0,
+    "itemsRevised": 0
+  }
+]

@@ -1,0 +1,92 @@
+{
+  "ts": "1793071080.923599",
+  "observeId": "day20-20261026a",
+  "generatedAtShanghai": "2026-10-27 11:26:22 Asia/Shanghai",
+  "readOnly": true,
+  "exitCode": "unknown",
+  "overallR2Pass": "unchanged/not_set_by_this_reconcile",
+  "failedHttp": 7,
+  "httpRequests": 488,
+  "httpCompleted": 481,
+  "reservations": 488,
+  "ledger": {
+    "sumRecordsWritten_job_result": 572,
+    "sumItemsNew_source_run": 571,
+    "sumItemsRevised_source_run": 1,
+    "sumItemsSeen_source_run": 8948,
+    "conclusion": "recordsWritten(572) = itemsNew(571) + itemsRevised(1)",
+    "revisionEventSeq": 2318,
+    "revisionSource": "intel:id-w01"
+  },
+  "dbRo": {
+    "intel_item": 571,
+    "intel_item_version": 572,
+    "intel_item_current_change": 572,
+    "intel_fetch_run": 464,
+    "dupIdentityGroups": 0,
+    "itemsWithMultipleVersions": 1
+  },
+  "revisionItem": {
+    "itemId": "f6218730-eedd-49c1-bb88-b74bc279528f",
+    "sourceId": "intel:id-w01",
+    "canonicalUrl": "https://www.bmkg.go.id/alerts/nowcast/en/CAH20261026005_alert.xml",
+    "title": "Thunderstorm Tonight in Aceh",
+    "currentVersionId": "dbea8936-7ca3-4524-b04c-22de853482a8",
+    "versions": [
+      {
+        "id": "2bd78ec2-168e-4b66-99f3-5d37d7f310bd",
+        "contentHash": "fb24516c2d12b1f6283e165c7e3eb13e17fa9f77e26e50334a119a1f3965c238",
+        "fetchedAt": "2026-10-26T13:18:28.931Z",
+        "createdAt": "2026-10-26T13:18:28.931Z",
+        "sourcePublishedAt": "2026-10-26T12:46:00.000Z"
+      },
+      {
+        "id": "dbea8936-7ca3-4524-b04c-22de853482a8",
+        "contentHash": "04c394e3bb5e8c8546d6eb9836dc0fe6e2873e36bc4f6c34613e3111f7ee071d",
+        "fetchedAt": "2026-10-26T14:19:18.052Z",
+        "createdAt": "2026-10-26T14:19:18.052Z",
+        "sourcePublishedAt": "2026-10-26T13:50:00.000Z"
+      }
+    ],
+    "changes": [
+      {
+        "from": null,
+        "to": "2bd78ec2-168e-4b66-99f3-5d37d7f310bd",
+        "reason": "new_version",
+        "changedAt": "2026-10-26T13:18:28.931Z"
+      },
+      {
+        "from": "2bd78ec2-168e-4b66-99f3-5d37d7f310bd",
+        "to": "dbea8936-7ca3-4524-b04c-22de853482a8",
+        "reason": "new_version",
+        "changedAt": "2026-10-26T14:19:18.052Z"
+      }
+    ]
+  },
+  "finishedEvent": {
+    "sequence": 4830,
+    "at": "2026-10-27T02:58:21.391Z",
+    "type": "finished",
+    "reason": "deadline"
+  },
+  "dirtyAnalysis": {
+    "manifestHead": "e41d3145b4276a0c02aab9f00d795476aefa1608",
+    "worktreeDirty": true,
+    "worktreeDirtyMechanism": "Boolean(git status --porcelain) in scripts/r2-intel-observe-worker.ts",
+    "preservedDirtyPathListAtStart": null,
+    "note": "No porcelain path list was persisted in manifest/start event; only boolean worktreeDirty.",
+    "observeCodeFilesCount": 19,
+    "observeCodeFilesGitHashObjectEqualsHead": true,
+    "observeCodeFilesContentVsHead": "LF-normalized content identical to HEAD e41d3145; sha256 in manifest fingerprints on-disk CRLF bytes under autocrlf=true, not divergent logic",
+    "currentPorcelainSecondary": [
+      "M src/routeTree.gen.ts"
+    ],
+    "currentDirtyAffectsObserveExec": false,
+    "routeTreeInObserveCodeFiles": false
+  },
+  "continuous24hAcceptance": "NOT_GRANTED; clock/sleep/network gaps require independent review",
+  "reason": "deadline",
+  "hardAborted": true,
+  "ownershipReleased": true,
+  "readOnlyReopen": true
+}

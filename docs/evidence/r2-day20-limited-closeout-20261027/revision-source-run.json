@@ -1,0 +1,19 @@
+[
+  {
+    "sequence": 2318,
+    "at": "2026-10-26T14:19:51.231Z",
+    "type": "source_run",
+    "sourceId": "intel:id-w01",
+    "run": {
+      "id": "37dea6c2-c8e9-470c-92aa-9ba17cb0571d",
+      "sourceId": "intel:id-w01",
+      "startedAt": "2026-10-26T14:19:18.052Z",
+      "finishedAt": "2026-10-26T14:19:18.052Z",
+      "status": "ok_items",
+      "itemsSeen": 17,
+      "itemsNew": 9,
+      "itemsRevised": 1,
+      "errorCode": null
+    }
+  }
+]

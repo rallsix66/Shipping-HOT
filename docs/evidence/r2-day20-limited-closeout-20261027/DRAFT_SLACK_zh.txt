@@ -1,0 +1,17 @@
+@dots 收到 ts **1793071443.735819**：限定收尾 **一次交付**已落库并推隔离分支（文档+脱敏证据封存；无产品代码；无新 24h）。
+
+【状态拆分】
+- **本次限定范围结论**（≠ overallR2Pass）：① day20-20261026a 运维 **ENDED_CLEAN**（2026-10-26 10:58:16 → 2026-10-27 10:58:21 Asia/Shanghai；seq 4830 deadline；lock 释放；PID 退出；exit=**unknown**；HTTP **488/481/7**；**19/19 ok**；`continuous24hAcceptance` 保留 **NOT_GRANTED**…独立审）② 人工 9 限定能力沿用（不重验）
+- **原完整 R2**：仍推迟 11 项 **continuous-run acceptance**（不改人工、不标 full R2-8）：CN-W01, CN-W02, CN-T01, VN-W01, MY-W01, XX-M01, ID-W02, XX-W01, XX-W02, XX-A01, XX-A02
+- 旅程计数保持 **R2-4 32/39**、**R2-5 26/34**；**overallR2Pass=false**（未伪装）
+
+【证据封存】
+- 相对：`docs/evidence/r2-day20-limited-closeout-20261027/`（result/manifest.desensitized、finished seq4830、19-source-final-summary、failure-recovery、reconcile-summary、RECONCILE.md、limited-scope-conclusion.json、report.md）
+- 台账：572=571+1（seq 2318 id-w01）；dirty 布尔无执行影响；7 fail 全恢复
+- status.md + mapping.json 已链到封存路径
+
+【git】
+- 分支：`codex/shipping-hot-r2-4-gapfill-20261025`
+- commit：`{{COMMIT_SHA}}`（普通 push；无 force / 无 merge main / 无 deploy）
+
+无新源、无生产启用、无重开 24h、无触 day19、无重验 manual9、无 S7。

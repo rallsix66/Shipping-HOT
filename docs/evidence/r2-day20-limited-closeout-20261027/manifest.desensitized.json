@@ -1,0 +1,700 @@
+{
+  "evidenceMode": "live",
+  "codeIdentity": {
+    "head": "e41d3145b4276a0c02aab9f00d795476aefa1608",
+    "worktreeDirty": true,
+    "files": {
+      "scripts/r2-intel-observe.ts": "0b03478ec4e90f5a6ca5378d811e7feb2701e377a7c2abea8428ceb777bf6d3f",
+      "scripts/r2-intel-observe-options.ts": "f982cbb671f3ad84077c87de44d3db671456e3b91ffb7aed94efd186fe01c8fd",
+      "scripts/r2-intel-observe-environment.ts": "2daf9f6b19f811b631dc74502a7aef420f1d6ba785bf98b4f6ca36ac5adcc8e9",
+      "scripts/r2-intel-observe-worker.ts": "7b0b6482b3e54d1b2e2516751c151fa78a2fcfe95f3421550759eac3467256c9",
+      "scripts/r2-intel-observe-worker-startup.ts": "6e5b0fc0a0988ba88633cbf2d530f7bd70248ff2a847c46ab56bd1b1c60168f6",
+      "scripts/tsx-alias-loader.mjs": "0d811687dae2df6b65ca92210b1620946f4cc892799416c1917dc76149a7c39d",
+      "server/runtime/intel-observation.ts": "e4d71eff79a1e401d85918b420cea1d355cfcbab263017f9bbebc4fabfc094f8",
+      "server/runtime/intel-observation-network.ts": "6127d1c312356fcde9a1dee4da4f4fe498cece76f48fb6d3dff5dab272066e57",
+      "server/runtime/intel-allow-select.ts": "be4da431c76823520a3c1c8389c45ac0a273aadd18b3fc416884d4c4355741b8",
+      "server/runtime/intel-collect-job.ts": "56c4e652b02edaee29d4a97b8e4555c0d2772d4aa17abeccec30c9797e64ff85",
+      "server/runtime/intel-production.ts": "4e66812d5887a8ba14946bb3d10f2a6d4d5ce3f2dae0b7bf65de92428dd13d7f",
+      "server/runtime/bootstrap.ts": "bf60fe5e79ca4df548bc812425b24dabc74d55ef8d617a34471ee89508117e93",
+      "server/runtime/background-runtime.ts": "a85169f572066d64f9cc5688d51a5c294a27a23cb1fe5f6faa6bede326464f39",
+      "server/services/article-fetch-security.ts": "86a2d35cc0418f00caf85cbfc94abe5ac120e941d5fc53a214d0b0f043873049",
+      "server/intel/collect.ts": "ec09d1624c2c1fd2fb171522497ac03fdf2a3bbf481c92e5fec571a5f72a91a9",
+      "server/intel/sources.ts": "621a567d53397a4a919c9d5da62ba106e7b5a2196d2c9a4c5d85656defc70665",
+      "server/intel/sources/registry.ts": "a3092d876a7d7efb77d0144e61fc893e36dfd55caf159008621b88dbec742dd5",
+      "server/intel/sources/rss-candidates.ts": "bc6e330d0c1c8aac05dddbd98e5888fb1917f1a6265ef8a5b496ec310380e80b",
+      "server/intel/sources/html-index-candidates.ts": "e9f616d74d02d0bb0da3a70ea1961633d62683f0ff6372309f64ece6a89019fb"
+    },
+    "environmentKeys": [
+      "ComSpec",
+      "HOME",
+      "PATHEXT",
+      "Path",
+      "SHIPPING_DATA_MODE",
+      "SHIPPING_INTEL_ENABLED",
+      "SHIPPING_INTEL_SOURCE_IDS",
+      "SHIPPING_OBSERVATION_CHILD",
+      "SHIPPING_RUNTIME_ENABLED",
+      "SystemRoot",
+      "TEMP",
+      "TMP",
+      "TSX_TSCONFIG_PATH",
+      "TZ",
+      "USERPROFILE",
+      "windir"
+    ],
+    "environmentIsolation": {
+      "home": ".home",
+      "discardedWindowsKeys": [
+        "HOMEDRIVE",
+        "HOMEPATH",
+        "LOGONSERVER",
+        "SYSTEMDRIVE",
+        "USERDOMAIN",
+        "USERNAME",
+        "USERPROFILE"
+      ],
+      "tsconfigPath": "tsconfig.json",
+      "userConfigCopied": false,
+      "moduleGlobalPaths": [],
+      "homedirMatches": true,
+      "gitConfig": "repository-only; system/global config disabled"
+    }
+  },
+  "processCwd": "[OBSERVE_DIR]",
+  "directory": "[OBSERVE_DIR]",
+  "databasePath": ".data/shipping-hot-v3.sqlite3",
+  "startedAt": "2026-10-26T02:58:16.435Z",
+  "until": "2026-10-27T02:58:16.435Z",
+  "config": {
+    "sourceIds": [
+      "TH-W01",
+      "ID-W01",
+      "CN-T02",
+      "TH-C01",
+      "PH-C01",
+      "CN-P01",
+      "TH-C02",
+      "VN-P03",
+      "VN-T01",
+      "ID-T01",
+      "XX-K03",
+      "ID-T02",
+      "VN-D01",
+      "XX-K02",
+      "XX-K01",
+      "MY-C01",
+      "MY-T01",
+      "PH-M01",
+      "XX-M03"
+    ],
+    "durationMs": 86400000,
+    "maxHttpRequests": 2000,
+    "approvedRedirects": [
+      {
+        "from": "https://jdih.kemenkeu.go.id/",
+        "to": "https://jdih.kemenkeu.go.id/home"
+      }
+    ],
+    "profile": "24h-19"
+  },
+  "frequency": {
+    "jobTickMinutes": 15,
+    "adaptiveMinMinutes": 15,
+    "adaptiveMaxMinutes": 60
+  },
+  "sources": [
+    {
+      "id": "intel:th-w01",
+      "catalogId": "TH-W01",
+      "name": "TMD CAP alerts",
+      "kind": "rss",
+      "url": "https://www.tmd.go.th/en/api/xml/CAP",
+      "persistence": "full",
+      "enabled": true,
+      "allowedHosts": [
+        "www.tmd.go.th"
+      ],
+      "allowedContentTypes": [
+        "application/rss+xml",
+        "application/atom+xml",
+        "application/rdf+xml",
+        "application/xml",
+        "text/xml"
+      ],
+      "intervalMs": 3600000,
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:id-w01",
+      "catalogId": "ID-W01",
+      "name": "BMKG nowcast alerts",
+      "kind": "rss",
+      "url": "https://www.bmkg.go.id/alerts/nowcast/en/rss.xml",
+      "persistence": "excerpt_only",
+      "enabled": true,
+      "allowedHosts": [
+        "www.bmkg.go.id"
+      ],
+      "allowedContentTypes": [
+        "application/rss+xml",
+        "application/atom+xml",
+        "application/rdf+xml",
+        "application/xml",
+        "text/xml"
+      ],
+      "intervalMs": 3600000,
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:cn-t02",
+      "catalogId": "CN-T02",
+      "name": "MOF tax policy notices",
+      "kind": "web_list",
+      "url": "https://szs.mof.gov.cn/zhengcefabu/",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "szs.mof.gov.cn"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "webList": {
+        "listSelector": ".zzright .listBox > ul.liBox",
+        "itemSelector": "li",
+        "linkSelector": "a[href]",
+        "titleSelector": "a[href]",
+        "publishedAtSelector": "span",
+        "calendar": "gregorian",
+        "allowUrlPrefixes": [
+          "https://szs.mof.gov.cn/zhengcefabu"
+        ],
+        "dateRuleBasis": "CN-T02 complete raw observed 2026-10-14: one policy ul.liBox in .zzright .listBox; each li has one policy link/title and sibling span YYYY-MM-DD. Day precision only, no time or timezone."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:th-c01",
+      "catalogId": "TH-C01",
+      "name": "Thai Customs news",
+      "kind": "web_list",
+      "url": "https://www.customs.go.th/list_strc_simple_with_date.php?ini_content=customs_news&ini_menu=menu_public_relations_160421_04&order_by=date&sort_type=0&lang=th",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "www.customs.go.th"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "webList": {
+        "listSelector": "table.table-hover",
+        "itemSelector": "tbody > tr",
+        "linkSelector": "td:nth-child(3) a[href]",
+        "titleSelector": "td:nth-child(3) a[href]",
+        "publishedAtSelector": "td:nth-child(4)",
+        "calendar": "buddhist",
+        "dateFormat": "thai_month_name",
+        "allowUrlPrefixes": [
+          "https://www.customs.go.th/cont_strc_simple_with_date.php"
+        ],
+        "dateRuleBasis": "TH-C01 index observed 2026-10-13: title/detail link in row column3 (confirmed by short-title row) and date in column4, full Thai month names/year2569. Same index explicitly names Buddhist era 2569 in a news title. Day precision only; no time or offset supplied."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:ph-c01",
+      "catalogId": "PH-C01",
+      "name": "Philippine Customs media releases",
+      "kind": "web_list",
+      "url": "https://customs.gov.ph/category/media-releases/",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "customs.gov.ph"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "webList": {
+        "listSelector": ".uk-child-width-1-1.uk-grid-match",
+        "itemSelector": ".el-item.uk-card",
+        "linkSelector": "h3.el-title > a[href]",
+        "titleSelector": "h3.el-title > a[href]",
+        "publishedAtSelector": ".el-meta",
+        "calendar": "gregorian",
+        "dateFormat": "english_month_name",
+        "dateRuleBasis": "PH-C01 complete raw observed 2026-10-14: unique card grid, one h3.el-title anchor and .el-meta full English month/day/year per card. Read more is not the title node. Gregorian day precision; no time or timezone."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:cn-p01",
+      "catalogId": "CN-P01",
+      "name": "Guangdong MSA official notices",
+      "kind": "web_list",
+      "url": "https://www.gd.msa.gov.cn/",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "www.gd.msa.gov.cn"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "webList": {
+        "listSelector": ".index-tab-box:has(.index-tabs > li:first-child > a[href='/html/gdmsa/xxgk/gkml/tzgg/index.html']) .index-tab-con > ul.index-tab-item:first-child",
+        "itemSelector": "li",
+        "linkSelector": "a[href]",
+        "titleSelector": "a[href]",
+        "publishedAtSelector": "span.index-tab-date",
+        "calendar": "gregorian",
+        "allowUrlPrefixes": [
+          "https://www.gd.msa.gov.cn/html/gdmsa/xxgk/article"
+        ],
+        "dateRuleBasis": "CN-P01 complete raw observed 2026-10-14: actual notice tab identified by first header's exact tzgg link and corresponding first ul.index-tab-item; eight li have xxgk article/title and sibling index-tab-date YYYY-MM-DD. Excludes hsyw news. Day precision only."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:th-c02",
+      "catalogId": "TH-C02",
+      "name": "Thai Customs document announcements",
+      "kind": "web_list",
+      "url": "https://www.customs.go.th/list_strc_download_with_docno_date.php?ini_content=announce_160426_01&order_by=date&sort_type=0&lang=th",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "www.customs.go.th"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "webList": {
+        "listSelector": "table.table-hover",
+        "itemSelector": "tbody > tr",
+        "linkSelector": "td:nth-child(3) a[href]",
+        "titleSelector": "td:nth-child(3) a[href]",
+        "publishedAtSelector": "td:nth-child(4)",
+        "calendar": "buddhist",
+        "dateFormat": "thai_month_name",
+        "allowUrlPrefixes": [
+          "https://www.customs.go.th/cont_strc_download_with_docno_date.php"
+        ],
+        "dateRuleBasis": "TH-C02 complete raw observed 2026-10-14: column3 title/detail link, column4 header วันที่เอกสาร (document date), full Thai month names/Buddhist year2569. Column2 is document number, column5 download count. Local document day only, not publication timestamp; no time or timezone."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:vn-p03",
+      "catalogId": "VN-P03",
+      "name": "Saigon Newport public news",
+      "kind": "web_list",
+      "url": "https://saigonnewport.com.vn/tin-tuc",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "saigonnewport.com.vn"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "webList": {
+        "listSelector": ".page-container > .news",
+        "itemSelector": ".news-card",
+        "linkSelector": "h3.title > a[href]",
+        "titleSelector": "h3.title > a[href]",
+        "publishedAtSelector": "p.news-label.date",
+        "dateOrder": "dmy",
+        "calendar": "gregorian",
+        "allowUrlPrefixes": [
+          "https://saigonnewport.com.vn/tin-tuc"
+        ],
+        "dateRuleBasis": "VN-P03 complete raw observed 2026-10-14: unique news container has dated cards, each h3.title link paired with p.news-label.date D/M/Y (including 18/09/2026). Source news day only, no clock or timezone; not proof of operational port impact."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:vn-t01",
+      "catalogId": "VN-T01",
+      "name": "IDEA public news",
+      "kind": "web_list",
+      "url": "https://idea.gov.vn/",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "idea.gov.vn"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "webList": {
+        "listSelector": "#newSlider",
+        "itemSelector": "li",
+        "linkSelector": "a.news012ndLink[href]",
+        "titleSelector": ".news012ndLinkTit",
+        "publishedAtSelector": ".news012ndLinkTime",
+        "dateOrder": "dmy",
+        "calendar": "gregorian",
+        "allowUrlPrefixes": [
+          "https://idea.gov.vn/default.aspx"
+        ],
+        "dateRuleBasis": "VN-T01 complete raw observed 2026-10-14: unique newSlider has three news012ndLink items, title isolated in news012ndLinkTit and local D/M/Y day in news012ndLinkTime. Exact default.aspx business query identities retained; no time or timezone."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:id-t01",
+      "catalogId": "ID-T01",
+      "name": "JDIH current regulation metadata",
+      "kind": "web_list",
+      "url": "https://jdih.kemendag.go.id/",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "jdih.kemendag.go.id"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "webList": {
+        "listSelector": "#terkini .slider-terkini > .swiper-wrapper",
+        "itemSelector": ".swiper-slide",
+        "linkSelector": "a.d-inline-block[href]",
+        "titleSelector": "p.mt-2.mb-0",
+        "publishedAtSelector": "span.badge.bg-primary",
+        "calendar": "gregorian",
+        "dateFormat": "indonesian_enactment_date",
+        "allowUrlPrefixes": [
+          "https://jdih.kemendag.go.id/peraturan"
+        ],
+        "dateRuleBasis": "ID-T01 complete raw observed 2026-10-14: unique current-regulation terkini slider, card title in p.mt-2.mb-0 kept exactly including visible ellipsis, distinct regulation link and badge Ditetapkan D Month YYYY (Indonesian months plus observed literal October). Explicit Gregorian enactment day, not publication timestamp; no clock/timezone. Popular tab/articles excluded."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:xx-k03",
+      "catalogId": "XX-K03",
+      "name": "SITC main-site news metadata",
+      "kind": "web_list",
+      "url": "https://www.sitc.com/en/list.asp?classid=44",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "www.sitc.com"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "webList": {
+        "listSelector": "#content",
+        "itemSelector": ".media.row-fluid",
+        "linkSelector": "h4.title.media-heading > a[href]",
+        "titleSelector": "h4.title.media-heading > a[href]",
+        "publishedAtSelector": "ul.meta > li",
+        "calendar": "gregorian",
+        "dateFormat": "sitc_publication_day",
+        "metadataLinkRule": "sitc_show",
+        "dateRuleBasis": "XX-K03 saved complete index2026-10-15: each news card pairs its own h4 title/original HTTP show.asp?id identity with whole source-labelled 发布日期: YYYY.MM.DD. Explicit Gregorian day only; no timezone, clock or publication instant. Metadata identity is not HTTP body-fetch permission."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:id-t02",
+      "catalogId": "ID-T02",
+      "name": "Indonesia MOF JDIH homepage law cards",
+      "kind": "web_list",
+      "url": "https://jdih.kemenkeu.go.id/",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "jdih.kemenkeu.go.id"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "webList": {
+        "listSelector": "body",
+        "itemSelector": "a[href]:has(> .jdih-recent.recent-doc-2)",
+        "linkSelector": "a[href]",
+        "titleSelector": ".jdih-recent p",
+        "publishedAtSelector": "span.card-tag",
+        "calendar": "gregorian",
+        "dateFormat": "indonesian_month_abbr",
+        "allowUrlPrefixes": [
+          "https://jdih.kemenkeu.go.id/dok"
+        ],
+        "dateRuleBasis": "ID-T02 saved root307 and real same-host /home200 2026-10-15: Terkini/Populer desktop/mobile cards bind own /dok/ identity, descriptive p title and span.card-tag DD Indonesian-month-abbreviation YYYY. Identical repeated title/date associations dedupe; identifier span.title is separately audited. Unlabelled source card day only, not certified publication/enactment/effectiveness; no clock/timezone/UTC. No script execution or detail fetch."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:vn-d01",
+      "catalogId": "VN-D01",
+      "name": "Vietnam disaster prevention public news",
+      "kind": "web_list",
+      "url": "https://phongchongthientai.mard.gov.vn/Pages/Trang-chu.aspx",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "phongchongthientai.mard.gov.vn"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "webList": {
+        "listSelector": ".boxtopnews ul.news-headlines",
+        "itemSelector": "li > .item .col-md-10.title_item",
+        "linkSelector": "p > a[href]",
+        "titleAttribute": "title",
+        "linkTextFormat": "title-dmy-date",
+        "dateOrder": "dmy",
+        "calendar": "gregorian",
+        "allowUrlPrefixes": [
+          "https://phongchongthientai.mard.gov.vn/Pages"
+        ],
+        "dateRuleBasis": "VN-D01 complete raw observed 2026-10-15: unique news-headlines list, four own-anchor full title attributes and visible trailing (D/M/YYYY) dates. Preserve the full title rather than truncated visible text. Gregorian source-displayed list day only; no publication clock/timezone or disaster/port impact inference."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:xx-k02",
+      "catalogId": "XX-K02",
+      "name": "ONE Newsroom",
+      "kind": "json_list",
+      "url": "https://www.one-line.com/en/newsroom",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "www.one-line.com"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "jsonList": {
+        "htmlScriptSelector": "script#__NEXT_DATA__",
+        "itemsPaths": [
+          "props.pageProps.pinArticle",
+          "props.pageProps.articles"
+        ],
+        "titlePaths": [
+          "title"
+        ],
+        "urlPath": "aliasUrl",
+        "publishedAtPath": "releaseDate",
+        "calendar": "gregorian",
+        "allowUrlPrefixes": [
+          "https://www.one-line.com/newsroom"
+        ],
+        "dateRuleBasis": "XX-K02 saved ONE Newsroom HTML 2026-10-15: inert application/json __NEXT_DATA__ pinArticle plus nine articles; releaseDate is source-labelled local second precision without timezone. Preserve raw field, not a certified publication instant or port-impact time."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:xx-k01",
+      "catalogId": "XX-K01",
+      "name": "Maersk News and Advisories",
+      "kind": "web_list",
+      "url": "https://www.maersk.com/news",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "www.maersk.com"
+      ],
+      "allowedContentTypes": [
+        "text/html",
+        "application/xhtml+xml"
+      ],
+      "intervalMs": 3600000,
+      "sourceHeaderLimit": {
+        "sourceId": "intel:xx-k01",
+        "url": "https://www.maersk.com/news",
+        "maxHeaderSize": 32768
+      },
+      "webList": {
+        "listSelector": "body",
+        "itemSelector": ".p-section__news__teaser, a.news-hub__panel__item",
+        "linkSelector": "a.p-section__news__teaser__title[href], a.news-hub__panel__item[href]",
+        "titleSelector": ".p-section__news__teaser__title, .news-hub__panel__item__title",
+        "publishedAtSelector": ".p-section__news__teaser__timestamp, .news-hub__panel__item__timestamp",
+        "calendar": "gregorian",
+        "dateFormat": "english_month_abbr_day",
+        "allowUrlPrefixes": [
+          "https://www.maersk.com/news/articles"
+        ],
+        "dateRuleBasis": "XX-K01 complete 46251-byte HTML saved 2026-10-20: 12 Latest news teasers and two panels of three own-link/title/date cards. Strict d Mon YYYY Gregorian displayed day; publication role/timezone/instant unknown. Metadata only, no detail fetch or archive coverage claim."
+      },
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:my-c01",
+      "catalogId": "MY-C01",
+      "name": "JKDM announcements (Royal Malaysian Customs)",
+      "kind": "rss",
+      "url": "https://www.customs.gov.my/ms/arkib/pengumuman?format=feed&type=rss",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "www.customs.gov.my"
+      ],
+      "allowedContentTypes": [
+        "application/rss+xml",
+        "application/atom+xml",
+        "application/rdf+xml",
+        "application/xml",
+        "text/xml"
+      ],
+      "intervalMs": 3600000,
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:my-t01",
+      "catalogId": "MY-T01",
+      "name": "MOF Malaysia media releases",
+      "kind": "rss",
+      "url": "https://www.mof.gov.my/portal/ms/berita/siaran-media?format=feed&type=rss",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "www.mof.gov.my"
+      ],
+      "allowedContentTypes": [
+        "application/rss+xml",
+        "application/atom+xml",
+        "application/rdf+xml",
+        "application/xml",
+        "text/xml"
+      ],
+      "intervalMs": 3600000,
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:ph-m01",
+      "catalogId": "PH-M01",
+      "name": "PortCalls Asia",
+      "kind": "rss",
+      "url": "https://portcalls.com/feed/",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "portcalls.com"
+      ],
+      "allowedContentTypes": [
+        "application/rss+xml",
+        "application/atom+xml",
+        "application/rdf+xml",
+        "application/xml",
+        "text/xml"
+      ],
+      "intervalMs": 3600000,
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    },
+    {
+      "id": "intel:xx-m03",
+      "catalogId": "XX-M03",
+      "name": "Splash247",
+      "kind": "rss",
+      "url": "https://splash247.com/feed/",
+      "enabled": true,
+      "persistence": "disallowed",
+      "allowedHosts": [
+        "splash247.com"
+      ],
+      "allowedContentTypes": [
+        "application/rss+xml",
+        "application/atom+xml",
+        "application/rdf+xml",
+        "application/xml",
+        "text/xml"
+      ],
+      "intervalMs": 3600000,
+      "adaptive": {
+        "minMinutes": 15,
+        "maxMinutes": 60
+      }
+    }
+  ],
+  "registeredJobs": [
+    "intel-collect"
+  ],
+  "resumeSupported": false,
+  "paidJobsRegistered": false
+}

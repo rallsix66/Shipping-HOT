@@ -1,3 +1,29 @@
+## 2026-10-27 — 限定收尾（day20 自然结束 + 人工9；dots `1793071443.735819`）
+
+- Isolation: `codex/shipping-hot-r2-4-gapfill-20261025` @ worktree `.tmp/worktrees/r2-4-gapfill-20261025`
+- **模式**：文档 + 脱敏证据封存 + 隔离分支普通 push；**无**产品代码改动；**无**新 24h / 重启 day20 / 删锁 / 触 day19；**无**重验 manual9；**无** S7；**无** merge/deploy/force；**无**生产启用
+- **overallR2Pass=false**（不变；禁止伪装成 true）
+
+### 本次限定范围结论（独立字段；≠ overallR2Pass）
+
+1. **19 源 day20**（`day20-20261026a` / `24h-19`）运维自然结束 **ENDED_CLEAN**：start 2026-10-26 10:58:16 → end 2026-10-27 10:58:21 Asia/Shanghai；seq 1→4830 reason=`deadline`；lock 已释放；PID 已退出；exitCode=**unknown**；HTTP **488/481/7**；reservations=488；终态 **19/19 ok**；`continuous24hAcceptance` 字符串保留 **`NOT_GRANTED; clock/sleep/network gaps require independent review`**（供独立审查，不授予连续 24h 通过）
+2. **人工 9** 限定能力（CN-P02 / VN-P01 / MY-P03 / MY-L01 / PH-P01 / PH-W01 / PH-W02 / XX-F01 / MY-P02）沿用既有接受；本收口**不重验**
+
+### 原完整 R2 — 仍推迟 11 项连续验收
+
+仅推迟 **continuous-run acceptance**；保留自动方向与已接受单次/离线证据；**不**改人工；**不**标 full R2-8 pass：
+
+**CN-W01, CN-W02, CN-T01, VN-W01, MY-W01, XX-M01, ID-W02, XX-W01, XX-W02, XX-A01, XX-A02**
+
+### 台账 / dirty / 计数
+
+- 572 vs 571 = **itemsRevised=1**（seq 2318 `intel:id-w01`）；RO DB item=571 / version=572
+- dirty：manifest head `e41d3145`、worktreeDirty=true（仅布尔）；19 observe codeFiles hash=HEAD → **无执行影响**；exit=unknown
+- 失败 7 次均已恢复（VN-D01×6 + CN-P01×1）
+- 旅程计数保持 **R2-4 32/39**、**R2-5 26/34**；numeric **3/5**（历史有限；非生产挂载）
+- 证据封存：[report](evidence/r2-day20-limited-closeout-20261027/report.md) / [limited-scope-conclusion.json](evidence/r2-day20-limited-closeout-20261027/limited-scope-conclusion.json) / [reconcile-summary](evidence/r2-day20-limited-closeout-20261027/reconcile-summary.json) / [RECONCILE](evidence/r2-day20-limited-closeout-20261027/RECONCILE.md)；矩阵：[mapping.json](evidence/r2-current-source-matrix-2026-10-14/mapping.json)
+
+---
 ## 2026-10-26 — R2 manual-9 acceptance gapfill (dots `1792999604.372009`)
 
 - Isolation: `codex/shipping-hot-r2-4-gapfill-20261025` @ worktree `.tmp/worktrees/r2-4-gapfill-20261025`
