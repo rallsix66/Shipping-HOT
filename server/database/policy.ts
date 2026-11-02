@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks"
 import { randomUUID } from "node:crypto"
 import type { Database } from "db0"
 import { type PolicyChangeLogEntry, type PolicyDeclaredStatus, type PolicyDetail, type PolicyFields, type PolicyFilter, type PolicyInput, type PolicyRecordView, type PolicyTimezone, type PolicyVersionView, httpsUrl, policyDisplay, policyLocalDate, policyTimezones, validatePolicyInput } from "@shared/policy"
@@ -97,10 +98,11 @@ function frozen(row: RecordRow): string | null {
 /** Policy repository. Reads are query-only; every write is an explicit call that appends a version and/or change-log entry. */
 /**
  * Serialize top-level BEGIN IMMEDIATE across PolicyRepository instances that share one db0 connection.
- * Independent requests must not race into nested BEGIN; intentional nesting still uses SAVEPOINT.
+ * True nesting is detected via AsyncLocalStorage (same call chain); connection depth alone must NOT
+ * treat an independent request as a SAVEPOINT inside a peer transaction.
  */
 const policyTxnTails = new WeakMap<object, Promise<void>>()
-const policyTxDepthByDb = new WeakMap<object, number>()
+const policyTxContext = new AsyncLocalStorage<{ connectionKey: object, depth: number }>()
 
 function policyDbKey(db: Database): object {
   return db as unknown as object
@@ -109,14 +111,15 @@ function policyDbKey(db: Database): object {
 export class PolicyRepository {
   constructor(private readonly db: Database) {}
 
-  /** Nestable transactions: outer BEGIN IMMEDIATE, inner SAVEPOINT (for atomic policy+side effects). Depth is per connection. */
+  /** Nestable transactions: outer BEGIN IMMEDIATE, inner SAVEPOINT only for same async call chain. */
   private async tx<T>(fn: () => Promise<T>): Promise<T> {
     const key = policyDbKey(this.db)
-    const depth = policyTxDepthByDb.get(key) ?? 0
-    if (depth > 0) {
-      return await this.txAtDepth(fn, depth)
+    const ctx = policyTxContext.getStore()
+    if (ctx && ctx.connectionKey === key && ctx.depth > 0) {
+      // Real nesting within the same async call chain → SAVEPOINT.
+      return await this.txAtDepth(fn, ctx.depth)
     }
-    // Top-level: coordinate by shared connection so two repository instances cannot each BEGIN.
+    // Independent request: wait for the connection write queue (do not join a peer txn).
     const previous = policyTxnTails.get(key) ?? Promise.resolve()
     let release!: () => void
     const gate = new Promise<void>((resolve) => {
@@ -139,9 +142,8 @@ export class PolicyRepository {
     const sp = `policy_sp_${depth}`
     if (nested) await this.db.prepare(`SAVEPOINT ${sp}`).run()
     else await this.db.prepare("BEGIN IMMEDIATE").run()
-    policyTxDepthByDb.set(key, depth + 1)
     try {
-      const result = await fn()
+      const result = await policyTxContext.run({ connectionKey: key, depth: depth + 1 }, fn)
       if (nested) await this.db.prepare(`RELEASE ${sp}`).run()
       else await this.db.prepare("COMMIT").run()
       return result
@@ -153,10 +155,6 @@ export class PolicyRepository {
         /* ignore rollback errors */
       }
       throw error
-    } finally {
-      const next = (policyTxDepthByDb.get(key) ?? 1) - 1
-      if (next <= 0) policyTxDepthByDb.delete(key)
-      else policyTxDepthByDb.set(key, next)
     }
   }
 

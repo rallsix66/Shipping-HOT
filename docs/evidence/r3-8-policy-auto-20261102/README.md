@@ -26,3 +26,6 @@ See subdirectory rc2/ for REQUEST CHANGES round-2 on tip e3409e45 (schema v39, e
 
 ## RC3
 See subdirectory rc3/ for REQUEST CHANGES round-3 on tip e180dfcf (exact analysis hash bind; completed-only prior reuse + rejected retry; connection-scoped locks; real 038 mid-fault + IFNULL fixture honesty).
+
+## RC4
+See subdirectory rc4/ for REQUEST CHANGES round-4 on tip c81789ec (untrimmed run select + full-member hash bind; ALS nesting vs independent repo write queue + barrier regression).

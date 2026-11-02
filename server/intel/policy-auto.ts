@@ -522,17 +522,10 @@ export class PolicyAutoService {
     }
 
     const rows = await deps.analysisRepo.listForVersion(input.itemId, input.versionId)
-    // Bind analyses to the caller exact identity BEFORE run selection — never stitch a
-    // "complete" run from same item/version rows that carry a different contentHash.
-    const bound = rows.filter(r =>
-      r.itemId === input.itemId
-      && r.versionId === input.versionId
-      && r.contentHash === input.contentHash,
-    )
-    if (rows.length > 0 && bound.length === 0) {
-      return { ok: false, reason: "analysis_content_hash_mismatch" }
-    }
-    const mapped = bound.map(r => ({
+    // Do NOT pre-filter/trim by hash before selecting the target run — that would turn a
+    // mixed-hash run into extract-only, or drop the newest bad run and fall back to an older one.
+    // Pick the run from the untrimmed set first, then require *every* member to match identity.
+    const mapped = rows.map(r => ({
       id: r.id,
       itemId: r.itemId,
       versionId: r.versionId,
@@ -559,13 +552,13 @@ export class PolicyAutoService {
     if (!selection.complete || !selection.runId || !selection.rows.length) {
       return { ok: false, reason: selection.reason || "analysis_run_unselectable" }
     }
-    // Defense: every selected row must still match the exact identity (no post-filter stitch).
+    // Any member mismatch → refuse this run; do not try another run.
     if (selection.rows.some(r =>
       r.itemId !== input.itemId
       || r.versionId !== input.versionId
       || r.contentHash !== input.contentHash,
     )) {
-      return { ok: false, reason: "analysis_identity_mismatch" }
+      return { ok: false, reason: "analysis_content_hash_mismatch" }
     }
 
     const extractRow = selection.rows.find(r => r.step === "extract" && (r.status === "completed" || r.status === "reused"))

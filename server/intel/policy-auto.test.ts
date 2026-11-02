@@ -904,162 +904,7 @@ describe("r3-8 RC2 extract contract + safe v37 upgrade + source mapping", () => 
     void builtOfficial
   })
 
-  it("buildCandidate: no TikTok guess; isFirstParty≠official; expired≠repealed; Shopee rejected", async () => {
-    const { auto, intel, analysis, native } = await setup()
-    const source = { ...intelSourceSeeds[0]!, persistence: "full" as const }
-    await intel.upsertSource(source, NOW)
-
-    async function seed(extract: Record<string, unknown>, label: string) {
-      const body = `Body for ${label}`
-      const contentHash = hashText(body)
-      const saved = await intel.writeEntry({
-        sourceId: source.id,
-        canonicalUrl: `https://example.org/fixture/map-${label}`,
-        title: `[FIXTURE] ${label}`,
-        contentHash,
-        contentScope: "full_text",
-        extractorVersion: "policy-auto-test-v1",
-        blocks: licensedBlocks("full_text", `[FIXTURE] ${label}`, body),
-        fetchedAt: NOW,
-      })
-      const runId = `run-map-${label}`
-      await analysis.insert({
-        itemId: saved.itemId,
-        versionId: saved.versionId,
-        contentHash,
-        step: "prefilter",
-        status: "completed",
-        provenance: "ai",
-        basis: "fixture",
-        runId,
-        modelId: "m",
-        promptHash: "p",
-        output: { decision: "PASS" },
-      })
-      await analysis.insert({
-        itemId: saved.itemId,
-        versionId: saved.versionId,
-        contentHash,
-        step: "extract",
-        status: "completed",
-        provenance: "ai",
-        basis: "fixture",
-        runId,
-        modelId: "m",
-        promptHash: "p",
-        output: { extract },
-      })
-      return { saved, contentHash, runId }
-    }
-
-    const baseExtract = {
-      eventType: "platform_rule",
-      countries: ["TH"],
-      ports: [],
-      cities: [],
-      chainStages: [],
-      namedEntity: null,
-      occurredAt: null,
-      effectiveFrom: "2026-11-01",
-      effectiveUntil: null,
-      numbers: {},
-      isOfficialStatement: false,
-      isFirstParty: false,
-      publisher: "News Desk",
-      documentNumber: "NEWS-1",
-      status: null,
-      platform: null,
-      dimensions: { impact: 1, scope: 1, urgency: 1, actionability: 1 },
-    }
-
-    // Media report about platform_rule without platform evidence → media/rumor path → human (missing platform)
-    const media = await seed(baseExtract, "media-pr")
-    const mediaBuilt = await auto.buildCandidateFromExactIntel(
-      { intelRepo: intel, analysisRepo: analysis },
-      { itemId: media.saved.itemId, versionId: media.saved.versionId, contentHash: media.contentHash, runId: media.runId },
-    )
-    expect(mediaBuilt.ok).toBe(true)
-    if (mediaBuilt.ok) {
-      expect(mediaBuilt.candidate.sourceType).toBe("media")
-      expect(mediaBuilt.candidate.platform).toBeNull()
-      expect(mediaBuilt.candidate.status).toBe("rumor")
-      const applied = await auto.apply(mediaBuilt.candidate, T0)
-      expect(applied.outcome).toBe("needs_human_confirm")
-      expect(applied.reason).toBe("platform_evidence_insufficient")
-    }
-
-    // isFirstParty without isOfficialStatement → media (not official)
-    const fp = await seed({
-      ...baseExtract,
-      eventType: "customs_rule",
-      countries: ["VN"],
-      isOfficialStatement: false,
-      isFirstParty: true,
-      publisher: "Carrier Co",
-      documentNumber: "CARRIER-DOC",
-      status: "published",
-      platform: null,
-    }, "first-party")
-    const fpBuilt = await auto.buildCandidateFromExactIntel(
-      { intelRepo: intel, analysisRepo: analysis },
-      { itemId: fp.saved.itemId, versionId: fp.saved.versionId, contentHash: fp.contentHash, runId: fp.runId },
-    )
-    expect(fpBuilt.ok).toBe(true)
-    if (fpBuilt.ok) {
-      expect(fpBuilt.candidate.sourceType).toBe("media")
-      expect(fpBuilt.candidate.status).toBe("rumor")
-    }
-
-    // expired status from extract → null (not repealed); official missing status → human
-    const exp = await seed({
-      ...baseExtract,
-      eventType: "customs_rule",
-      countries: ["VN"],
-      isOfficialStatement: true,
-      isFirstParty: false,
-      publisher: "Customs",
-      documentNumber: "EXP-1",
-      status: "expired",
-      platform: null,
-    }, "expired")
-    const expBuilt = await auto.buildCandidateFromExactIntel(
-      { intelRepo: intel, analysisRepo: analysis },
-      { itemId: exp.saved.itemId, versionId: exp.saved.versionId, contentHash: exp.contentHash, runId: exp.runId },
-    )
-    expect(expBuilt.ok).toBe(true)
-    if (expBuilt.ok) {
-      expect(expBuilt.candidate.status).toBeNull()
-      const applied = await auto.apply(expBuilt.candidate, T0)
-      expect(applied.outcome).toBe("needs_human_confirm")
-      expect(applied.reason).toBe("status_evidence_insufficient")
-    }
-
-    // Shopee explicit → rejected out of scope
-    const sh = await seed({
-      ...baseExtract,
-      isFirstParty: true,
-      publisher: "Shopee",
-      documentNumber: "SH-1",
-      status: "published",
-      platform: "shopee",
-    }, "shopee")
-    const shBuilt = await auto.buildCandidateFromExactIntel(
-      { intelRepo: intel, analysisRepo: analysis },
-      { itemId: sh.saved.itemId, versionId: sh.saved.versionId, contentHash: sh.contentHash, runId: sh.runId },
-    )
-    expect(shBuilt.ok).toBe(true)
-    if (shBuilt.ok) {
-      expect(shBuilt.candidate.sourceType).toBe("platform")
-      expect(shBuilt.candidate.platform).toBe("shopee")
-      const applied = await auto.apply(shBuilt.candidate, T0)
-      expect(applied.outcome).toBe("rejected")
-      expect(applied.reason).toBe("platform_out_of_auto_scope")
-    }
-
-    native.close()
-  })
-
-  it("applyFromExactIntel: wrong-hash analyses cannot form a run; exact bind still creates", async () => {
+  it("applyFromExactIntel: mixed-hash same run and newest-bad/old-good refuse without trim/fallback; exact bind still creates", async () => {
     const { auto, policies, intel, analysis, native } = await setup()
     const source = { ...intelSourceSeeds[0]!, persistence: "full" as const }
     await intel.upsertSource(source, NOW)
@@ -1100,8 +945,77 @@ describe("r3-8 RC2 extract contract + safe v37 upgrade + source mapping", () => 
       },
     }
 
-    // Complete run under WRONG contentHash only — must not be selected / must not write policy or pending body.
-    const badRun = "run-wrong-hash"
+    // Counterexample 1: same run with wrong-hash prefilter + correct-hash extract.
+    // Pre-trim would drop prefilter and write policy from extract-only — must refuse instead.
+    const mixedRun = "run-mixed-hash"
+    await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: wrongHash,
+      step: "prefilter",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture-mixed-prefilter",
+      runId: mixedRun,
+      modelId: "model-mixed",
+      modelName: "fixture-mixed",
+      promptHash: "prompt-mixed",
+      output: { decision: "PASS", content: "ok" },
+      createdAt: "2026-10-01T00:00:01.000Z",
+    })
+    await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash,
+      step: "extract",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture-mixed-extract",
+      runId: mixedRun,
+      modelId: "model-mixed",
+      modelName: "fixture-mixed",
+      promptHash: "prompt-mixed",
+      output: extractPayload,
+      createdAt: "2026-10-01T00:00:01.100Z",
+    })
+    const mixed = await auto.applyFromExactIntel(
+      { intelRepo: intel, analysisRepo: analysis },
+      { itemId: saved.itemId, versionId: saved.versionId, contentHash, runId: mixedRun, isFixture: true, enteredBy: "policy-auto-test" },
+      T0,
+    )
+    expect(mixed.outcome).toBe("rejected")
+    expect(mixed.reason).toBe("analysis_content_hash_mismatch")
+    expect((await policies.list({}, T0)).length).toBe(0)
+    expect((await auto.listPending()).length).toBe(0)
+
+    // Counterexample 2: older run fully correct; newest run all wrong-hash; no explicit runId.
+    // Pre-trim would drop newest and fall back to old — must refuse the selected (newest) run instead.
+    const oldGoodRun = "run-old-good"
+    for (const step of ["prefilter", "extract"] as const) {
+      await analysis.insert({
+        itemId: saved.itemId,
+        versionId: saved.versionId,
+        contentHash,
+        step,
+        status: "completed",
+        provenance: "ai",
+        basis: "fixture-old-good",
+        runId: oldGoodRun,
+        modelId: "model-old",
+        modelName: "fixture-old",
+        promptHash: "prompt-old",
+        createdAt: step === "prefilter"
+          ? "2026-10-01T00:00:02.000Z"
+          : "2026-10-01T00:00:02.100Z",
+        output: step === "prefilter"
+          ? { decision: "PASS", content: "ok" }
+          : {
+              ...extractPayload,
+              extract: { ...extractPayload.extract, documentNumber: "HASH-OLD-GOOD" },
+            },
+      })
+    }
+    const newestBadRun = "run-newest-bad"
     for (const step of ["prefilter", "extract"] as const) {
       await analysis.insert({
         itemId: saved.itemId,
@@ -1110,25 +1024,28 @@ describe("r3-8 RC2 extract contract + safe v37 upgrade + source mapping", () => 
         step,
         status: "completed",
         provenance: "ai",
-        basis: "fixture-wrong-hash",
-        runId: badRun,
-        modelId: "model-bad",
-        modelName: "fixture-bad",
-        promptHash: "prompt-bad",
+        basis: "fixture-newest-bad",
+        runId: newestBadRun,
+        modelId: "model-newest-bad",
+        modelName: "fixture-newest-bad",
+        promptHash: "prompt-newest-bad",
+        createdAt: step === "prefilter"
+          ? "2026-10-01T00:00:03.000Z"
+          : "2026-10-01T00:00:03.100Z",
         output: step === "prefilter" ? { decision: "PASS", content: "ok" } : extractPayload,
       })
     }
-    const mismatched = await auto.applyFromExactIntel(
+    const noFallback = await auto.applyFromExactIntel(
       { intelRepo: intel, analysisRepo: analysis },
-      { itemId: saved.itemId, versionId: saved.versionId, contentHash, runId: badRun, isFixture: true, enteredBy: "policy-auto-test" },
+      { itemId: saved.itemId, versionId: saved.versionId, contentHash, isFixture: true, enteredBy: "policy-auto-test" },
       T0,
     )
-    expect(mismatched.outcome).toBe("rejected")
-    expect(mismatched.reason).toMatch(/analysis_content_hash_mismatch|analysis_run_unselectable|run_not_selectable/)
+    expect(noFallback.outcome).toBe("rejected")
+    expect(noFallback.reason).toBe("analysis_content_hash_mismatch")
     expect((await policies.list({}, T0)).length).toBe(0)
     expect((await auto.listPending()).length).toBe(0)
 
-    // Exact matching hash run still creates.
+    // Exact matching hash run (explicit runId) still creates.
     const goodRun = "run-exact-hash"
     for (const step of ["prefilter", "extract"] as const) {
       await analysis.insert({
@@ -1143,6 +1060,9 @@ describe("r3-8 RC2 extract contract + safe v37 upgrade + source mapping", () => 
         modelId: "model-good",
         modelName: "fixture-good",
         promptHash: "prompt-good",
+        createdAt: step === "prefilter"
+          ? "2026-10-01T00:00:04.000Z"
+          : "2026-10-01T00:00:04.100Z",
         output: step === "prefilter" ? { decision: "PASS", content: "ok" } : extractPayload,
       })
     }

@@ -1,3 +1,9 @@
+## R3-8 政策库自动生成（仅离线）(2026-11-02) — RC4 after dots REQUEST CHANGES on `c81789ec`
+
+- Slice §4.11 / R3-8 only — **not** full R3 pass. Real 200-label set / real effect&cost still unrun; R3-5 **BLOCKED**; S7 harness **NOT_RUN** (EXPECTED_SCHEMA_VERSION=39 synced only); unmerged / undeployed.
+- RC4-only fixes on tip `c81789ec`: (1) exact analysis bind without trim/fallback — select run from untrimmed set, then require every member item/version/hash match (refuse mixed-hash same-run and newest-bad/old-good without falling back); (2) PolicyRepository AsyncLocalStorage nesting vs independent connection write-queue — barrier cross-repo: A holds txn, B waits; A rollback; B commits and remains; nested outer+inner create still rolls back together.
+- Gates: typecheck / lint / build / full Vitest **2191** / label browser e2e **90/90** / Neat Freak. Evidence: `docs/evidence/r3-8-policy-auto-20261102/rc4/`. Zero live crawl / paid / keys / new sources. No Slack send from agent.
+
 ## R3-8 政策库自动生成（仅离线）(2026-11-02) — RC3 after dots REQUEST CHANGES on `e180dfcf`
 
 - Slice §4.11 / R3-8 only — **not** full R3 pass. Real 200-label set / real effect&cost still unrun; R3-5 **BLOCKED**; S7 harness **NOT_RUN** (EXPECTED_SCHEMA_VERSION=39 synced only); unmerged / undeployed.

@@ -1,0 +1,25 @@
+R3-8 REQUEST CHANGES round-4 gates (Asia/Shanghai wall clock ~2026-11-02 15:10)
+
+pnpm typecheck  PASS
+pnpm lint       PASS
+pnpm build      PASS
+pnpm test / vitest run  PASS  173 files / 2191 passed / 10 skipped  (vitest-full.txt)
+label browser e2e (scripts/e2e-r3-1-label-browser.mjs)  PASS  90/90  (label-browser-e2e.txt)
+  - R3-5 boundary remains BLOCKED (asserted)
+  - intel-eval-report.json retained (status INCOMPLETE / missing samples)
+S7 integrated harness  NOT_RUN (EXPECTED_SCHEMA_VERSION synced to 39 only)
+Neat Freak             done (evidence + status sync; no destructive cleanup)
+
+Schema: unchanged at v39 (no new migration this RC)
+
+RC4 items closed (only these two):
+1. Exact bind without trim/fallback — selectConsistentAnalysisRun on untrimmed rows first; then require every selected-run member matches item/version/hash; refuse on any mismatch (no extract-only stitch; no fall back to older good run). Tests: mixed-hash same run; newest-bad/old-good without runId; explicit exact bind still creates.
+2. True nesting vs independent requests — AsyncLocalStorage marks same call-chain depth for SAVEPOINT; independent repo writes always wait on connection write queue. Barrier test: A holds txn, B waits; A rollback; B commits and data remains. Nested outer+inner create still rolls back together. Auto dual-instance convergence retained.
+
+Closed and not reopened: rejected retry, prior versionId no B record, auto dual-instance write queue, real 038 mid-fault / IFNULL evidence, offline eval INCOMPLETE.
+
+Explicit non-claims:
+- real 200 human label set / real accuracy&cost NOT RUN
+- R3-5 BLOCKED; S7 NOT_RUN; unmerged; undeployed
+- zero live crawl / paid / keys / new sources / Slack send
+- parent baseline tip c81789eca8ff36834bb61493babdcb3eea64f391

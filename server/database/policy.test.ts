@@ -79,6 +79,79 @@ async function setup() {
   return { native, database, repo: new PolicyRepository(database) }
 }
 
+describe("r3-8 policy repository connection txn isolation", () => {
+  it("independent repoB.create waits while repoA holds txn; A rollback then B commits and data remains", async () => {
+    const { native, database } = await setup()
+    const repoA = new PolicyRepository(database)
+    const repoB = new PolicyRepository(database)
+
+    let releaseA!: () => void
+    const holdA = new Promise<void>((resolve) => {
+      releaseA = resolve
+    })
+    let aInside = false
+    let bFinished = false
+
+    const aPromise = repoA.runInTransaction(async () => {
+      await repoA.create(official({ documentNumber: "A-HOLD-ROLLBACK", sourceUrl: "https://example.org/fixture/a-hold" }), T0)
+      aInside = true
+      await holdA
+      throw new Error("a_barrier_rollback")
+    }).then(
+      () => null as Error | null,
+      (err: unknown) => (err instanceof Error ? err : new Error(String(err))),
+    )
+
+    const aReady = () => aInside
+    let waited = 0
+    while (!aReady() && waited < 200) {
+      await new Promise(r => setTimeout(r, 5))
+      waited += 1
+    }
+    expect(aInside).toBe(true)
+
+    const bPromise = (async () => {
+      const created = await repoB.create(official({ documentNumber: "B-INDEPENDENT", sourceUrl: "https://example.org/fixture/b-indep" }), T0)
+      bFinished = true
+      return created
+    })()
+
+    // Peer must not join A's txn as SAVEPOINT and return early.
+    await new Promise(r => setTimeout(r, 80))
+    expect(bFinished).toBe(false)
+
+    releaseA()
+    const aErr = await aPromise
+    expect(aErr?.message).toMatch(/a_barrier_rollback/)
+
+    const bCreated = await bPromise
+    expect(bFinished).toBe(true)
+    expect(bCreated.documentNumber).toBe("B-INDEPENDENT")
+
+    const list = await repoB.list({}, T0)
+    expect(list.some(r => r.documentNumber === "A-HOLD-ROLLBACK")).toBe(false)
+    expect(list.some(r => r.documentNumber === "B-INDEPENDENT")).toBe(true)
+    native.close()
+  })
+
+  it("same call-chain nesting: outer runInTransaction + inner create rolls back together", async () => {
+    const { native, repo } = await setup()
+    await expect(repo.runInTransaction(async () => {
+      await repo.create(official({ documentNumber: "NEST-OUTER-ROLL", sourceUrl: "https://example.org/fixture/nest-roll" }), T0)
+      throw new Error("nested_outer_rollback")
+    })).rejects.toThrow(/nested_outer_rollback/)
+    expect((await repo.list({}, T0)).some(r => r.documentNumber === "NEST-OUTER-ROLL")).toBe(false)
+
+    // Successful nesting still commits once.
+    const ok = await repo.runInTransaction(async () => {
+      return await repo.create(official({ documentNumber: "NEST-OUTER-OK", sourceUrl: "https://example.org/fixture/nest-ok" }), T0)
+    })
+    expect(ok.documentNumber).toBe("NEST-OUTER-OK")
+    expect((await repo.list({}, T0)).some(r => r.documentNumber === "NEST-OUTER-OK")).toBe(true)
+    native.close()
+  })
+})
+
 describe("r1.5-7 validation", () => {
   const ok = (i: PolicyInput) => validatePolicyInput(i, at("2026-10-12T02:00:00Z"))
   const err = (i: PolicyInput) => {
