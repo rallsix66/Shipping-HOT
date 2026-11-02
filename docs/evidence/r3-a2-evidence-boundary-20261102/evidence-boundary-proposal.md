@@ -1,9 +1,10 @@
-# A2 证据边界方案 — ExactVersion 送模授权（交审稿）
+# A2 证据边界方案 — ExactVersion 送模授权（交审稿 · Draft）
 
-> 方案通过前**不执行** A2 产品实现。无可信证据时保持 **BLOCKED**。
+> **Status: Draft**（非 Accepted ADR）。方案通过前**不执行** A2 产品实现。无可信证据时保持 **BLOCKED**。
 > 复用已有契约（`admitModelPayload` / `ExactVersionModelLicense` / ClipAudit / persistence），**不**新造一套权限系统。
+> 相对 tip `3e420536` 的 RC 文档收紧见同目录 `rc-docs-tighten/`。
 
-## 1. 现有证据为何不足
+## 1. 现有证据为何不足（盘点结论：接受）
 
 ### 1.1 Manual clip 审计 = 未核验声明
 
@@ -11,8 +12,8 @@
 
 | 字面量 | 含义（代码/ADR-010） | 对送模 |
 |---|---|---|
-| `user_declaration_unverified` | 历史「自有/获权」声明；actor/time 未身份认证 | **一律拒绝**（`admitModelPayload` → `rights_unknown`） |
-| `manual_capture_unverified` | 新普通剪藏：`private_material` + `rightsStatus: unknown` | **一律拒绝**（`private_material`） |
+| `user_declaration_unverified` | 历史「自有/获权」声明；actor/time 未身份认证 | **一律硬拒**（`admitModelPayload` → `rights_unknown`） |
+| `manual_capture_unverified` | 新普通剪藏：`private_material` + `rightsStatus: unknown` | **一律硬拒**（`private_material`） |
 
 仓库内**不存在** `verified` / `confirmed` / `attested` 等核验终态。声明存在 ≠ 权利已核验。
 
@@ -39,105 +40,89 @@
 - 因公开网页可读 / catalog 收录就当许可
 - 因测试能注入 license 就宣称 A2 已接通
 - bare `modelUsePermitted=true`（闸已 fail-closed）
+- 未认证 operator 勾选「有权 + 同意」——**仍是声明**，**不得**列成达到可信核验的等价选项，也不得当作绕过现有硬拒的路径
 
-## 2. 最小核验接口如何默认拒绝
+## 2. 默认拒绝面 + 现有 clip 硬拒（本片保留，不设计绕过）
 
-建议 A2 窄颁发器（方案通过后再实现）对外唯一入口形如：
+建议未来核验入口（**仅在用户批准下一片后**才编码；本包仍不实现）形如：
 
-`tryIssueExactVersionModelLicense(input) → { ok:true, license } | { ok:false, code, reason }`
+`tryVerifyExactVersionEvidence(input) → { ok:true, evidenceRef } | { ok:false, code, reason }`
+
+> 注意：本片**不**预先设计「更高证据绕过现有 clip 硬拒」。现有 `admitModelPayload` 对 private / unverified 的硬拒**原样保留**；任何未来颁发/核验层都**不得**绕过该闸。
 
 **默认拒绝面**（任一命中即拒；无证据 → BLOCKED，不发 `permitted:true`）：
 
 | 拒绝类 | 条件 | 建议 code（对齐/扩展现有 deny） |
 |---|---|---|
-| 私有素材 | clip `usage === private_material` 且无独立送模许可记录 | `private_material` |
+| 私有素材 | clip `usage === private_material` | `private_material`（**现有硬拒；本片不设绕过**） |
 | 权利未知 | `rightsStatus === unknown` 或缺少可信 rights 记录 | `rights_unknown` |
-| 未核验声明 | verification ∈ `{user_declaration_unverified, manual_capture_unverified}` 且无更高核验证据 | `rights_unknown` |
+| 未核验声明 | verification ∈ `{user_declaration_unverified, manual_capture_unverified}` | `rights_unknown`（**现有硬拒；不得以「有更高证据」预留绕过**） |
 | 仅可读可存 | 仅有 persistence/contentScope，无 model-use 许可行 | `no_model_permission` |
 | 身份不符 | 请求的 item/version/contentHash 与材料或许可绑定不一致 | `license_mismatch` |
 | 版本/hash 不符 | 正文变更后旧许可不自动继承 | `license_mismatch` |
 | 已撤销 | 许可记录 revoked / 过期 / 用途或模型服务超出范围 | `no_model_permission`（或未来 `license_revoked`） |
 | 公开可读误认 | 仅因 URL 公开/可抓取/目录收录 | `no_model_permission` |
 | 证据缺失 | `evidenceId` 空或 rights store 查无 | `rights_missing` / `no_model_permission` |
+| 用途范围不足 | 证据未覆盖请求步骤（见 §3） | `no_model_permission` / `purpose_out_of_scope` |
 
-闸顺序保持现有 `admitModelPayload`：**先** clip 硬拒，**再**校验 ExactVersion 绑定；颁发器不得绕过该闸。
+闸顺序保持现有 `admitModelPayload`：**先** clip 硬拒，**再**校验 ExactVersion 绑定；核验/颁发层不得绕过该闸。
 
-## 3. 未来可信记录所需字段
+## 3. 用途清单须覆盖真实分析链
 
-不新增平行权限产品；在现有 ExactVersion +（未来）rights evidence 行上落最小字段：
+真实 `IntelAnalysisStep` 链为：
 
-| 字段组 | 最小内容 | 说明 |
-|---|---|---|
-| 素材/来源 | `itemId`, `versionId`, `contentHash`, sourceId/catalogId, actualUrl（若有） | 精确版本绑定；hash 变则旧许可失效 |
-| 允许的模型服务与用途 | provider/model 绑定范围或 step 集合；用途枚举如 `analyze_prefilter_extract` | 「用户允许传输」≠「允许任意厂商/训练」 |
-| 正文范围 | `metadata_only` / `excerpt` / `full_text`（可窄于 persistence） | 送模范围 ≤ 存储许可 |
-| 许可依据 | basis（own_work / written_permission / license_text / …）+ 证据指针/摘要 | 公开可读 ≠ 依据 |
-| 确认身份 | 确认人（可认证身份或显式 operator 策略）、确认时间、确认渠道 | 区别于 `CLIP_UNIDENTIFIED_OPERATOR` 未认证声明 |
-| 撤销机制 | revokedAt / reason；查询时必检 | 撤销后颁发器与 admit 均拒 |
+`prefilter` → `extract` → `severity` →（必要时）`severity_tiebreak`
 
-### 3.1 两个必须区分的判断
+（产品叙述里的 pairwise / tiebreak 对应后两步。）
 
-1. **用户允许传输**：操作者同意把该版本正文发往指定模型服务（传输同意）。
+**用途授权必须逐步明确覆盖上述链。** 规则：
+
+1. 证据中的 allowed purpose / step 集合若**只含**前两步（如仅 `prefilter`+`extract`），则 **不得**据此放行 `severity` / `severity_tiebreak`；对应步骤必须拒绝（范围不足 → 拒该步，不是静默扩权）。
+2. **不自动包含**：embeddings、训练、二次分享、任意第三方转发、未点名的其他厂商/模型服务。
+3. 「用户允许传输」须绑定**指定服务**；「有权允许该素材使用」须有**可核验权利依据**——两者同时成立才谈得上 `permitted: true`（且仍受 §2 硬拒约束；本片不实现颁发）。
+
+## 4. 推荐设计（默认；不把 A–G 七组一次推给用户）
+
+本片把原先分散的技术选择题收成**推荐设计**。真实素材依据、指定服务与传输同意属于**后续实际授权**时再办；预算 / 真实密钥 / S7 继续既定边界（见 `r3-capability-and-blockers.md`），本包不催问。
+
+| 主题 | 推荐默认 |
+|---|---|
+| 默认姿态 | fail-closed；无可信证据 → BLOCKED；零 Provider |
+| clip 硬拒 | **保留**现有 private / unverified 硬拒；本片不设计绕过 |
+| 精确绑定 | license / evidence 必须绑定 `itemId` + `versionId` + `contentHash`；hash 变则旧证据失效 |
+| 范围收窄 | 送模正文范围 ≤ persistence；用途逐步覆盖 prefilter/extract/severity/severity_tiebreak；缺步拒步 |
+| 撤销检查 | 查询与 admit 路径均必检 revoked/过期/超范围 |
+| 未认证勾选 | **不是**可信核验；不得等价于 verified |
+| 存储 | 优先扩展现有 metadata / 另批 evidence 行；`evidenceId` 指向该行；本方案不预支 DDL、**不写入授权记录** |
+| 入口形态 | 无 HTTP 随意申请；不自动 grant；不接浏览 GET；不接 cron |
+| 测试夹具 | 可继续手工 `licenseFor`；文档与门禁写明「非生产颁发」 |
+| 预算/密钥/S7 | 维持既定 BLOCKED / 另批；本片不展开选项问卷 |
+
+### 4.1 两个必须区分的判断（后续实际授权时）
+
+1. **用户允许传输**：同意把该版本正文发往**指定**模型服务（传输同意）。
 2. **有权允许该素材使用**：素材本身具备可核验的使用/再处理权利（权利依据）。
 
-两者**同时**满足才能 `permitted: true`。缺一即 BLOCKED。
-**不把公开可读当许可**（ADR-010：产品授权 ≠ 任意页面版权许可）。
+两者**同时**满足才可能 `permitted: true`。缺一即 BLOCKED。
+**不把公开可读当许可**（ADR-010）。
 
-## 4. 最小实现方案（仍待批准；本包不编码）
+## 5. 用户下一步（仅一项；写入交审，本执行器不询问用户）
 
-1. **进程内窄 factory**（wiring-gaps A2）：只接受「已存在且未撤销的可信 rights evidence」+ 精确 item/version/hash + 用途/服务范围匹配 → 返回 `ExactVersionModelLicense`。
-2. **无 HTTP 随意申请**；不自动 grant；不接浏览 GET；不接 cron。
-3. **复用** `admitModelPayload` 为最终送模闸；pipeline / A1 编排继续要求注入 license。
-4. **evidence 存储**：优先扩展现有 manual action metadata / 专用 evidence 表（另批 schema），`evidenceId` 指向该行；本方案不预支 DDL。
-5. **失败语义**：查无/未核验/撤销/失配 → 不构造 license；分析入口保持 BLOCKED/denied，零 Provider。
-6. **测试**：夹具仍可手工 license，但文档与门禁继续写明「非生产颁发」。
+在**尚未拿到下列决定前不编码** A2：
 
-### 4.1 需要用户一次确认的选项（勿碎片催问）
+> **是否继续做「零付费、无授权记录写入、无 HTTP」的 fail-closed 证据核验接口与夹具测试？**
+>
+> 范围仅限：验证**调用方提供的**可信证据是否满足契约；**不**创造证据、**不**实际授权、**不**宣称生产颁发器接通。
 
-请 dots/用户对下列选项给**一批**答复即可（可勾选/改写）：
+本项获批前：只做文档；获批后另开切片实施该核验接口 + 夹具（仍非生产颁发器）。
 
-**A. 可信确认身份**
-
-- A1：仅本机已登录/已配置的单一 operator 身份可确认送模许可
-- A2：允许未认证本地 operator，但必须每次显式勾选「我确认有权 + 同意传输」，并永久审计（仍非公开网页自动许可）
-- A3：其它（请写明）
-
-**B. 许可依据最低线**
-
-- B1：仅 `own_work` 或持有书面/票据类 permission 证据可进入核验队列
-- B2：额外允许特定已审核 catalog 源的「官方公告摘录送模」白名单（按 sourceId+URL 精确产品，不扩全站）
-- B3：暂时不做任何自动源；仅人工素材走确认流
-
-**C. 模型服务与用途范围**
-
-- C1：仅绑定 Settings 中已配置的 chat 分析步骤（prefilter/extract），禁止训练/二次分享表述
-- C2：允许 embeddings 另议
-- C3：其它限制
-
-**D. 正文范围默认**
-
-- D1：默认最多 `excerpt`（≤280）送模，full_text 需额外确认
-- D2：允许与 persistence 同级（仍需双重同意）
-
-**E. 撤销**
-
-- E1：提供本地「撤销该 version 送模许可」动作；撤销后立即 BLOCKED
-- E2：仅手动清库/改 evidence（不推荐）
-
-**F. A2 实现时机**
-
-- F1：批准本方案后立刻做进程内颁发器（仍无 HTTP）
-- F2：先只合并文档边界；颁发器另开切片
-- F3：与 A3 受控触发入口同批（仍默否认）
-
-**G. 与 R3 阻塞一并确认（见 `r3-capability-and-blockers.md`）**
-
-- 真实密钥/双厂商测连、真实约 200 标注集、预算数字、S7 是否另批 —— 本包只列出，不执行
-
-## 5. 明确不做
+## 6. 明确不做
 
 - 不升级现有未核验字段为 `permitted:true`
 - 不创建「授权记录」假数据冒充生产
 - 不开 HTTP/定时自动颁发
 - 不 merge / deploy / 进 R4
 - 不把公开可读、persistence、测试夹具当成送模许可
+- 不预先设计「更高证据」绕过 clip 硬拒
+- 不把未认证 operator 勾选当作可信核验等价项
+- 不用仅覆盖前两步的授权放行全链 severity/tiebreak

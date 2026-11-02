@@ -1,13 +1,17 @@
-﻿A2 ExactVersion evidence-boundary proposal gates (2026-11-02 Asia/Shanghai)
+A2 ExactVersion evidence-boundary proposal gates (2026-11-02 Asia/Shanghai)
 
-baseline tip (kept): b507306fcae81828cc9446ac0b65b96a179fe0da
-scope: docs-only + readonly inventory
-product code diff vs baseline: NONE (server/src/shared product paths untouched)
+parent tip: 3e42053630d098d76e07dd36e415fedc665e39a8
+A1 accepted tip (kept): b507306fcae81828cc9446ac0b65b96a179fe0da
+scope: docs-only RC tighten (rc-docs-tighten) — Draft retained; inventory "evidence insufficient" accepted
+product code diff vs parent tip: NONE (server/src/shared product paths untouched)
 typecheck/lint/build/vitest: NOT RE-RUN (docs-only; inherit A1 tip gate on b507306)
-readonly inventory: PASS (issuerFunctionHits=0; verification literals unverified-only)
+readonly inventory: unchanged PASS (issuerFunctionHits=0; verification literals unverified-only)
+hard-deny wording: clip private/unverified hard deny retained; no higher-evidence bypass designed
+purpose chain: prefilter/extract/severity/severity_tiebreak documented; embeddings/train/reshare not auto
+next user decision: single item — fail-closed verify API + fixtures (zero-pay, no auth-record write, no HTTP); coding deferred
 S7: NOT_RUN
 R3-5: BLOCKED
-A2 ExactVersion issuer: NOT WIRED (proposal under review only)
+A2 ExactVersion issuer: NOT WIRED (proposal Draft under review only)
 production enable: OFF
 merge/deploy: NOT DONE
 user disturb / Slack send: NOT DONE

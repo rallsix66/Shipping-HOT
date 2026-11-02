@@ -2,14 +2,14 @@
 
 先交复核，**不直接扩范围**。需要真实模型/人工/费用的单项标 **BLOCKED**。
 
-**更新（A1）**：离线显式分析→政策编排已接线；retry 完整成功终态闸已补；生产仍未启用；A2 颁发器未接通。
+**更新（A1 + A2 Draft RC）**：离线显式分析→政策编排已接线；retry 完整成功终态闸已补；生产仍未启用；A2 证据边界 Draft 已 RC 收紧，核验/颁发器仍未接通。
 
 ## A. 仍可零付费完成的接线缺口
 
 | # | 缺口 | 现状 | 最小建议（需 dots 批准后再做） | 风险 |
 |---|---|---|---|---|
 | A1 | 分析完成 → 政策自动入库 | **已交付 + RC**：`runOfflineAnalyzeThenPolicy` + `retryPolicyApplyFromExactRun`（持久完整成功终态校验）；默认关；单测 15/15；证据 `…/r3-a1-offline-analyze-policy-20261102/` + `rc-retry-success-gate/` | 完成：离线显式编排。**生产仍未启用** | 勿接到 GET/浏览；勿开默认生产开关；**A2 仍未接通** |
-| A2 | ExactVersion 颁发器（进程内） | 仅测试手工构造；**证据边界方案交审中**（`docs/evidence/r3-a2-evidence-boundary-20261102/`）；现有 clip 审计/persistence/`evidenceId` **不足**且**不得**升级为 `permitted:true` | **方案通过前不实现**。获批后：窄 factory 仅接受可信 rights evidence + 精确 item/version/hash；默认拒绝 private/unknown/unverified/仅可读可存/hash 不符/撤销；无 HTTP 随意申请 | 防止 bare `modelUsePermitted=true`；测试夹具≠生产许可 |
+| A2 | ExactVersion 核验/颁发（进程内） | 仅测试手工构造；**证据边界 Draft + RC 收紧**（`…/r3-a2-evidence-boundary-20261102/` + `rc-docs-tighten/`）；现有证据**不足**（已接受）且**不得**升级为 `permitted:true`；**保留** clip 硬拒 | **单项下一步决定前不编码**。推荐：fail-closed 核验（零付费/无授权记录写入/无 HTTP）只验证提供的证据；精确绑定 + 用途覆盖 prefilter/extract/severity/severity_tiebreak；无绕过硬拒 | 防止 bare `modelUsePermitted=true`；测试夹具≠生产许可；未认证勾选≠核验 |
 | A3 | 受控分析触发入口（非浏览） | 无 HTTP/任务 | 增加显式 operator-only `POST`（或脚本）调用 `runOfflineAnalyze`，强制 license+预算闸；GET 仍零分析 | 需权限模型；默否认 |
 | A4 | 标注 enroll 批量/筛选辅助 | 单条 enroll API 已有 | 只读「候选入队」列表（已有 intel item、已授权摘录），仍人工点选 enroll | 不自动爬取 |
 | A5 | 评测报告诚实字段 | offline eval INCOMPLETE | 固化缺失样本/类别/语言计数面板（只读） | 不填假数据 |
@@ -28,7 +28,7 @@
 ## C. 建议的最小下一片（供复核，不执行）
 
 **A1 已执行**（离线编排已接线，生产仍未启用）。
-**下一片候选**：先审 A2 **证据边界方案**（docs-only，本包）；**通过前不实现**颁发器。获批后：A2 窄颁发器（仍零付费；不开放 HTTP）± A3 受控 operator 触发。
+**下一片候选（待用户一项决定）**：是否做零付费、无授权记录写入、无 HTTP 的 fail-closed **证据核验接口 + 夹具**（只验证提供的可信证据；不创造证据；不实际授权；不宣称生产颁发器接通）。**决定前不编码**。A3 默否认另批。
 **不含**：R4、真实预算、真实 200 集、merge/deploy、开放浏览触发、默认生产开。
 
 若 dots 希望先只合并文档收口、接线另开切片，本包亦可止于矩阵+证据。

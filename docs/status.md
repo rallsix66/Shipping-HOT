@@ -1,11 +1,10 @@
-## A2 ExactVersion 送模证据边界方案（docs-only 交审）(2026-11-02)
+## A2 ExactVersion 送模证据边界方案（docs-only Draft；RC 收紧）(2026-11-02)
 
-- Baseline tip（A1 已限定接受，保持）：`b507306fcae81828cc9446ac0b65b96a179fe0da`.
-- **仅文档 + 只读核查**；**未**实现 A2 颁发器；**未**开 HTTP/定时/自动 grant；**未**把 clip 审计 / `source.persistence` / `evidenceId` 升级为 `permitted:true`。
-- 结论：现有 manual clip 审计均为未核验声明；persistence 仅存读范围；`evidenceId` 仍是未来接口；无颁发函数（issuerHits=0）；无证据保持 **BLOCKED**。
-- 交付：最小核验默认拒绝面、未来可信记录字段、用户一次确认选项 A–G、R3 已接受能力与剩余真实阻塞一览。
-- Evidence: `docs/evidence/r3-a2-evidence-boundary-20261102/`；草案 `docs/design/r3-a2-exactversion-evidence-boundary-draft.md`。
-- Gates: docs-only（产品代码相对 b507306 无改）；S7 **NOT_RUN**；R3-5 **BLOCKED**；未 merge/deploy；未打扰用户；未发 Slack。
+- Parent tip（本 RC 相对）：`3e42053630d098d76e07dd36e415fedc665e39a8`；A1 限定接受 tip 保持：`b507306fcae81828cc9446ac0b65b96a179fe0da`.
+- **仅文档**；草案保持 **Draft**；盘点「现有证据不足」**接受**；**未**实现 A2 颁发器/核验接口；**未**开 HTTP/定时/自动 grant；**未**写入授权记录；**未**把 clip / persistence / `evidenceId` 升级为 `permitted:true`。
+- RC 三处收紧：① 保留现有 clip private/unverified **硬拒**，不预留更高证据绕过；未认证「有权+同意」勾选仍是声明。② 用途须覆盖 `prefilter`/`extract`/`severity`/`severity_tiebreak`；embeddings/训练/二次分享不自动包含；缺步拒步。③ 取消 A–G 问卷 → **推荐设计**；下一步仅一项用户决定（零付费、无授权记录写入、无 HTTP 的 fail-closed 核验接口+夹具；决定前不编码）。
+- Evidence: `docs/evidence/r3-a2-evidence-boundary-20261102/`（含 `rc-docs-tighten/`）；草案 `docs/design/r3-a2-exactversion-evidence-boundary-draft.md`。
+- Gates: docs-only；S7 **NOT_RUN**；R3-5 **BLOCKED**；未 merge/deploy；未打扰用户；未发 Slack。
 
 ## A1 离线显式分析→政策编排 (2026-11-02)
 
