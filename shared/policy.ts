@@ -1,5 +1,5 @@
 /**
- * R1.5-7 policy library (9.29 plan §4.11). Manual entry only (R3 auto extraction/matching is NOT implemented).
+ * R1.5-7 policy library (9.29 plan §4.11). Manual entry + R3-8 offline auto create/update (PolicyAutoService; no live crawl).
  * Policies are reference records: they never infer port shutdown or risk events.
  */
 import { isCivilDate } from "./promo-calendar"

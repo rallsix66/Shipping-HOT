@@ -6,6 +6,7 @@ import type {
   LabelDetailResponse,
   LabelListResponse,
 } from "@shared/intel-label"
+import { blockedLeaveHref, blockedLeaveTarget, mergeLeaveFromHref } from "@shared/label-leave-target"
 import { ShippingShell } from "./app"
 import { myFetch } from "~/utils"
 import "./manual-intel.css"
@@ -54,6 +55,7 @@ export function IntelLabelPage() {
   const [baseline, setBaseline] = useState<LabelDecisionFields>(emptyDecision())
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
+  const [pendingLeaveHref, setPendingLeaveHref] = useState("")
   const [pendingNav, setPendingNav] = useState<null | (() => void)>(null)
   const [draftReady, setDraftReady] = useState(false)
   const dirty = useMemo(() => !decisionEqual(draft, baseline), [draft, baseline])
@@ -134,6 +136,20 @@ export function IntelLabelPage() {
 
   const blockLeave = dirty || saving
   const navigate = useNavigate()
+  const intendedHrefRef = useRef("")
+  useEffect(() => {
+    if (!blockLeave) return
+    const onClick = (event: MouseEvent) => {
+      const el = event.target
+      if (!(el instanceof Element)) return
+      const a = el.closest("a")
+      if (!a) return
+      const href = a.getAttribute("href")
+      if (href && href.startsWith("/")) intendedHrefRef.current = href
+    }
+    document.addEventListener("click", onClick, true)
+    return () => document.removeEventListener("click", onClick, true)
+  }, [blockLeave])
   const blocker = useBlocker({
     shouldBlockFn: () => dirtyRef.current || savingRef.current,
     withResolver: true,
@@ -144,11 +160,21 @@ export function IntelLabelPage() {
     if (blocker.status !== "blocked") return
     // POP (history.back) already moved the address bar; cancel immediately so URL/draft
     // stay on /label while confirm is up. leave-yes re-navigates to the intended target.
-    const nextPath = blocker.next?.pathname || "/"
+    // TanStack useBlocker omits hash from next; merge clicked <a href> when present.
+    const next = mergeLeaveFromHref(blocker.next, intendedHrefRef.current)
+    const target = blockedLeaveTarget(next)
+    const href = blockedLeaveHref(next)
     blocker.reset?.()
+    setPendingLeaveHref(href)
     setPendingNav(() => () => {
       dirtyRef.current = false
-      void navigate({ to: nextPath })
+      setPendingLeaveHref("")
+      intendedHrefRef.current = ""
+      void navigate({
+        to: target.to,
+        search: target.search as never,
+        hash: target.hash,
+      })
     })
   }, [blocker, blocker.status, navigate])
 
@@ -539,7 +565,7 @@ export function IntelLabelPage() {
             </div>
             {dirty && <p data-testid="label-dirty">有未保存修改</p>}
             {pendingNav && (
-              <div data-testid="label-leave-confirm" className="manual-intel__leave">
+              <div data-testid="label-leave-confirm" className="manual-intel__leave" data-leave-href={pendingLeaveHref}>
                 <p>有未保存的标注修改，确定离开？</p>
                 <button
                   type="button"
@@ -560,6 +586,7 @@ export function IntelLabelPage() {
                   data-testid="label-leave-no"
                   onClick={() => {
                     setPendingNav(null)
+                    setPendingLeaveHref("")
                     blocker.reset?.()
                   }}
                 >

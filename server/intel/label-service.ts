@@ -116,8 +116,13 @@ export function aiPrelabelHasSelectableRun(
     if (!row) return false
     linked.push(row)
   }
+  // Defense: mixed run_id groups or any NULL run_id must not surface as selectable.
+  // selectConsistentAnalysisRun alone can pick one group from a mixed set.
+  if (linked.some(r => !(typeof r.runId === "string" && r.runId.length > 0))) return false
+  const runIds = new Set(linked.map(r => r.runId as string))
+  if (runIds.size !== 1) return false
   const selection = selectConsistentAnalysisRun(linked)
-  return Boolean(selection.complete && selection.runId)
+  return Boolean(selection.complete && selection.runId && selection.rows.length === linked.length)
 }
 
 /** Per-step config fingerprint: step:value|… — eval compares overlapping steps only. */

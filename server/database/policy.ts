@@ -142,11 +142,11 @@ export class PolicyRepository {
     }
   }
 
-  private async writeRecord(id: string, f: PolicyFields, versionId: string, now: string, insert: boolean) {
+  private async writeRecord(id: string, f: PolicyFields, versionId: string, now: string, insert: boolean, entryMethod: "manual" | "auto" = "manual") {
     const values = [f.category, f.countryCode, f.platform, f.title, f.documentNumber, f.publisher, f.publishedAt, f.effectiveAt, f.expiresAt, f.status, f.scopeText, f.sourceUrl, f.enteredBy, versionId, now, f.sourceType, f.bodyExcerpt, f.fullText, f.basisText, f.stage, f.isFixture ? 1 : 0, f.applicableTimezone]
     if (insert) {
       await this.db.prepare(`INSERT INTO policy_record (category, country_code, platform, title, document_number, publisher, published_at, effective_at, expires_at, status, scope_text, source_url, entered_by, current_version_id, updated_at, source_type, body_excerpt, full_text, basis_text, stage, is_fixture, applicable_timezone, id, entry_method, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'manual', ?)`).run(...values, id, now)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(...values, id, entryMethod, now)
     } else {
       await this.db.prepare(`UPDATE policy_record SET category = ?, country_code = ?, platform = ?, title = ?, document_number = ?, publisher = ?, published_at = ?, effective_at = ?, expires_at = ?, status = ?, scope_text = ?, source_url = ?, entered_by = ?, current_version_id = ?, updated_at = ?, source_type = ?, body_excerpt = ?, full_text = ?, basis_text = ?, stage = ?, is_fixture = ?, applicable_timezone = ? WHERE id = ?`).run(...values, id)
     }
@@ -175,10 +175,11 @@ export class PolicyRepository {
    *   date (in the new record's zone) and takes effect only from then (immediately if already reached).
    * All checks run before any write; on failure nothing changes.
    */
-  async create(input: PolicyInput & { supersedesPolicyId?: unknown, relation?: unknown, changeSummary?: unknown }, now: Date): Promise<PolicyRecordView> {
+  async create(input: PolicyInput & { supersedesPolicyId?: unknown, relation?: unknown, changeSummary?: unknown, entryMethod?: unknown }, now: Date): Promise<PolicyRecordView> {
     const result = validatePolicyInput(input, now)
     if (!result.ok) throw new PolicyError(result.error, 422)
     const f = result.fields
+    const entryMethod = input.entryMethod === "auto" ? "auto" as const : "manual" as const
     const at = now.toISOString()
     let old: RecordRow | undefined
     let relation: "revised" | "repealed" | undefined
@@ -206,7 +207,7 @@ export class PolicyRepository {
     return await this.tx(async () => {
       const summary = typeof input.changeSummary === "string" && input.changeSummary.trim() ? input.changeSummary.trim().slice(0, 1000) : "人工录入新建"
       const versionId = await this.appendVersion(id, null, f, summary, f.enteredBy, at, "create")
-      await this.writeRecord(id, f, versionId, at, true)
+      await this.writeRecord(id, f, versionId, at, true, entryMethod)
       if (old && relation) {
         const switchAt = f.effectiveAt ?? policyLocalDate(now, f.applicableTimezone!)
         const word = relation === "repealed" ? "废止" : "修订"
@@ -284,6 +285,24 @@ export class PolicyRepository {
       }
       return await this.view((await this.row(id))!, now)
     })
+  }
+
+  /**
+   * R3-8 exact identity: country + publisher + documentNumber (trimmed).
+   * Empty publisher or documentNumber never matches (caller must human-confirm).
+   */
+  async findExactIdentity(countryCode: string, publisher: string, documentNumber: string): Promise<PolicyRecordView[]> {
+    const c = countryCode.trim()
+    const p = publisher.trim()
+    const d = documentNumber.trim()
+    if (!c || !p || !d) return []
+    const rows = await this.db.prepare(
+      "SELECT * FROM policy_record WHERE country_code = ? AND publisher = ? AND document_number = ? ORDER BY created_at, id",
+    ).all(c, p, d) as RecordRow[]
+    const now = new Date()
+    const out: PolicyRecordView[] = []
+    for (const row of rows) out.push(await this.view(row, now))
+    return out
   }
 
   async list(filter: PolicyFilter, now: Date): Promise<PolicyRecordView[]> {

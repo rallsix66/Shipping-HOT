@@ -1,4 +1,5 @@
 import type { Database } from "db0"
+import { policyAutoMigration } from "./037-policy-auto"
 import { p0FoundationMigration } from "#/database/migrations/001-p0-foundation"
 import { watchlistIsolationMigration } from "#/database/migrations/002-watchlist-isolation"
 import { p1aPortDirectoryMigration } from "#/database/migrations/003-p1a-port-directory"
@@ -83,6 +84,7 @@ export const shippingMigrations: readonly ShippingMigration[] = [
   intelLabelMigration,
   intelLabelRequestIdMigration,
   intelAnalysisRunIdMigration,
+  policyAutoMigration,
 ]
 
 export const latestShippingSchemaVersion = shippingMigrations[shippingMigrations.length - 1].version

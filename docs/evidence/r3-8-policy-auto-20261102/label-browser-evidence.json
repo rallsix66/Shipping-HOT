@@ -1,0 +1,417 @@
+{
+  "tip": "r3-1-label-eval",
+  "baseUrl": "http://127.0.0.1:4491",
+  "runDir": "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/.tmp/r3-8-label-browser",
+  "evidenceDir": "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/docs/evidence/r3-8-policy-auto-20261102",
+  "checks": [
+    {
+      "ok": true,
+      "label": "schema v37 after init (got 37)"
+    },
+    {
+      "ok": true,
+      "label": "GET labels -> 200"
+    },
+    {
+      "ok": true,
+      "label": "coverage total=2 (got 2)"
+    },
+    {
+      "ok": true,
+      "label": "coverage reports missingNotes honestly"
+    },
+    {
+      "ok": true,
+      "label": "no human confirmed yet"
+    },
+    {
+      "ok": true,
+      "label": "GET label detail -> 200"
+    },
+    {
+      "ok": true,
+      "label": "AI prelabel isHuman=false"
+    },
+    {
+      "ok": true,
+      "label": "no human decision yet"
+    },
+    {
+      "ok": true,
+      "label": "browse labels: zero new receipts (before={\"usage\":0,\"receipts\":0,\"attempts\":0} after={\"usage\":0,\"receipts\":0,\"attempts\":0})"
+    },
+    {
+      "ok": true,
+      "label": "save human decision -> 200"
+    },
+    {
+      "ok": true,
+      "label": "saved decision isHuman"
+    },
+    {
+      "ok": true,
+      "label": "duplicate submit returns same id (ldc_65dd204fecc7430cb1fce4b7)"
+    },
+    {
+      "ok": true,
+      "label": "stale hash rejected -> 409"
+    },
+    {
+      "ok": true,
+      "label": "system:ai operator rejected -> 400"
+    },
+    {
+      "ok": true,
+      "label": "save labels: still zero new receipts (got 0)"
+    },
+    {
+      "ok": true,
+      "label": "label page DOM present"
+    },
+    {
+      "ok": true,
+      "label": "coverage widget visible (合计 2 · 已人工确认 1 · AI 预标 0 · 未审 1\n\n类别：port:1 / weather:1\n\n语言：en:1 / zh:1\n\n缺口：below_r3_2_target_200_have_2；missing_category_policy；missing_category_lastmile；missing_language_vi；missing_language_th；missing_language_id)"
+    },
+    {
+      "ok": true,
+      "label": "draft ready before first edit"
+    },
+    {
+      "ok": true,
+      "label": "browser filled operator/notes/official"
+    },
+    {
+      "ok": true,
+      "label": "dirty after edit (got 1)"
+    },
+    {
+      "ok": true,
+      "label": "UI save message (已纠正并保存（计为人工标注）) saving=0"
+    },
+    {
+      "ok": true,
+      "label": "GET after UI save has humanDecision"
+    },
+    {
+      "ok": true,
+      "label": "GET notes after UI save (notes=browser-correct-notes)"
+    },
+    {
+      "ok": true,
+      "label": "GET operator after UI save (op=e2e.browser)"
+    },
+    {
+      "ok": true,
+      "label": "GET official after UI save (official=true)"
+    },
+    {
+      "ok": true,
+      "label": "GET queue human_confirmed (status=human_confirmed)"
+    },
+    {
+      "ok": true,
+      "label": "next navigates to item 2"
+    },
+    {
+      "ok": true,
+      "label": "prev returns to item 1"
+    },
+    {
+      "ok": true,
+      "label": "leave confirm shown on dirty next"
+    },
+    {
+      "ok": true,
+      "label": "leave-no keeps draft"
+    },
+    {
+      "ok": true,
+      "label": "leave-yes proceeds to next"
+    },
+    {
+      "ok": true,
+      "label": "leave-yes abandoned A draft on B (notes=)"
+    },
+    {
+      "ok": true,
+      "label": "B draft ready after leave-yes"
+    },
+    {
+      "ok": true,
+      "label": "draft bound to B after leave-yes"
+    },
+    {
+      "ok": true,
+      "label": "B save notes not A's draft (notes=)"
+    },
+    {
+      "ok": true,
+      "label": "B save operator (op=e2e.after-leave)"
+    },
+    {
+      "ok": true,
+      "label": "cancel clears dirty"
+    },
+    {
+      "ok": true,
+      "label": "dirty armed for beforeunload/blocker"
+    },
+    {
+      "ok": true,
+      "label": "intercepted save failure fired"
+    },
+    {
+      "ok": true,
+      "label": "save failure message (msg=保存失败：content_hash_mismatch（可重试，草稿仍保留）)"
+    },
+    {
+      "ok": true,
+      "label": "save failure keeps dirty (dirty=1)"
+    },
+    {
+      "ok": true,
+      "label": "retry save operator (op=e2e.retry)"
+    },
+    {
+      "ok": true,
+      "label": "retry save confirms queue"
+    },
+    {
+      "ok": true,
+      "label": "saving flag during slow save (midSaving=1)"
+    },
+    {
+      "ok": true,
+      "label": "controls disabled while saving (correct=true confirm=true)"
+    },
+    {
+      "ok": true,
+      "label": "slow-save final notes from in-flight snapshot (slow-save-v1)"
+    },
+    {
+      "ok": true,
+      "label": "saving cleared after slow save (afterSaving=0)"
+    },
+    {
+      "ok": true,
+      "label": "dirty before Shell nav leave"
+    },
+    {
+      "ok": true,
+      "label": "Shell home Link present"
+    },
+    {
+      "ok": true,
+      "label": "on label route before Shell click (path=/label)"
+    },
+    {
+      "ok": true,
+      "label": "Shell Link dirty nav MUST show leave confirm"
+    },
+    {
+      "ok": true,
+      "label": "Shell Link blocked: still on label page"
+    },
+    {
+      "ok": true,
+      "label": "Shell Link blocked: URL still /label"
+    },
+    {
+      "ok": true,
+      "label": "Shell Link blocked: draft retained"
+    },
+    {
+      "ok": true,
+      "label": "leave-no stays on label"
+    },
+    {
+      "ok": true,
+      "label": "leave-no URL still /label"
+    },
+    {
+      "ok": true,
+      "label": "leave-no keeps draft"
+    },
+    {
+      "ok": true,
+      "label": "second Shell click shows confirm again"
+    },
+    {
+      "ok": true,
+      "label": "leave-yes left label page"
+    },
+    {
+      "ok": true,
+      "label": "leave-yes reached home URL (got /)"
+    },
+    {
+      "ok": true,
+      "label": "hidden policies search/hash Link present"
+    },
+    {
+      "ok": true,
+      "label": "dirty before search/hash leave"
+    },
+    {
+      "ok": true,
+      "label": "search/hash Link dirty nav shows leave confirm"
+    },
+    {
+      "ok": true,
+      "label": "leave confirm data-leave-href keeps search/hash (got /policies?country=VN#r38-keep)"
+    },
+    {
+      "ok": true,
+      "label": "leave-yes reached policies (got /policies)"
+    },
+    {
+      "ok": true,
+      "label": "leave-yes kept search (got ?country=VN)"
+    },
+    {
+      "ok": true,
+      "label": "leave-yes kept hash (got #r38-keep)"
+    },
+    {
+      "ok": true,
+      "label": "Shell label Link navigated to label"
+    },
+    {
+      "ok": true,
+      "label": "dirty before history.back"
+    },
+    {
+      "ok": true,
+      "label": "history.back dirty MUST show leave confirm (no OR skip)"
+    },
+    {
+      "ok": true,
+      "label": "history.back blocked: still on label"
+    },
+    {
+      "ok": true,
+      "label": "history.back blocked: URL still /label"
+    },
+    {
+      "ok": true,
+      "label": "history.back blocked: draft retained"
+    },
+    {
+      "ok": true,
+      "label": "Back leave-no stays on label"
+    },
+    {
+      "ok": true,
+      "label": "Back leave-no keeps draft"
+    },
+    {
+      "ok": true,
+      "label": "Back leave-no URL still /label"
+    },
+    {
+      "ok": true,
+      "label": "second history.back shows confirm"
+    },
+    {
+      "ok": true,
+      "label": "Back leave-yes left label"
+    },
+    {
+      "ok": true,
+      "label": "Back leave-yes left label URL (got /policies)"
+    },
+    {
+      "ok": true,
+      "label": "A→B→A three distinct decision ids (ldc_8dc7bf5e815a429a99cd9f1d,ldc_911d6ce6c0de497ba7bed151,ldc_6a0c23776a1540b082657316)"
+    },
+    {
+      "ok": true,
+      "label": "request-id conflict → 409 (got 409)"
+    },
+    {
+      "ok": true,
+      "label": "list redacts excerpts"
+    },
+    {
+      "ok": true,
+      "label": "no external network from label page (got 0)"
+    },
+    {
+      "ok": true,
+      "label": "intel-eval exit 0"
+    },
+    {
+      "ok": true,
+      "label": "intel-eval-report.json written"
+    },
+    {
+      "ok": true,
+      "label": "eval humanLabeled>=1 (got 2)"
+    },
+    {
+      "ok": true,
+      "label": "R3-5 boundary BLOCKED"
+    }
+  ],
+  "screenshots": [
+    "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/docs/evidence/r3-8-policy-auto-20261102/label-page.png",
+    "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/docs/evidence/r3-8-policy-auto-20261102/label-page-after-ops.png"
+  ],
+  "api": {
+    "list0": {
+      "total": 2,
+      "missing": [
+        "no_human_confirmed_labels",
+        "below_r3_2_target_200_have_2",
+        "missing_category_policy",
+        "missing_category_lastmile",
+        "missing_language_vi",
+        "missing_language_th",
+        "missing_language_id"
+      ]
+    },
+    "save": {
+      "id": "ldc_65dd204fecc7430cb1fce4b7",
+      "labelItemId": "lbl_e2e_001",
+      "itemId": "item_e2e_1",
+      "versionId": "ver_e2e_1",
+      "contentHash": "hash_e2e_1",
+      "kind": "human_correct",
+      "operator": "e2e.tester",
+      "isHuman": true,
+      "decision": {
+        "prefilterKeep": true,
+        "eventType": "port_closure",
+        "countries": [
+          "MY"
+        ],
+        "ports": [
+          "MYPKG"
+        ],
+        "effectiveFrom": "2026-11-02",
+        "isOfficialStatement": true,
+        "notes": "corrected official flag"
+      },
+      "analysisIds": [],
+      "promptHash": null,
+      "modelId": null,
+      "modelName": null,
+      "clientRequestId": "e2e-req-1",
+      "createdAt": "2026-11-02T05:31:56.624Z"
+    },
+    "uiSaveReadback": {
+      "queueStatus": "human_confirmed",
+      "notes": "browser-correct-notes",
+      "operator": "e2e.browser",
+      "isOfficialStatement": true
+    },
+    "evalStdout": "{\n  \"ok\": true,\n  \"outPath\": \"D:\\\\try one\\\\Shipping HOT\\\\.tmp\\\\worktrees\\\\r3-1-llm-registry-20261027\\\\docs\\\\evidence\\\\r3-8-policy-auto-20261102\\\\intel-eval-report.json\",\n  \"status\": \"INCOMPLETE\",\n  \"r3_5\": \"BLOCKED\",\n  \"humanLabeled\": 2\n}\n",
+    "evalStderr": "(node:43376) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "evalStatus": 0,
+    "evalReport": {
+      "status": "INCOMPLETE",
+      "r3_5": "BLOCKED",
+      "humanLabeled": 2
+    }
+  }
+}

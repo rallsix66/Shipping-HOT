@@ -1,3 +1,10 @@
+## R3-8 政策库自动生成（仅离线）(2026-11-02)
+
+- Tip lane after dots accept `483a864` (watermark 1793595541.081439). Slice §4.11 / R3-8 only — **not** full R3 pass. Real 200-label set / real effect&cost still unrun; R3-5 **BLOCKED**; S7 harness **NOT_RUN**; unmerged / undeployed.
+- Additive schema **v37**: `policy_auto_pending` + `policy_auto_audit`. `PolicyAutoService.apply` reuses `PolicyRepository.create/revise` + `validatePolicyInput`; exact match country+publisher+documentNumber; missing doc#/publisher/status evidence → human pending (idempotent); media↔rumor; platform≠government; Shopee/Lazada platform_rule rejected; TikTok Shop offline dated-paragraph fixtures for create/update/idempotent; audit always records analysisIds/model/prompt; policy GET paths stay zero-model (static guard).
+- Same-slice defenses: `aiPrelabelHasSelectableRun` rejects mixed run_id / NULL-mixed (selector alone may still pick one group); leave-confirm preserves target search+hash via `blockedLeaveTarget` + `data-leave-href` (browser e2e).
+- Gates: typecheck / lint / build / full Vitest (see evidence) / label browser e2e (search+hash leave) / Neat Freak. Evidence: `docs/evidence/r3-8-policy-auto-20261102/`. Zero live crawl / paid / keys / new sources. No Slack send from agent.
+
 ## R3-1 §4.9 RC4 REQUEST CHANGES closeout (2026-11-02)
 
 - Sole remaining P2 after RC3: post v35→v36 upgrade, legacy `ai_prelabel` rows still linked to NULL `run_id` analysis were returned by `LabelService.detail` and accepted by `scripts/intel-eval.ts` (contentHash-only), so old predictions and full-history receipt costs entered reports.

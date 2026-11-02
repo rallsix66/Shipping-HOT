@@ -57,6 +57,23 @@ describe("aiPrelabelHasSelectableRun", () => {
     expect(aiPrelabelHasSelectableRun({ analysisIds: ["a1", "a2"] }, rows)).toBe(true)
     expect(aiPrelabelHasSelectableRun({ analysisIds: ["a1", "nope"] }, rows)).toBe(false)
   })
+
+  it("rejects mixed run_id groups and NULL-mixed sets (selector would otherwise pick one)", () => {
+    const mixed = [
+      { id: "a1", createdAt: "2026-11-01T00:00:00.000Z", runId: "run-a", step: "extract" as const },
+      { id: "a2", createdAt: "2026-11-01T00:00:01.000Z", runId: "run-b", step: "extract" as const },
+    ]
+    expect(aiPrelabelHasSelectableRun({ analysisIds: ["a1", "a2"] }, mixed)).toBe(false)
+    // selector alone would still pick a run from mixed:
+    expect(selectConsistentAnalysisRun(mixed).runId).toBeTruthy()
+
+    const nullMixed = [
+      { id: "a1", createdAt: "2026-11-01T00:00:00.000Z", runId: "run-a", step: "extract" as const },
+      { id: "a2", createdAt: "2026-11-01T00:00:01.000Z", runId: null, step: "extract" as const },
+    ]
+    expect(aiPrelabelHasSelectableRun({ analysisIds: ["a1", "a2"] }, nullMixed)).toBe(false)
+    expect(selectConsistentAnalysisRun(nullMixed).complete && selectConsistentAnalysisRun(nullMixed).runId).toBeTruthy()
+  })
 })
 
 describe("label-service projection + live rights", () => {

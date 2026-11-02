@@ -166,6 +166,34 @@ async function seedLabels() {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
   for (const r of rows) insertItem.run(...r, now, now)
+  // R3-8: AI prelabel surfaces only when linked analysis shares one selectable run_id.
+  db.prepare(`
+    INSERT OR REPLACE INTO intel_analysis (
+      id, item_id, version_id, content_hash, step, attempt_index, run_id, status,
+      provider_id, model_id, model_name, prompt_hash, reuse_key, output_json,
+      provenance, basis, receipt_id, error_code, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    "an_e2e_extract_1",
+    "item_e2e_1",
+    "ver_e2e_1",
+    "hash_e2e_1",
+    "extract",
+    1,
+    "run_e2e_1",
+    "completed",
+    "fixture",
+    "model-fake",
+    "fake-model",
+    "prompt-fake",
+    null,
+    JSON.stringify({ eventType: "port_closure", countries: ["MY"], ports: ["MYPKG"] }),
+    "ai",
+    "e2e fixture analysis",
+    null,
+    null,
+    now,
+  )
   db.prepare(`
     INSERT OR REPLACE INTO intel_label_decision (
       id, label_item_id, item_id, version_id, content_hash, kind, operator, is_human,
@@ -188,9 +216,9 @@ async function seedLabels() {
       effectiveFrom: "2026-11-02",
       isOfficialStatement: false,
     }),
-    "[]",
+    JSON.stringify(["an_e2e_extract_1"]),
     "prompt-fake",
-    null,
+    "model-fake",
     "fake-model",
     now,
   )
@@ -226,7 +254,7 @@ async function main() {
     }
   }, 60000)
   if (!ready) throw new Error(`server not ready; log: ${serverLogPath}`)
-  check(ready?.database?.schemaVersion === 36, `schema v36 after init (got ${ready?.database?.schemaVersion})`)
+  check(ready?.database?.schemaVersion === 37, `schema v37 after init (got ${ready?.database?.schemaVersion})`)
 
   await seedLabels()
 
@@ -730,6 +758,54 @@ async function main() {
   check(await evalBool("!document.querySelector('[data-testid=intel-label-page]')"), "leave-yes left label page")
   const homePath = await evalStr("location.pathname")
   check(homePath === "/" || homePath === "", `leave-yes reached home URL (got ${homePath})`)
+
+  // R3-8: leave-yes must preserve target search + hash (hidden Shell Link)
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=shell-nav-label]')?.click(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))")) ? true : undefined
+  }, 15000)
+  check(await evalBool("Boolean(document.querySelector('[data-testid=shell-nav-policies-query-hash]'))"), "hidden policies search/hash Link present")
+  await evalBool(`(() => {
+    const notes = document.querySelector('[data-testid=label-notes]');
+    const op = document.querySelector('[data-testid=label-operator]');
+    const nset = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+    const oset = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    oset?.call(op, 'e2e.hash');
+    op.dispatchEvent(new Event('input', { bubbles: true }));
+    nset?.call(notes, 'search-hash-draft');
+    notes.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  })()`)
+  check(await evalBool(`document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty') === '1'`), "dirty before search/hash leave")
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=shell-nav-policies-query-hash]')?.click(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")) ? true : undefined
+  }, 8000)
+  check(await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))"), "search/hash Link dirty nav shows leave confirm")
+  const leaveHref = await evalStr("document.querySelector('[data-testid=label-leave-confirm]')?.getAttribute('data-leave-href') || ''")
+  check(leaveHref.includes("policies") && leaveHref.includes("country") && leaveHref.includes("r38-keep"), `leave confirm data-leave-href keeps search/hash (got ${leaveHref})`)
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-leave-yes]')?.click(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const path = await evalStr("location.pathname")
+    const search = await evalStr("location.search")
+    const hash = await evalStr("location.hash")
+    return String(path).includes("policies") && String(search).includes("country") && String(hash).includes("r38-keep") ? true : undefined
+  }, 10000)
+  const afterPath = await evalStr("location.pathname")
+  const afterSearch = await evalStr("location.search")
+  const afterHash = await evalStr("location.hash")
+  check(String(afterPath).includes("policies"), `leave-yes reached policies (got ${afterPath})`)
+  check(String(afterSearch).includes("country"), `leave-yes kept search (got ${afterSearch})`)
+  check(String(afterHash).includes("r38-keep"), `leave-yes kept hash (got ${afterHash})`)
 
   // Real route history: home → label (Shell Link), dirty, history.back stay + leave
   await cdp.send("Runtime.evaluate", {
