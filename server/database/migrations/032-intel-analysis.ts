@@ -2,8 +2,11 @@ import type { Database } from "db0"
 
 /**
  * R3-1 offline intel analysis persistence (ADR-007 / plan section 4.1-4.2).
- * Append-only analysis rows: material version, step, model, prompt hash, reuse_key, provenance/basis.
+ * Append-only analysis rows: material version, step, model, prompt hash, provenance/basis.
  * Additive and idempotent. No budgets table.
+ *
+ * NOTE: reuse_key is added by migration 033. Do not amend this already-shipped v32 shape
+ * in place -- runMigrations skips recorded versions.
  */
 export const intelAnalysisMigration = {
   version: 32,
@@ -26,7 +29,6 @@ export const intelAnalysisMigration = {
         model_id TEXT NULL,
         model_name TEXT NULL,
         prompt_hash TEXT NULL,
-        reuse_key TEXT NULL,
         output_json TEXT NULL,
         provenance TEXT NOT NULL CHECK (provenance IN ('ai', 'system')),
         basis TEXT NOT NULL,
@@ -35,12 +37,7 @@ export const intelAnalysisMigration = {
         created_at TEXT NOT NULL
       )
     `)
-    // Idempotent column add for DBs that created an earlier 032 shape without reuse_key.
-    const cols = await db.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name: string }>
-    if (Array.isArray(cols) && cols.length > 0 && !cols.some(c => c.name === "reuse_key")) {
-      await db.exec("ALTER TABLE intel_analysis ADD COLUMN reuse_key TEXT NULL")
-    }
     await db.exec("CREATE INDEX IF NOT EXISTS idx_intel_analysis_item_version ON intel_analysis(item_id, version_id, step, created_at)")
-    await db.exec("CREATE INDEX IF NOT EXISTS idx_intel_analysis_dedupe ON intel_analysis(item_id, version_id, step, reuse_key, content_hash, status)")
+    await db.exec("CREATE INDEX IF NOT EXISTS idx_intel_analysis_dedupe ON intel_analysis(item_id, version_id, step, model_id, prompt_hash, content_hash, status)")
   },
 } as const

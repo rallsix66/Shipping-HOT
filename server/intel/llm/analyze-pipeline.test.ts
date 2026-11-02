@@ -109,7 +109,7 @@ const extractJson = JSON.stringify({
   countries: ["MY"],
   ports: ["MYPKG"],
   cities: ["Port Klang"],
-  chainStages: ["port"],
+  chainStages: ["①"],
   namedEntity: "Westports",
   occurredAt: null,
   effectiveFrom: "2026-11-01",
@@ -209,6 +209,12 @@ describe("industry selection helpers", () => {
     expect(EXTRACT_PROMPT.text).toContain("isOfficialStatement")
     expect(EXTRACT_PROMPT.text).toContain("isFirstParty")
     expect(EXTRACT_PROMPT.text).toContain("do not conflate")
+    expect(EXTRACT_PROMPT.text).toContain("government or regulator")
+    expect(EXTRACT_PROMPT.text).toContain("Carrier/port/platform self-announcements are NOT official")
+    expect(EXTRACT_PROMPT.text).toContain("UN/LOCODE")
+    expect(EXTRACT_PROMPT.text).toContain("①|②|③|④|⑤|⑥")
+    expect(EXTRACT_PROMPT.text).toMatch(/海关总署公告/)
+    expect(EXTRACT_PROMPT.text).toMatch(/船公司自身停航通告/)
   })
 
   it("strict-parses extract/severity; rejects silent coerces", () => {
@@ -251,6 +257,60 @@ describe("industry selection helpers", () => {
       dimensions: { impact: 7, scope: 5, urgency: 6, actionability: 4 },
       rumourOnly: "yes",
     }))).toBeNull()
+
+    // numbers oversize must fail (no silent truncate)
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      numbers: { delayDays: "x".repeat(9000) },
+    }))).toBeNull()
+    // full wording under limit is preserved
+    const longOk = "约 ".concat("3".repeat(100), " 天延误（原文）")
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      numbers: { delayDays: longOk },
+    }))?.numbers.delayDays).toBe(longOk)
+
+    // impossible calendar date
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      occurredAt: "2026-99-99",
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      occurredAt: "2026-02-30",
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      occurredAt: "2026-11-02",
+    }))?.occurredAt).toBe("2026-11-02")
+
+    // ports must be UN/LOCODE; free-text / bad length fail
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      ports: ["Port Klang"],
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      ports: ["MYPK"],
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      ports: ["mypkg"],
+    }))?.ports).toEqual(["MYPKG"])
+
+    // chainStages only ①–⑥
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      chainStages: ["port"],
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      chainStages: ["⑦"],
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      chainStages: ["①", "④"],
+    }))?.chainStages).toEqual(["①", "④"])
   })
 })
 
@@ -341,7 +401,7 @@ describe("runOfflineAnalyze offline chain", () => {
     cleanups.push(() => native.close())
     const db = wrap(native)
     await initShippingTables(db, "mock")
-    expect((await import("#/database/runtime")).latestSchemaVersion).toBe(32)
+    expect((await import("#/database/runtime")).latestSchemaVersion).toBe(33)
     const store = secrets()
     await setupRegistry(db, store)
     const intel = new IntelRepository(db)

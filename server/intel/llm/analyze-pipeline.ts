@@ -147,10 +147,40 @@ function asStrictInt(value: unknown, min: number, max: number): number | null {
 }
 
 /** Required string array -- wrong type fails (no silent []). */
-function asStrictStringArray(value: unknown): string[] | null {
+function asStrictStringArray(value: unknown, maxLen = 120): string[] | null {
   if (!Array.isArray(value)) return null
   if (!value.every(v => typeof v === "string")) return null
-  return value.map(v => v.slice(0, 120))
+  // Over-length entries fail (no silent truncate).
+  if (value.some(v => (v as string).length > maxLen)) return null
+  return value as string[]
+}
+
+/** UN/LOCODE: exactly 5 chars, AA + 3 alnum. Empty array allowed; invalid codes fail (no invent/drop). */
+const UNLOCODE_RE = /^[A-Z]{2}[A-Z0-9]{3}$/
+function asStrictUnlocodeArray(value: unknown): string[] | null {
+  if (!Array.isArray(value)) return null
+  if (!value.every(v => typeof v === "string")) return null
+  const out: string[] = []
+  for (const raw of value as string[]) {
+    const code = raw.trim().toUpperCase()
+    if (!UNLOCODE_RE.test(code)) return null
+    out.push(code)
+  }
+  return out
+}
+
+/** Plan chain stages ①–⑥ only. Empty array allowed; unknown marks fail (no guess mapping). */
+const CHAIN_STAGES = new Set(["①", "②", "③", "④", "⑤", "⑥"])
+function asStrictChainStages(value: unknown): string[] | null {
+  if (!Array.isArray(value)) return null
+  if (!value.every(v => typeof v === "string")) return null
+  const out: string[] = []
+  for (const raw of value as string[]) {
+    const s = raw.trim()
+    if (!CHAIN_STAGES.has(s)) return null
+    out.push(s)
+  }
+  return out
 }
 
 function asStrictNullableString(value: unknown): string | null | undefined {
@@ -160,15 +190,28 @@ function asStrictNullableString(value: unknown): string | null | undefined {
   return value.slice(0, 500)
 }
 
-/** ISO date/datetime string or null. */
+/** Real calendar ISO date/datetime string or null. Rejects impossible dates (e.g. 2026-99-99). */
 function asStrictDateOrNull(value: unknown): string | null | undefined {
   if (value === null) return null
   if (typeof value !== "string") return undefined
   const s = value.trim()
-  if (!s) return undefined
-  // Accept YYYY-MM-DD or full ISO-8601 datetime
-  if (!/^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/.test(s)) return undefined
-  return s.slice(0, 64)
+  if (!s || s.length > 64) return undefined
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/)
+  if (!m) return undefined
+  const y = Number(m[1])
+  const mo = Number(m[2])
+  const d = Number(m[3])
+  if (!Number.isInteger(y) || !Number.isInteger(mo) || !Number.isInteger(d)) return undefined
+  if (mo < 1 || mo > 12 || d < 1 || d > 31) return undefined
+  const dt = new Date(Date.UTC(y, mo - 1, d))
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return undefined
+  if (m[4] !== undefined) {
+    const hh = Number(m[4])
+    const mm = Number(m[5])
+    const ss = m[6] !== undefined ? Number(m[6]) : 0
+    if (hh > 23 || mm > 59 || ss > 59) return undefined
+  }
+  return s
 }
 
 function asStrictNullableBool(value: unknown): boolean | null | undefined {
@@ -177,15 +220,22 @@ function asStrictNullableBool(value: unknown): boolean | null | undefined {
   return undefined
 }
 
-/** numbers must be a plain object (not array); values string|number|null only. */
+/** numbers must be a plain object (not array); values string|number|null only. No silent truncate. */
+const NUMBERS_STRING_MAX = 8192
 function asStrictNumbersMap(value: unknown): Record<string, string | number | null> | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null
   const out: Record<string, string | number | null> = {}
   for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-    if (v === null) out[k] = null
-    else if (typeof v === "number" && Number.isFinite(v)) out[k] = v
-    else if (typeof v === "string") out[k] = v.slice(0, 200)
-    else return null
+    if (v === null) {
+      out[k] = null
+    } else if (typeof v === "number" && Number.isFinite(v)) {
+      out[k] = v
+    } else if (typeof v === "string") {
+      if (v.length > NUMBERS_STRING_MAX) return null
+      out[k] = v
+    } else {
+      return null
+    }
   }
   return out
 }
@@ -245,9 +295,9 @@ export function parseExtractOutput(raw: unknown): ExtractedIntel | null {
   if (impact === null || scope === null || urgency === null || actionability === null) return null
 
   const countries = asStrictStringArray(obj.countries)
-  const ports = asStrictStringArray(obj.ports)
+  const ports = asStrictUnlocodeArray(obj.ports)
   const cities = asStrictStringArray(obj.cities)
-  const chainStages = asStrictStringArray(obj.chainStages)
+  const chainStages = asStrictChainStages(obj.chainStages)
   if (!countries || !ports || !cities || !chainStages) return null
 
   const namedEntity = asStrictNullableString(obj.namedEntity)
