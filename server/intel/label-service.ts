@@ -99,6 +99,27 @@ export function selectConsistentAnalysisRun<T extends AnalysisIdentityRow>(rows:
   return { rows: selected, runId: bestId, complete: true }
 }
 
+/**
+ * Cached ai_prelabel is only a *current* prediction when every linked analysis row
+ * belongs to one selectable run_id group. Legacy NULL run_id (pre-v36) stays in DB
+ * for audit but must not surface as usable prediction or eval cost grouping.
+ */
+export function aiPrelabelHasSelectableRun(
+  ai: { analysisIds: string[] } | null | undefined,
+  analysisRows: AnalysisIdentityRow[],
+): boolean {
+  if (!ai?.analysisIds?.length) return false
+  const byId = new Map(analysisRows.map(r => [r.id, r]))
+  const linked: AnalysisIdentityRow[] = []
+  for (const id of ai.analysisIds) {
+    const row = byId.get(id)
+    if (!row) return false
+    linked.push(row)
+  }
+  const selection = selectConsistentAnalysisRun(linked)
+  return Boolean(selection.complete && selection.runId)
+}
+
 /** Per-step config fingerprint: step:value|… — eval compares overlapping steps only. */
 export function buildStepConfigFingerprint(
   rows: Array<{ step: string, status?: string, promptHash?: string | null, modelId?: string | null, modelName?: string | null }>,
@@ -315,10 +336,14 @@ export class LabelService {
     // Never leak cached excerpt on the item payload either.
     const safeItem: LabelItemView = { ...item, excerpt: liveExcerpt }
 
+    const cachedAi = await this.labels.latestAiPrelabel(item.id)
+    // Fail-closed: legacy/incomplete run identity is audit-only, not current prediction.
+    const aiPrelabel = aiPrelabelHasSelectableRun(cachedAi, matched) ? cachedAi : null
+
     return {
       item: safeItem,
       material,
-      aiPrelabel: await this.labels.latestAiPrelabel(item.id),
+      aiPrelabel,
       humanDecision: await this.labels.latestDecision(item.id, { humanOnly: true }),
       analysisSummaries: matched.map(r => ({
         id: r.id,

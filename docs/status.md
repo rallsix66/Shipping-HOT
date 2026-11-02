@@ -1,3 +1,11 @@
+## R3-1 §4.9 RC4 REQUEST CHANGES closeout (2026-11-02)
+
+- Sole remaining P2 after RC3: post v35→v36 upgrade, legacy `ai_prelabel` rows still linked to NULL `run_id` analysis were returned by `LabelService.detail` and accepted by `scripts/intel-eval.ts` (contentHash-only), so old predictions and full-history receipt costs entered reports.
+- Fix: shared `aiPrelabelHasSelectableRun` — every linked analysis id must exist and belong to one complete selectable `run_id` group. Detail returns `aiPrelabel: null` when not selectable (DB audit row kept). Eval CLI fail-closed skips non-selectable AI before predictions/cost aggregation (no re-enroll required). Human confirm/correct untouched.
+- E2E upgrade regression: seed with AI+human → NULL `run_id` → detail/eval without and with re-enroll reject legacy prediction/costs; after new `run_id` analysis + enroll, detail/eval restore with new receipts only.
+- Evidence: `.tmp/r3-1-llm-registry-20261027/r3-label-eval-rc4-20261102/`.
+- Gates: typecheck/lint PASS; vitest label-service + intel-eval-readonly PASS (incl. RC4); full vitest/build recorded in evidence. Ordinary push; no Slack sent from executor.
+
 ## R3-1 §4.9 RC3 REQUEST CHANGES closeout (2026-11-02)
 
 - Parent tip `f18ba2119049f5d4dda1986ab61e3a829e171732` (dots REQUEST CHANGES ts 1793592897.126379). Same label→eval slice; **closed RC2 items stay closed** (save txn / same-ID concurrent / operator conflict+rollback; A→B draft bind no cross-write; eval true readonly + fileMustExist). No rewrite of executed 034/035; additive schema **v36** only.

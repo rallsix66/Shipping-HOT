@@ -32,7 +32,7 @@ async function main() {
     process.exit(2)
   }
   const outDir = resolve(process.env.INTEL_EVAL_OUT
-    ?? resolve(ROOT, ".tmp/r3-1-llm-registry-20261027/r3-label-eval-rc2-20261102"))
+    ?? resolve(ROOT, ".tmp/r3-1-llm-registry-20261027/r3-label-eval-rc4-20261102"))
   mkdirSync(outDir, { recursive: true })
   const outPath = resolve(outDir, "intel-eval-report.json")
 
@@ -245,6 +245,7 @@ async function main() {
     }
 
     const labels = new IntelLabelRepository(db)
+    const { aiPrelabelHasSelectableRun } = await import("../server/intel/label-service.ts")
     const human = await labels.listHumanDecisions()
     const predictions = new Map()
     const predictionMeta = new Map()
@@ -253,16 +254,65 @@ async function main() {
       const item = await labels.getItem(h.labelItemId)
       if (!item || item.contentHash !== h.contentHash) continue
       const ai = await labels.latestAiPrelabel(h.labelItemId)
-      if (ai && ai.contentHash === h.contentHash) {
-        predictions.set(h.labelItemId, ai.decision)
-        predictionMeta.set(h.labelItemId, {
-          modelName: ai.modelName,
-          modelId: ai.modelId,
-          promptHash: ai.promptHash,
-          analysisIds: ai.analysisIds,
-        })
-        for (const id of ai.analysisIds) analysisIds.add(id)
+      if (!ai || ai.contentHash !== h.contentHash) continue
+      // Load linked analysis identity (incl. run_id). Legacy NULL run_id → not selectable.
+      let linkedRows: Array<{
+        id: string
+        step: string
+        status?: string
+        createdAt: string
+        attemptIndex?: number
+        runId?: string | null
+        modelId?: string | null
+        modelName?: string | null
+        promptHash?: string | null
+        receiptId?: string | null
+      }> = []
+      if (ai.analysisIds.length > 0) {
+        const ph = ai.analysisIds.map(() => "?").join(",")
+        const rows = await db.prepare(`
+          SELECT id, step, status, created_at AS createdAt, attempt_index AS attemptIndex,
+                 run_id AS runId, model_id AS modelId, model_name AS modelName,
+                 prompt_hash AS promptHash, receipt_id AS receiptId
+          FROM intel_analysis
+          WHERE id IN (${ph})
+        `).all(...ai.analysisIds) as Array<{
+          id: string
+          step: string
+          status: string
+          createdAt: string
+          attemptIndex: number
+          runId: string | null
+          modelId: string | null
+          modelName: string | null
+          promptHash: string | null
+          receiptId: string | null
+        }>
+        linkedRows = rows.map(r => ({
+          id: String(r.id),
+          step: String(r.step),
+          status: r.status,
+          createdAt: String(r.createdAt),
+          attemptIndex: r.attemptIndex,
+          runId: r.runId,
+          modelId: r.modelId,
+          modelName: r.modelName,
+          promptHash: r.promptHash,
+          receiptId: r.receiptId,
+        }))
       }
+      if (!aiPrelabelHasSelectableRun(ai, linkedRows)) {
+        // Audit cache retained in DB; do not use as current prediction or cost group.
+        continue
+      }
+      predictions.set(h.labelItemId, ai.decision)
+      predictionMeta.set(h.labelItemId, {
+        modelName: ai.modelName,
+        modelId: ai.modelId,
+        promptHash: ai.promptHash,
+        analysisIds: ai.analysisIds,
+      })
+      for (const id of ai.analysisIds) analysisIds.add(id)
     }
 
     let byCurrency: Array<{ currency: string, actualTotal: number, receiptCount: number, receiptIds: string[] }> = []

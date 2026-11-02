@@ -7,7 +7,7 @@ import { IntelRepository } from "#/database/intel"
 import { IntelAnalysisRepository } from "#/database/intel-analysis"
 import { licensedBlocks } from "#/intel/content-license"
 import { intelSourceSeeds } from "#/intel/sources"
-import { LabelService, decisionFromAnalysisOutputs, selectConsistentAnalysisRun, stepConfigsConflict } from "#/intel/label-service"
+import { LabelService, aiPrelabelHasSelectableRun, decisionFromAnalysisOutputs, selectConsistentAnalysisRun, stepConfigsConflict } from "#/intel/label-service"
 
 type Native = InstanceType<typeof NativeDatabase>
 function wrap(native: Native) {
@@ -35,6 +35,29 @@ const NOW = "2026-11-02T03:00:00.000Z"
 const source = intelSourceSeeds[0]!
 const body = "Westports announces berth suspension for labeling rights tests. ".repeat(8)
 const hash = (text: string) => createHash("sha256").update(text).digest("hex")
+
+describe("aiPrelabelHasSelectableRun", () => {
+  it("rejects missing ids, empty analysisIds, and legacy NULL run_id groups", () => {
+    expect(aiPrelabelHasSelectableRun(null, [])).toBe(false)
+    expect(aiPrelabelHasSelectableRun({ analysisIds: [] }, [])).toBe(false)
+    const legacy = [
+      { id: "a1", step: "prefilter", createdAt: "t1", runId: null },
+      { id: "a2", step: "extract", createdAt: "t2", runId: null },
+    ]
+    expect(aiPrelabelHasSelectableRun({ analysisIds: ["a1", "a2"] }, legacy)).toBe(false)
+    expect(aiPrelabelHasSelectableRun({ analysisIds: ["a1", "missing"] }, legacy)).toBe(false)
+  })
+
+  it("accepts only when every linked id shares one complete run_id", () => {
+    const rows = [
+      { id: "a1", step: "prefilter", createdAt: "t1", runId: "run-1" },
+      { id: "a2", step: "extract", createdAt: "t2", runId: "run-1" },
+      { id: "b1", step: "prefilter", createdAt: "t3", runId: "run-2" },
+    ]
+    expect(aiPrelabelHasSelectableRun({ analysisIds: ["a1", "a2"] }, rows)).toBe(true)
+    expect(aiPrelabelHasSelectableRun({ analysisIds: ["a1", "nope"] }, rows)).toBe(false)
+  })
+})
 
 describe("label-service projection + live rights", () => {
   const cleanups: Array<() => void> = []
@@ -619,5 +642,156 @@ describe("label-service projection + live rights", () => {
     const d = await service.detail(enrolled.id)
     expect(d.aiPrelabel?.analysisIds.sort()).toEqual([bPre.id, bFail.id].sort())
     expect(d.aiPrelabel?.analysisIds).toContain(bFail.id)
+  })
+
+  it("rC4: v35→v36 legacy AI cache (NULL run_id) is audit-only on detail; human kept; eval-ready only after new run_id analysis", async () => {
+    const { native, db, service, intel, analysis } = await fresh()
+    const { IntelLabelRepository } = await import("#/database/intel-label")
+    const labels = new IntelLabelRepository(db)
+
+    await intel.upsertSource(source, NOW)
+    const saved = await intel.writeEntry({
+      sourceId: source.id,
+      canonicalUrl: "https://example.test/label-rc4-upgrade",
+      title: "RC4 UPGRADE",
+      contentHash: hash(body),
+      contentScope: "full_text",
+      extractorVersion: "label-service-test-v1",
+      blocks: licensedBlocks("full_text", "RC4 UPGRADE", body),
+      fetchedAt: NOW,
+    })
+
+    // Enroll while run_id present (creates AI cache), then NULL run_id to simulate v35→v36 migrate.
+    const legacyPre = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "prefilter",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "pre-migrate-run",
+      modelId: "legacy-m",
+      modelName: "Legacy",
+      promptHash: "legacy-pre",
+      receiptId: "rcpt-legacy-pre",
+      createdAt: "2026-10-01T01:00:00.000Z",
+      output: { decision: "PASS", content: "legacy-pre" },
+    })
+    const legacyEx = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "extract",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "pre-migrate-run",
+      modelId: "legacy-m",
+      modelName: "Legacy",
+      promptHash: "legacy-ex",
+      receiptId: "rcpt-legacy-ex",
+      createdAt: "2026-10-01T02:00:00.000Z",
+      output: {
+        extract: {
+          eventType: "port_closure",
+          countries: ["MY"],
+          ports: ["MYPKG"],
+          effectiveFrom: "2026-10-01",
+          isOfficialStatement: true,
+        },
+        content: "legacy-ex",
+      },
+    })
+    const enrolled = await service.enrollFromExisting({ itemId: saved.itemId, versionId: saved.versionId })
+    expect((await service.detail(enrolled.id)).aiPrelabel?.analysisIds.sort()).toEqual(
+      [legacyPre.id, legacyEx.id].sort(),
+    )
+
+    await service.saveHuman({
+      labelItemId: enrolled.id,
+      expectedContentHash: hash(body),
+      kind: "human_confirm",
+      operator: "human.rc4",
+      decision: {
+        prefilterKeep: true,
+        eventType: "port_closure",
+        countries: ["MY"],
+        ports: ["MYPKG"],
+        effectiveFrom: "2026-10-01",
+        isOfficialStatement: true,
+        notes: "human-kept-across-upgrade",
+      },
+      clientRequestId: "rc4-human-1",
+    })
+
+    native.prepare("UPDATE intel_analysis SET run_id = NULL WHERE id IN (?, ?)").run(legacyPre.id, legacyEx.id)
+
+    // Without re-enroll: detail fail-closed; human retained; AI audit row still in DB.
+    const afterUpgrade = await service.detail(enrolled.id)
+    expect(afterUpgrade.aiPrelabel).toBeNull()
+    expect(afterUpgrade.humanDecision?.decision.notes).toBe("human-kept-across-upgrade")
+    expect(afterUpgrade.humanDecision?.decision.eventType).toBe("port_closure")
+    const cached = await labels.latestAiPrelabel(enrolled.id)
+    expect(cached?.analysisIds.sort()).toEqual([legacyPre.id, legacyEx.id].sort())
+
+    // Re-enroll with only legacy NULL run_id rows: still no usable AI; human preserved.
+    await service.enrollFromExisting({ itemId: saved.itemId, versionId: saved.versionId })
+    const afterReEnrollLegacy = await service.detail(enrolled.id)
+    expect(afterReEnrollLegacy.aiPrelabel).toBeNull()
+    expect(afterReEnrollLegacy.humanDecision?.decision.notes).toBe("human-kept-across-upgrade")
+    expect((await labels.latestAiPrelabel(enrolled.id))?.analysisIds.sort()).toEqual(
+      [legacyPre.id, legacyEx.id].sort(),
+    )
+
+    // New run_id analysis restores selectable prediction; human still kept; legacy ids not current.
+    const newPre = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "prefilter",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "run-post-v36",
+      modelId: "new-m",
+      modelName: "New",
+      promptHash: "new-pre",
+      receiptId: "rcpt-new-pre",
+      createdAt: "2026-11-02T05:00:00.000Z",
+      output: { decision: "PASS", content: "new-pre" },
+    })
+    const newEx = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "extract",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "run-post-v36",
+      modelId: "new-m",
+      modelName: "New",
+      promptHash: "new-ex",
+      receiptId: "rcpt-new-ex",
+      createdAt: "2026-11-02T06:00:00.000Z",
+      output: {
+        extract: {
+          eventType: "port_closure",
+          countries: ["MY"],
+          ports: ["MYPKG"],
+          effectiveFrom: "2026-11-02",
+          isOfficialStatement: true,
+        },
+        content: "new-ex",
+      },
+    })
+    await service.enrollFromExisting({ itemId: saved.itemId, versionId: saved.versionId })
+    const restored = await service.detail(enrolled.id)
+    expect(restored.aiPrelabel?.analysisIds.sort()).toEqual([newPre.id, newEx.id].sort())
+    expect(restored.aiPrelabel?.modelId).toContain("new-m")
+    expect(restored.humanDecision?.decision.notes).toBe("human-kept-across-upgrade")
+    expect(restored.aiPrelabel?.analysisIds).not.toContain(legacyPre.id)
+    expect(restored.aiPrelabel?.analysisIds).not.toContain(legacyEx.id)
   })
 })
