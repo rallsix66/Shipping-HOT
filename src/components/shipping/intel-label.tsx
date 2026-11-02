@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { useBlocker } from "@tanstack/react-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import type {
   LabelDecisionFields,
@@ -40,6 +41,10 @@ function errorCode(error: unknown): string {
   return e?.data?.statusMessage ?? e?.statusMessage ?? e?.message ?? "unknown_error"
 }
 
+function newRequestId(labelItemId: string): string {
+  return `ui-${labelItemId}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 export function IntelLabelPage() {
   const client = useQueryClient()
   const [filter, setFilter] = useState({ queueStatus: "all", category: "all", language: "all" })
@@ -51,6 +56,11 @@ export function IntelLabelPage() {
   const [message, setMessage] = useState("")
   const [pendingNav, setPendingNav] = useState<null | (() => void)>(null)
   const dirty = useMemo(() => !decisionEqual(draft, baseline), [draft, baseline])
+  const seededForId = useRef<string>("")
+  const seededHashRef = useRef<string>("")
+  const saveGen = useRef(0)
+  const activeItemRef = useRef<string>("")
+  const requestIdRef = useRef<string>("")
 
   const params = new URLSearchParams(
     Object.entries(filter).filter(([, v]) => v && v !== "all"),
@@ -64,6 +74,7 @@ export function IntelLabelPage() {
   const items = list.data?.items ?? []
   const coverage = list.data?.coverage
   const activeId = items.find(i => i.id === selectedId)?.id ?? items[0]?.id ?? ""
+  activeItemRef.current = activeId
 
   const detail = useQuery({
     queryKey: ["intel-label", activeId, params],
@@ -75,35 +86,61 @@ export function IntelLabelPage() {
     refetchOnWindowFocus: false,
   })
 
+  // Seed draft only when label id / contentHash changes — never on save refetch updatedAt,
+  // and never while dirty/saving, so late responses cannot clobber edits or wipe save messages.
   useEffect(() => {
     const d = detail.data
     if (!d) return
+    if (d.item.id !== activeItemRef.current) return
+    if (saving) return
+    if (dirty) return
+    // Same identity already seeded: ignore refetch after save (preserves success message).
+    if (
+      seededForId.current === d.item.id
+      && seededHashRef.current === d.item.contentHash
+    ) {
+      return
+    }
     const seed = d.humanDecision?.decision
       ?? d.aiPrelabel?.decision
       ?? emptyDecision()
     setDraft({ ...seed, notes: seed.notes ?? "" })
     setBaseline({ ...seed, notes: seed.notes ?? "" })
+    seededForId.current = d.item.id
+    seededHashRef.current = d.item.contentHash
+    requestIdRef.current = newRequestId(d.item.id)
     setMessage("")
-  // Seed draft only when the selected label identity/version changes.
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally ignore nested decision churn
-  }, [detail.data?.item.id, detail.data?.item.updatedAt])
+  }, [detail.data?.item.id, detail.data?.item.contentHash, activeId, dirty, saving, detail.data])
+
+  const blockLeave = dirty || saving
+  const blocker = useBlocker({
+    shouldBlockFn: () => blockLeave,
+    withResolver: true,
+    enableBeforeUnload: blockLeave,
+  })
 
   useEffect(() => {
-    const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!dirty) return
-      event.preventDefault()
-      event.returnValue = ""
-    }
-    window.addEventListener("beforeunload", onBeforeUnload)
-    return () => window.removeEventListener("beforeunload", onBeforeUnload)
-  }, [dirty])
+    if (blocker.status !== "blocked") return
+    setPendingNav(() => () => {
+      blocker.proceed?.()
+    })
+  }, [blocker, blocker.status])
 
   function guardNav(next: () => void) {
+    if (saving) {
+      setMessage("保存进行中，请稍候再切换")
+      return
+    }
     if (!dirty) {
       next()
       return
     }
     setPendingNav(() => next)
+  }
+
+  function patchDraft(updater: (d: LabelDecisionFields) => LabelDecisionFields) {
+    if (saving) return
+    setDraft(updater)
   }
 
   async function save(kind: "human_confirm" | "human_correct") {
@@ -112,38 +149,57 @@ export function IntelLabelPage() {
       setMessage("请填写操作者（真实人工确认，不接受 system: 前缀）")
       return
     }
+    const itemId = detail.data.item.id
+    const contentHash = detail.data.item.contentHash
+    const snapshot = draft
+    const reqId = requestIdRef.current || newRequestId(itemId)
+    const gen = ++saveGen.current
     setSaving(true)
     setMessage("")
     try {
-      await myFetch(`/shipping/intel/labels/${encodeURIComponent(detail.data.item.id)}/decision`, {
+      await myFetch(`/shipping/intel/labels/${encodeURIComponent(itemId)}/decision`, {
         method: "POST",
         body: {
           kind,
           operator: operator.trim(),
-          expectedContentHash: detail.data.item.contentHash,
-          decision: draft,
-          clientRequestId: `ui-${detail.data.item.id}-${detail.data.item.contentHash}`,
+          expectedContentHash: contentHash,
+          decision: snapshot,
+          clientRequestId: reqId,
         },
       })
-      setBaseline(draft)
+      // Superseded save generation: drop. Do not require activeItemRef match for the
+      // status message — list invalidation can briefly clear items and flicker the ref.
+      if (gen !== saveGen.current) return
+      const stillOnItem = activeItemRef.current === itemId || selectedId === itemId || selectedId === ""
       setMessage(kind === "human_confirm" ? "已确认并保存（计为人工标注）" : "已纠正并保存（计为人工标注）")
+      if (stillOnItem) {
+        setBaseline(snapshot)
+        seededForId.current = itemId
+        seededHashRef.current = contentHash
+        requestIdRef.current = newRequestId(itemId)
+      }
       await client.invalidateQueries({ queryKey: ["intel-labels"] })
-      await client.invalidateQueries({ queryKey: ["intel-label"] })
+      await client.invalidateQueries({ queryKey: ["intel-label", itemId] })
     } catch (error) {
-      setMessage(`保存失败：${errorCode(error)}`)
+      if (gen !== saveGen.current) return
+      setMessage(`保存失败：${errorCode(error)}（可重试，草稿仍保留）`)
     } finally {
-      setSaving(false)
+      if (gen === saveGen.current) setSaving(false)
     }
   }
 
   function go(id: string | null) {
     if (!id) return
-    guardNav(() => setSelectedId(id))
+    guardNav(() => {
+      seededForId.current = ""
+      seededHashRef.current = ""
+      setSelectedId(id)
+    })
   }
 
   return (
     <ShippingShell title="情报标注">
-      <div className="manual-intel" data-testid="intel-label-page">
+      <div className="manual-intel" data-testid="intel-label-page" data-saving={saving ? "1" : "0"} data-dirty={dirty ? "1" : "0"}>
         <p>§4.9 人工复核 · 只存 URL/摘录/标注 · 浏览不触发模型</p>
         <section className="manual-intel__panel">
           <h2>覆盖（如实显示，不编造）</h2>
@@ -169,11 +225,11 @@ export function IntelLabelPage() {
                   </p>
                   <p>
                     类别：
-                    {coverage.byCategory.map(b => `${b.key}:${b.total}`).join(" / ") || "无"}
+                    {coverage.byCategory.map(b => `${b.key}:${b.total}`).join(" / ") || "—"}
                   </p>
                   <p>
                     语言：
-                    {coverage.byLanguage.map(b => `${b.key}:${b.total}`).join(" / ") || "无"}
+                    {coverage.byLanguage.map(b => `${b.key}:${b.total}`).join(" / ") || "—"}
                   </p>
                   {coverage.missingNotes.length > 0 && (
                     <p data-testid="label-missing-notes">
@@ -191,7 +247,15 @@ export function IntelLabelPage() {
           <div className="manual-intel__row">
             <label>
               状态
-              <select value={filter.queueStatus} onChange={e => guardNav(() => setFilter(f => ({ ...f, queueStatus: e.target.value })))}>
+              <select
+                disabled={saving}
+                value={filter.queueStatus}
+                onChange={e => guardNav(() => {
+                  seededForId.current = ""
+                  seededHashRef.current = ""
+                  setFilter(f => ({ ...f, queueStatus: e.target.value }))
+                })}
+              >
                 <option value="all">全部</option>
                 <option value="unreviewed">未审</option>
                 <option value="ai_prelabeled">AI 预标</option>
@@ -200,7 +264,15 @@ export function IntelLabelPage() {
             </label>
             <label>
               类别
-              <select value={filter.category} onChange={e => guardNav(() => setFilter(f => ({ ...f, category: e.target.value })))}>
+              <select
+                disabled={saving}
+                value={filter.category}
+                onChange={e => guardNav(() => {
+                  seededForId.current = ""
+                  seededHashRef.current = ""
+                  setFilter(f => ({ ...f, category: e.target.value }))
+                })}
+              >
                 <option value="all">全部</option>
                 <option value="policy">政策</option>
                 <option value="weather">天气</option>
@@ -212,7 +284,15 @@ export function IntelLabelPage() {
             </label>
             <label>
               语言
-              <select value={filter.language} onChange={e => guardNav(() => setFilter(f => ({ ...f, language: e.target.value })))}>
+              <select
+                disabled={saving}
+                value={filter.language}
+                onChange={e => guardNav(() => {
+                  seededForId.current = ""
+                  seededHashRef.current = ""
+                  setFilter(f => ({ ...f, language: e.target.value }))
+                })}
+              >
                 <option value="all">全部</option>
                 <option value="zh">zh</option>
                 <option value="en">en</option>
@@ -228,8 +308,14 @@ export function IntelLabelPage() {
               <li key={item.id}>
                 <button
                   type="button"
+                  data-testid={`label-queue-item-${item.id}`}
                   data-selected={item.id === activeId ? "1" : "0"}
-                  onClick={() => guardNav(() => setSelectedId(item.id))}
+                  disabled={saving}
+                  onClick={() => guardNav(() => {
+                    seededForId.current = ""
+                    seededHashRef.current = ""
+                    setSelectedId(item.id)
+                  })}
                 >
                   [
                   {item.queueStatus}
@@ -253,7 +339,10 @@ export function IntelLabelPage() {
           <section className="manual-intel__panel" data-testid="label-detail">
             <h2>条目审阅</h2>
             <p data-testid="label-identity">
-              item=
+              label=
+              {detail.data.item.id}
+              {" "}
+              · item=
               {detail.data.item.itemId}
               {" "}
               · version=
@@ -261,15 +350,15 @@ export function IntelLabelPage() {
               {" "}
               · hash=
               {detail.data.item.contentHash.slice(0, 12)}
-              …
             </p>
             <p><a href={detail.data.material.sourceUrl} target="_blank" rel="noreferrer">{detail.data.material.sourceUrl}</a></p>
             <p><strong>{detail.data.material.title}</strong></p>
             <pre data-testid="label-excerpt">{detail.data.material.excerpt ?? "（无许可摘录）"}</pre>
-            <p>
+            <p data-testid="label-material-scope">
               内容范围：
               {detail.data.material.contentScope}
-              {detail.data.material.bodyAvailable ? "" : " · 正文不可用"}
+              {detail.data.material.bodyAvailable ? "" : " · 正文不可读"}
+              {detail.data.material.materialReadFailed ? ` · 读取失败(${detail.data.material.materialReadCode})` : ""}
             </p>
 
             <h3>AI 预标注（不计人工完成）</h3>
@@ -308,14 +397,21 @@ export function IntelLabelPage() {
             )}
             <label>
               操作者
-              <input data-testid="label-operator" value={operator} onChange={e => setOperator(e.target.value)} placeholder="真实姓名/工号" />
+              <input
+                data-testid="label-operator"
+                disabled={saving}
+                value={operator}
+                onChange={e => setOperator(e.target.value)}
+                placeholder="真实姓名/工号"
+              />
             </label>
             <label>
               预筛保留
               <select
                 data-testid="label-prefilter"
+                disabled={saving}
                 value={draft.prefilterKeep === null ? "" : draft.prefilterKeep ? "1" : "0"}
-                onChange={e => setDraft(d => ({ ...d, prefilterKeep: e.target.value === "" ? null : e.target.value === "1" }))}
+                onChange={e => patchDraft(d => ({ ...d, prefilterKeep: e.target.value === "" ? null : e.target.value === "1" }))}
               >
                 <option value="">未定</option>
                 <option value="1">保留</option>
@@ -324,26 +420,47 @@ export function IntelLabelPage() {
             </label>
             <label>
               事件类型
-              <input data-testid="label-event-type" value={draft.eventType ?? ""} onChange={e => setDraft(d => ({ ...d, eventType: e.target.value || null }))} />
+              <input
+                data-testid="label-event-type"
+                disabled={saving}
+                value={draft.eventType ?? ""}
+                onChange={e => patchDraft(d => ({ ...d, eventType: e.target.value || null }))}
+              />
             </label>
             <label>
               国家（逗号分隔）
-              <input data-testid="label-countries" value={draft.countries.join(",")} onChange={e => setDraft(d => ({ ...d, countries: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))} />
+              <input
+                data-testid="label-countries"
+                disabled={saving}
+                value={draft.countries.join(",")}
+                onChange={e => patchDraft(d => ({ ...d, countries: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))}
+              />
             </label>
             <label>
               港口 UN/LOCODE（逗号分隔）
-              <input data-testid="label-ports" value={draft.ports.join(",")} onChange={e => setDraft(d => ({ ...d, ports: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))} />
+              <input
+                data-testid="label-ports"
+                disabled={saving}
+                value={draft.ports.join(",")}
+                onChange={e => patchDraft(d => ({ ...d, ports: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))}
+              />
             </label>
             <label>
               生效时间
-              <input data-testid="label-effective" value={draft.effectiveFrom ?? ""} onChange={e => setDraft(d => ({ ...d, effectiveFrom: e.target.value || null }))} />
+              <input
+                data-testid="label-effective"
+                disabled={saving}
+                value={draft.effectiveFrom ?? ""}
+                onChange={e => patchDraft(d => ({ ...d, effectiveFrom: e.target.value || null }))}
+              />
             </label>
             <label>
               官方通知
               <select
                 data-testid="label-official"
+                disabled={saving}
                 value={draft.isOfficialStatement === null ? "" : draft.isOfficialStatement ? "1" : "0"}
-                onChange={e => setDraft(d => ({ ...d, isOfficialStatement: e.target.value === "" ? null : e.target.value === "1" }))}
+                onChange={e => patchDraft(d => ({ ...d, isOfficialStatement: e.target.value === "" ? null : e.target.value === "1" }))}
               >
                 <option value="">未定</option>
                 <option value="1">是</option>
@@ -352,15 +469,21 @@ export function IntelLabelPage() {
             </label>
             <label>
               备注
-              <textarea data-testid="label-notes" value={draft.notes ?? ""} onChange={e => setDraft(d => ({ ...d, notes: e.target.value }))} />
+              <textarea
+                data-testid="label-notes"
+                disabled={saving}
+                value={draft.notes ?? ""}
+                onChange={e => patchDraft(d => ({ ...d, notes: e.target.value }))}
+              />
             </label>
 
             <div className="manual-intel__row">
-              <button type="button" data-testid="label-prev" disabled={!detail.data.neighbors.prevId} onClick={() => go(detail.data!.neighbors.prevId)}>上一条</button>
-              <button type="button" data-testid="label-next" disabled={!detail.data.neighbors.nextId} onClick={() => go(detail.data!.neighbors.nextId)}>下一条</button>
+              <button type="button" data-testid="label-prev" disabled={saving || !detail.data.neighbors.prevId} onClick={() => go(detail.data!.neighbors.prevId)}>上一条</button>
+              <button type="button" data-testid="label-next" disabled={saving || !detail.data.neighbors.nextId} onClick={() => go(detail.data!.neighbors.nextId)}>下一条</button>
               <button
                 type="button"
                 data-testid="label-cancel"
+                disabled={saving}
                 onClick={() => {
                   setDraft(baseline)
                   setMessage("已取消未保存修改")
@@ -379,9 +502,11 @@ export function IntelLabelPage() {
                   type="button"
                   data-testid="label-leave-yes"
                   onClick={() => {
-                    const go = pendingNav
+                    const goNext = pendingNav
                     setPendingNav(null)
-                    go?.()
+                    seededForId.current = ""
+                    seededHashRef.current = ""
+                    goNext?.()
                   }}
                 >
                   离开
@@ -389,7 +514,10 @@ export function IntelLabelPage() {
                 <button
                   type="button"
                   data-testid="label-leave-no"
-                  onClick={() => setPendingNav(null)}
+                  onClick={() => {
+                    setPendingNav(null)
+                    blocker.reset?.()
+                  }}
                 >
                   留下
                 </button>

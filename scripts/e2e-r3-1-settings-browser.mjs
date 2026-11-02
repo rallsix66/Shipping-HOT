@@ -201,7 +201,7 @@ async function main() {
     }
   }, 60000)
   if (!ready) throw new Error(`server not ready; log: ${serverLogPath}`)
-  check(ready?.database?.schemaVersion === 34, `schema v34 after init (got ${ready?.database?.schemaVersion})`)
+  check(ready?.database?.schemaVersion === 35, `schema v35 after init (got ${ready?.database?.schemaVersion})`)
 
   // Shared pool GET before configure: unconfigured fail-closed, zero provider/receipt side effects.
   const countersBeforeSharedGet = await readDbCounters()

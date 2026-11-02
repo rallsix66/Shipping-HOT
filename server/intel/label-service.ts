@@ -1,9 +1,10 @@
 /**
  * §4.9 labeling service — enroll/browse/save only.
- * Never calls model providers. AI prelabel is copied from existing intel_analysis rows.
+ * Never calls model providers. AI prelabel is projected from existing intel_analysis rows
+ * using the real completed/reused pipeline shapes ({decision,content} / {extract,content}).
  */
 import type { Database } from "db0"
-import type { LabelCategory, LabelDecisionFields, LabelDetailResponse, LabelListResponse } from "@shared/intel-label"
+import type { LabelCategory, LabelDecisionFields, LabelDetailResponse, LabelItemView, LabelListResponse } from "@shared/intel-label"
 import { IntelAnalysisRepository } from "#/database/intel-analysis"
 import { IntelRepository } from "#/database/intel"
 import { IntelLabelRepository, LabelInputError } from "#/database/intel-label"
@@ -21,33 +22,86 @@ function categoryFromEventType(eventType: string | null | undefined): LabelCateg
   return "other"
 }
 
-function decisionFromAnalysisOutputs(outputs: Array<{ step: string, output: unknown }>): LabelDecisionFields {
-  const pre = outputs.find(o => o.step === "prefilter")?.output as Record<string, unknown> | undefined
-  const extract = outputs.find(o => o.step === "extract")?.output as Record<string, unknown> | undefined
-  const keep = typeof pre?.keep === "boolean" ? pre.keep : typeof pre?.shouldKeep === "boolean" ? pre.shouldKeep : null
-  return {
-    prefilterKeep: keep,
-    eventType: typeof extract?.eventType === "string" ? extract.eventType : null,
-    countries: Array.isArray(extract?.countries) ? extract!.countries.filter((x): x is string => typeof x === "string") : [],
-    ports: Array.isArray(extract?.ports) ? extract!.ports.filter((x): x is string => typeof x === "string") : [],
-    effectiveFrom: typeof extract?.effectiveFrom === "string"
-      ? extract.effectiveFrom
-      : typeof extract?.occurredAt === "string"
-        ? extract.occurredAt
-        : null,
-    isOfficialStatement: typeof extract?.isOfficialStatement === "boolean"
-      ? extract.isOfficialStatement
-      : typeof extract?.official === "boolean"
-        ? extract.official
-        : null,
+function safeJson(raw: string): unknown {
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
   }
 }
 
-function licensedExcerpt(blocks: Array<{ type: string, text: string }>, bodyText: string | null): string | null {
+/**
+ * Project LabelDecisionFields from real analyze-pipeline completed/reused outputs:
+ * - prefilter: { decision: "PASS"|"BLOCK"|"UNKNOWN", content }
+ * - extract: { extract: ExtractedIntel, content }
+ * Legacy flat keep/shouldKeep / top-level extract keys are ignored (they never matched storage).
+ */
+export function decisionFromAnalysisOutputs(
+  outputs: Array<{ step: string, status?: string, output: unknown }>,
+): { decision: LabelDecisionFields, projected: boolean } {
+  const usable = outputs.filter(o => !o.status || o.status === "completed" || o.status === "reused")
+  const pre = usable.find(o => o.step === "prefilter")?.output
+  const extractOut = usable.find(o => o.step === "extract")?.output
+  let prefilterKeep: boolean | null = null
+  let projected = false
+  if (pre && typeof pre === "object" && !Array.isArray(pre)) {
+    const decision = (pre as Record<string, unknown>).decision
+    if (decision === "PASS") {
+      prefilterKeep = true
+      projected = true
+    } else if (decision === "BLOCK") {
+      prefilterKeep = false
+      projected = true
+    } else if (decision === "UNKNOWN") {
+      prefilterKeep = null
+      projected = true
+    }
+  }
+  let eventType: string | null = null
+  let countries: string[] = []
+  let ports: string[] = []
+  let effectiveFrom: string | null = null
+  let isOfficialStatement: boolean | null = null
+  if (extractOut && typeof extractOut === "object" && !Array.isArray(extractOut)) {
+    const nested = (extractOut as Record<string, unknown>).extract
+    if (nested && typeof nested === "object" && !Array.isArray(nested)) {
+      const extract = nested as Record<string, unknown>
+      projected = true
+      eventType = typeof extract.eventType === "string" ? extract.eventType : null
+      countries = Array.isArray(extract.countries) ? extract.countries.filter((x): x is string => typeof x === "string") : []
+      ports = Array.isArray(extract.ports) ? extract.ports.filter((x): x is string => typeof x === "string") : []
+      effectiveFrom = typeof extract.effectiveFrom === "string"
+        ? extract.effectiveFrom
+        : typeof extract.occurredAt === "string"
+          ? extract.occurredAt
+          : null
+      isOfficialStatement = typeof extract.isOfficialStatement === "boolean" ? extract.isOfficialStatement : null
+    }
+  }
+  return {
+    projected,
+    decision: {
+      prefilterKeep,
+      eventType,
+      countries,
+      ports,
+      effectiveFrom,
+      isOfficialStatement,
+    },
+  }
+}
+
+function licensedExcerpt(blocks: Array<{ type: string, text: string }>, bodyText: string | null, contentScope: string): string | null {
+  if (contentScope === "metadata_only") return null
   const excerptBlock = blocks.find(b => b.type === "excerpt")
   if (excerptBlock?.text) return excerptBlock.text.slice(0, EXCERPT_CHARS)
   if (!bodyText) return null
   return bodyText.length <= EXCERPT_CHARS ? bodyText : `${bodyText.slice(0, EXCERPT_CHARS - 1).trimEnd()}…`
+}
+
+/** Strip any cached excerpt from list views — live rights applied only on detail. */
+function redactListItem(item: LabelItemView): LabelItemView {
+  return { ...item, excerpt: null }
 }
 
 export class LabelService {
@@ -78,7 +132,7 @@ export class LabelService {
       language: query.language || "all",
     })
     const hasMore = rows.length > limit
-    const items = hasMore ? rows.slice(0, limit) : rows
+    const items = (hasMore ? rows.slice(0, limit) : rows).map(redactListItem)
     return { items, limit, offset, hasMore, coverage: await this.labels.coverage() }
   }
 
@@ -98,26 +152,42 @@ export class LabelService {
       category: (filter.category as never) || "all",
       language: filter.language || "all",
     })
-    let material
+
+    // Live rights only. Read failure must NOT fall back to cached item.excerpt.
+    let material: LabelDetailResponse["material"]
+    let liveExcerpt: string | null = null
     if (materialResult.ok) {
+      liveExcerpt = licensedExcerpt(
+        materialResult.material.blocks,
+        materialResult.material.bodyText,
+        materialResult.material.contentScope,
+      )
       material = {
         title: materialResult.material.title,
         sourceUrl: materialResult.material.canonicalUrl,
-        excerpt: licensedExcerpt(materialResult.material.blocks, materialResult.material.bodyText),
+        excerpt: liveExcerpt,
         contentScope: materialResult.material.contentScope,
-        bodyAvailable: Boolean(materialResult.material.bodyText),
+        bodyAvailable: Boolean(materialResult.material.bodyText) && materialResult.material.contentScope !== "metadata_only",
+        materialReadFailed: false,
+        materialReadCode: null,
       }
     } else {
       material = {
         title: item.title ?? "",
         sourceUrl: item.sourceUrl,
-        excerpt: item.excerpt,
+        excerpt: null,
         contentScope: "metadata_only",
         bodyAvailable: false,
+        materialReadFailed: true,
+        materialReadCode: materialResult.code,
       }
     }
+
+    // Never leak cached excerpt on the item payload either.
+    const safeItem: LabelItemView = { ...item, excerpt: liveExcerpt }
+
     return {
-      item,
+      item: safeItem,
       material,
       aiPrelabel: await this.labels.latestAiPrelabel(item.id),
       humanDecision: await this.labels.latestDecision(item.id, { humanOnly: true }),
@@ -126,8 +196,10 @@ export class LabelService {
         step: r.step,
         status: r.status,
         modelName: r.modelName,
+        modelId: r.modelId,
         promptHash: r.promptHash,
         provenance: r.provenance,
+        receiptId: r.receiptId,
         output: r.outputJson ? safeJson(r.outputJson) : null,
       })),
       neighbors,
@@ -137,6 +209,8 @@ export class LabelService {
   /**
    * Enroll from an existing approved item+version. Copies AI outputs if present.
    * Does not call providers and does not invent human labels.
+   * Re-enroll after analyze fills AI prelabel even when content hash is unchanged;
+   * never demotes human_confirmed.
    */
   async enrollFromExisting(input: {
     itemId: string
@@ -148,27 +222,36 @@ export class LabelService {
     if (!materialResult.ok) throw new LabelInputError(`material_${materialResult.code}`)
     const material = materialResult.material
     const analysisRows = await this.analysis.listForVersion(input.itemId, input.versionId)
-    const matched = analysisRows.filter(r => r.contentHash === material.version.contentHash && (r.status === "completed" || r.status === "reused"))
-    const decision = decisionFromAnalysisOutputs(
-      matched.map(r => ({ step: r.step, output: r.outputJson ? safeJson(r.outputJson) : null })),
+    const matched = analysisRows.filter(r =>
+      r.contentHash === material.version.contentHash
+      && (r.status === "completed" || r.status === "reused"),
+    )
+    const { decision, projected } = decisionFromAnalysisOutputs(
+      matched.map(r => ({
+        step: r.step,
+        status: r.status,
+        output: r.outputJson ? safeJson(r.outputJson) : null,
+      })),
     )
     const category = input.category ?? categoryFromEventType(decision.eventType)
-    const aiPrelabel = matched.length
+    const extractRow = matched.find(r => r.step === "extract") ?? matched.find(r => r.step === "prefilter")
+    const aiPrelabel = projected && matched.length
       ? {
           decision,
           analysisIds: matched.map(r => r.id),
-          promptHash: matched.find(r => r.promptHash)?.promptHash ?? null,
-          modelId: matched.find(r => r.modelId)?.modelId ?? null,
-          modelName: matched.find(r => r.modelName)?.modelName ?? null,
+          promptHash: extractRow?.promptHash ?? matched.find(r => r.promptHash)?.promptHash ?? null,
+          modelId: extractRow?.modelId ?? matched.find(r => r.modelId)?.modelId ?? null,
+          modelName: extractRow?.modelName ?? matched.find(r => r.modelName)?.modelName ?? null,
           operator: "system:ai",
         }
       : undefined
+    const excerpt = licensedExcerpt(material.blocks, material.bodyText, material.contentScope)
     return this.labels.enroll({
       itemId: input.itemId,
       versionId: input.versionId,
       contentHash: material.version.contentHash,
       sourceUrl: material.canonicalUrl,
-      excerpt: licensedExcerpt(material.blocks, material.bodyText),
+      excerpt,
       title: material.title,
       category,
       language: input.language ?? null,
@@ -185,13 +268,5 @@ export class LabelService {
     clientRequestId?: string
   }) {
     return this.labels.saveHumanDecision(input)
-  }
-}
-
-function safeJson(raw: string): unknown {
-  try {
-    return JSON.parse(raw)
-  } catch {
-    return null
   }
 }

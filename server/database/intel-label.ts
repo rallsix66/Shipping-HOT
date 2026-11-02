@@ -112,6 +112,7 @@ function mapDecision(row: Row): LabelDecisionView {
     promptHash: row.prompt_hash == null ? null : String(row.prompt_hash),
     modelId: row.model_id == null ? null : String(row.model_id),
     modelName: row.model_name == null ? null : String(row.model_name),
+    clientRequestId: row.client_request_id == null ? null : String(row.client_request_id),
     createdAt: String(row.created_at),
   }
 }
@@ -277,8 +278,8 @@ export class IntelLabelRepository {
 
   async latestDecision(labelItemId: string, opts?: { humanOnly?: boolean }): Promise<LabelDecisionView | null> {
     const sql = opts?.humanOnly
-      ? `SELECT * FROM intel_label_decision WHERE label_item_id = ? AND is_human = 1 ORDER BY created_at DESC LIMIT 1`
-      : `SELECT * FROM intel_label_decision WHERE label_item_id = ? ORDER BY created_at DESC LIMIT 1`
+      ? `SELECT * FROM intel_label_decision WHERE label_item_id = ? AND is_human = 1 ORDER BY created_at DESC, rowid DESC LIMIT 1`
+      : `SELECT * FROM intel_label_decision WHERE label_item_id = ? ORDER BY created_at DESC, rowid DESC LIMIT 1`
     const row = await this.db.prepare(sql).get(labelItemId) as Row | undefined
     return row ? mapDecision(row) : null
   }
@@ -287,7 +288,7 @@ export class IntelLabelRepository {
     const row = await this.db.prepare(`
       SELECT * FROM intel_label_decision
       WHERE label_item_id = ? AND kind = 'ai_prelabel'
-      ORDER BY created_at DESC LIMIT 1
+      ORDER BY created_at DESC, rowid DESC LIMIT 1
     `).get(labelItemId) as Row | undefined
     return row ? mapDecision(row) : null
   }
@@ -322,6 +323,7 @@ export class IntelLabelRepository {
     const title = input.title == null ? null : String(input.title).slice(0, 500)
     if (existing) {
       const hashChanged = existing.contentHash !== input.contentHash
+      const preserveHuman = existing.queueStatus === "human_confirmed" && !hashChanged
       await this.db.prepare(`
         UPDATE intel_label_item SET
           content_hash = ?, source_url = ?, excerpt = ?, category = ?, language = ?, title = ?,
@@ -343,7 +345,9 @@ export class IntelLabelRepository {
         now,
         existing.id,
       )
-      if (hashChanged && input.aiPrelabel) {
+      // Refresh AI prelabel on hash change, or when first/updated analysis arrives
+      // after enroll-before-analyze. Never demote a preserved human_confirmed queue.
+      if (input.aiPrelabel) {
         await this.insertDecision({
           labelItemId: existing.id,
           itemId: input.itemId,
@@ -359,9 +363,11 @@ export class IntelLabelRepository {
           modelName: input.aiPrelabel.modelName ?? null,
           createdAt: now,
         })
-        await this.db.prepare(`
-          UPDATE intel_label_item SET queue_status = 'ai_prelabeled', updated_at = ? WHERE id = ?
-        `).run(now, existing.id)
+        if (!preserveHuman) {
+          await this.db.prepare(`
+            UPDATE intel_label_item SET queue_status = 'ai_prelabeled', updated_at = ? WHERE id = ?
+          `).run(now, existing.id)
+        }
       }
       return (await this.getItem(existing.id))!
     }
@@ -420,21 +426,33 @@ export class IntelLabelRepository {
     if (!operator || operator.startsWith("system:")) {
       throw new LabelInputError("operator_must_be_human")
     }
-    // Duplicate submit: same operator + same decision payload within short window returns latest.
-    if (input.clientRequestId) {
-      const dup = await this.db.prepare(`
+    const decision = normalizeDecision(input.decision)
+    const requestId = typeof input.clientRequestId === "string" && input.clientRequestId.trim()
+      ? input.clientRequestId.trim().slice(0, 160)
+      : null
+
+    // Real request-ID idempotency: same ID returns the original row only when
+    // kind/hash/decision match; conflicting reuse is rejected. Different IDs
+    // always insert (A→B→A yields three audit rows; latest wins).
+    if (requestId) {
+      const existing = await this.db.prepare(`
         SELECT * FROM intel_label_decision
-        WHERE label_item_id = ? AND is_human = 1 AND operator = ?
-          AND decision_json = ?
-        ORDER BY created_at DESC LIMIT 1
-      `).get(
-        input.labelItemId,
-        operator,
-        JSON.stringify(normalizeDecision(input.decision)),
-      ) as Row | undefined
-      if (dup) return mapDecision(dup)
+        WHERE label_item_id = ? AND client_request_id = ?
+        LIMIT 1
+      `).get(input.labelItemId, requestId) as Row | undefined
+      if (existing) {
+        const mapped = mapDecision(existing)
+        const sameKind = mapped.kind === input.kind
+        const sameHash = mapped.contentHash === item.contentHash
+        const sameDecision = JSON.stringify(mapped.decision) === JSON.stringify(decision)
+        if (!sameKind || !sameHash || !sameDecision) {
+          throw new LabelInputError("client_request_id_conflict")
+        }
+        return mapped
+      }
     }
-    const decision = await this.insertDecision({
+
+    const inserted = await this.insertDecision({
       labelItemId: item.id,
       itemId: item.itemId,
       versionId: item.versionId,
@@ -442,17 +460,18 @@ export class IntelLabelRepository {
       kind: input.kind,
       operator,
       isHuman: true,
-      decision: normalizeDecision(input.decision),
+      decision,
       analysisIds: [],
       promptHash: null,
       modelId: null,
       modelName: null,
+      clientRequestId: requestId,
       createdAt: now,
     })
     await this.db.prepare(`
       UPDATE intel_label_item SET queue_status = 'human_confirmed', updated_at = ? WHERE id = ?
     `).run(now, item.id)
-    return decision
+    return inserted
   }
 
   private async insertDecision(input: {
@@ -468,14 +487,15 @@ export class IntelLabelRepository {
     promptHash: string | null
     modelId: string | null
     modelName: string | null
+    clientRequestId?: string | null
     createdAt: string
   }): Promise<LabelDecisionView> {
     const id = `ldc_${randomUUID().replace(/-/g, "").slice(0, 24)}`
     await this.db.prepare(`
       INSERT INTO intel_label_decision (
         id, label_item_id, item_id, version_id, content_hash, kind, operator, is_human,
-        decision_json, analysis_ids_json, prompt_hash, model_id, model_name, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        decision_json, analysis_ids_json, prompt_hash, model_id, model_name, client_request_id, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       input.labelItemId,
@@ -490,6 +510,7 @@ export class IntelLabelRepository {
       input.promptHash,
       input.modelId,
       input.modelName,
+      input.clientRequestId ?? null,
       input.createdAt,
     )
     const row = await this.db.prepare("SELECT * FROM intel_label_decision WHERE id = ?").get(id) as Row

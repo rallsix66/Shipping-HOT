@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url"
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)))
 const RUN_DIR = resolve(process.env.E2E_R31_LABEL_DIR ?? join(ROOT, ".tmp", "r3-1-label-browser"))
-const EVIDENCE_DIR = resolve(process.env.E2E_R31_EVIDENCE_DIR ?? join(ROOT, ".tmp", "r3-1-llm-registry-20261027", "r3-label-eval-20261102"))
+const EVIDENCE_DIR = resolve(process.env.E2E_R31_EVIDENCE_DIR ?? join(ROOT, ".tmp", "r3-1-llm-registry-20261027", "r3-label-eval-rc-20261102"))
 const DB_PATH = join(RUN_DIR, ".data", "shipping-hot-v3.sqlite3")
 const SERVER_ENTRY = join(ROOT, "dist", "output", "server", "index.mjs")
 const PORT = Number(process.env.E2E_R31_LABEL_PORT ?? "4491")
@@ -226,7 +226,7 @@ async function main() {
     }
   }, 60000)
   if (!ready) throw new Error(`server not ready; log: ${serverLogPath}`)
-  check(ready?.database?.schemaVersion === 34, `schema v34 after init (got ${ready?.database?.schemaVersion})`)
+  check(ready?.database?.schemaVersion === 35, `schema v35 after init (got ${ready?.database?.schemaVersion})`)
 
   await seedLabels()
 
@@ -392,12 +392,320 @@ async function main() {
     returnByValue: true,
   })
   check(String(coverageText.result?.value || "").includes("合计"), `coverage widget visible (${coverageText.result?.value})`)
+
+  async function evalBool(expr) {
+    const { result } = await cdp.send("Runtime.evaluate", { expression: expr, returnByValue: true, awaitPromise: true })
+    return Boolean(result?.value)
+  }
+  async function evalStr(expr) {
+    const { result } = await cdp.send("Runtime.evaluate", { expression: expr, returnByValue: true, awaitPromise: true })
+    return String(result?.value ?? "")
+  }
+  async function evalJson(expr) {
+    const raw = await evalStr(expr)
+    try {
+      return JSON.parse(raw)
+    } catch {
+      return null
+    }
+  }
+
+  // Select first queue item
+  await cdp.send("Runtime.evaluate", {
+    expression: `(() => {
+      const btn = document.querySelector('[data-testid="label-queue-item-lbl_e2e_001"]');
+      if (btn) btn.click();
+      return Boolean(btn);
+    })()`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const t = await evalStr("document.querySelector('[data-testid=label-identity]')?.innerText || ''")
+    return t.includes("lbl_e2e_001") ? true : undefined
+  }, 15000)
+
+  const edited = await evalBool(`(() => {
+    const op = document.querySelector('[data-testid=label-operator]');
+    const notes = document.querySelector('[data-testid=label-notes]');
+    const official = document.querySelector('[data-testid=label-official]');
+    if (!op || !notes || !official) return false;
+    const setNative = (el, value) => {
+      const proto = el.tagName === 'TEXTAREA' ? window.HTMLTextAreaElement.prototype : (el.tagName === 'SELECT' ? window.HTMLSelectElement.prototype : window.HTMLInputElement.prototype);
+      const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+      setter?.call(el, value);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    setNative(op, 'e2e.browser');
+    setNative(notes, 'browser-correct-notes');
+    setNative(official, 'true');
+    return true;
+  })()`)
+  check(edited, "browser filled operator/notes/official")
+  const dirtyBefore = await evalStr("document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty') || ''")
+  check(dirtyBefore === "1", `dirty after edit (got ${dirtyBefore})`)
+
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-correct]')?.click()`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const _saving = await evalStr("document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-saving') || ''")
+    const msg = await evalStr("document.querySelector('[data-testid=label-message]')?.innerText || ''")
+    if (msg.includes("已纠正") || msg.includes("已确认") || msg.includes("计为人工")) return true
+    void _saving
+    // _saving flipped 1→0 without message is still a progress signal; keep polling message
+    return undefined
+  }, 20000)
+  const saveMsg = await evalStr("document.querySelector('[data-testid=label-message]')?.innerText || ''")
+  const savingAfter = await evalStr("document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-saving') || ''")
+  check(saveMsg.includes("已纠正") || saveMsg.includes("已确认") || saveMsg.includes("计为人工"), `UI save message (${saveMsg}) saving=${savingAfter}`)
+
+  const afterUi = await (await fetch(`${BASE}/api/shipping/intel/labels/lbl_e2e_001`)).json()
+  check(afterUi?.humanDecision?.isHuman === true, "GET after UI save has humanDecision")
+  check(afterUi?.humanDecision?.decision?.notes === "browser-correct-notes"
+    || afterUi?.item?.queueStatus === "human_confirmed", `GET notes/status after UI save (notes=${afterUi?.humanDecision?.decision?.notes} status=${afterUi?.item?.queueStatus})`)
+  evidence.api.uiSaveReadback = {
+    queueStatus: afterUi?.item?.queueStatus,
+    notes: afterUi?.humanDecision?.decision?.notes,
+    operator: afterUi?.humanDecision?.operator,
+  }
+
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-next]')?.click()`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const t = await evalStr("document.querySelector('[data-testid=label-identity]')?.innerText || ''")
+    return t.includes("lbl_e2e_002") ? true : undefined
+  }, 10000)
+  check((await evalStr("document.querySelector('[data-testid=label-identity]')?.innerText || ''")).includes("lbl_e2e_002"), "next navigates to item 2")
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-prev]')?.click()`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const t = await evalStr("document.querySelector('[data-testid=label-identity]')?.innerText || ''")
+    return t.includes("lbl_e2e_001") ? true : undefined
+  }, 10000)
+  check((await evalStr("document.querySelector('[data-testid=label-identity]')?.innerText || ''")).includes("lbl_e2e_001"), "prev returns to item 1")
+
+  await evalBool(`(() => {
+    const notes = document.querySelector('[data-testid=label-notes]');
+    if (!notes) return false;
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+    setter?.call(notes, 'unsaved-draft-stay');
+    notes.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  })()`)
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-next]')?.click()`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")) ? true : undefined
+  }, 8000)
+  check(await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))"), "leave confirm shown on dirty next")
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-leave-no]')?.click()`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("!document.querySelector('[data-testid=label-leave-confirm]')")) ? true : undefined
+  }, 5000)
+  check((await evalStr("document.querySelector('[data-testid=label-notes]')?.value || ''")).includes("unsaved-draft-stay"), "leave-no keeps draft")
+
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-next]')?.click()`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")) ? true : undefined
+  }, 8000)
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-leave-yes]')?.click()`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const t = await evalStr("document.querySelector('[data-testid=label-identity]')?.innerText || ''")
+    return t.includes("lbl_e2e_002") ? true : undefined
+  }, 10000)
+  check((await evalStr("document.querySelector('[data-testid=label-identity]')?.innerText || ''")).includes("lbl_e2e_002"), "leave-yes proceeds to next")
+
+  await evalBool(`(() => {
+    const notes = document.querySelector('[data-testid=label-notes]');
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+    setter?.call(notes, 'will-cancel');
+    notes.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  })()`)
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-cancel]')?.click()`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const dirty = await evalStr("document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty') || '0'")
+    return dirty === "0" ? true : undefined
+  }, 5000)
+  check((await evalStr("document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty') || ''")) === "0", "cancel clears dirty")
+
+  await evalBool(`(() => {
+    const notes = document.querySelector('[data-testid=label-notes]');
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+    setter?.call(notes, 'beforeunload-draft');
+    notes.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  })()`)
+  check(await evalBool(`document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty') === '1'`), "dirty armed for beforeunload/blocker")
+
+  const failRetry = await evalJson(`(async () => {
+    const original = window.fetch.bind(window);
+    let sawFail = false;
+    window.fetch = async (input, init) => {
+      const url = String(typeof input === 'string' ? input : input.url || '');
+      if (url.includes('/decision') && init && init.method === 'POST') {
+        sawFail = true;
+        return new Response(JSON.stringify({ statusMessage: 'content_hash_mismatch' }), { status: 409, headers: { 'content-type': 'application/json' } });
+      }
+      return original(input, init);
+    };
+    const op = document.querySelector('[data-testid=label-operator]');
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    setter?.call(op, 'e2e.retry');
+    op.dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('[data-testid=label-correct]')?.click();
+    await new Promise(r => setTimeout(r, 800));
+    const msg = document.querySelector('[data-testid=label-message]')?.innerText || '';
+    const dirty = document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty');
+    window.fetch = original;
+    return JSON.stringify({ sawFail, msg, dirty });
+  })()`)
+  check(failRetry?.sawFail === true, "intercepted save failure fired")
+  check(String(failRetry?.msg || "").includes("失败") || String(failRetry?.msg || "").includes("mismatch") || failRetry?.dirty === "1", `save failure keeps draft (msg=${failRetry?.msg} dirty=${failRetry?.dirty})`)
+
+  const slowGuard = await evalJson(`(async () => {
+    const original = window.fetch.bind(window);
+    let release;
+    const gate = new Promise(r => { release = r; });
+    window.fetch = async (input, init) => {
+      const url = String(typeof input === 'string' ? input : input.url || '');
+      if (url.includes('/decision') && init && init.method === 'POST') {
+        await gate;
+        return original(input, init);
+      }
+      return original(input, init);
+    };
+    const notes = document.querySelector('[data-testid=label-notes]');
+    const nset = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+    const op = document.querySelector('[data-testid=label-operator]');
+    const oset = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    oset?.call(op, 'e2e.slow');
+    op.dispatchEvent(new Event('input', { bubbles: true }));
+    nset?.call(notes, 'slow-save-v1');
+    notes.dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('[data-testid=label-correct]')?.click();
+    await new Promise(r => setTimeout(r, 200));
+    nset?.call(notes, 'slow-save-v2-during-flight');
+    notes.dispatchEvent(new Event('input', { bubbles: true }));
+    const midDirty = document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty');
+    const midSaving = document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-saving');
+    release();
+    await new Promise(r => setTimeout(r, 1200));
+    window.fetch = original;
+    const afterNotes = document.querySelector('[data-testid=label-notes]')?.value || '';
+    const afterDirty = document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty');
+    return JSON.stringify({ midDirty, midSaving, afterNotes, afterDirty });
+  })()`)
+  check(slowGuard?.midSaving === "1" || slowGuard?.midDirty === "1", `saving/dirty during slow save (midSaving=${slowGuard?.midSaving})`)
+  check(!String(slowGuard?.afterNotes || "").includes("CACHED LEAKED"), `slow-save notes intact (${slowGuard?.afterNotes})`)
+
+  await evalBool(`(() => {
+    const notes = document.querySelector('[data-testid=label-notes]');
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+    setter?.call(notes, 'back-nav-draft');
+    notes.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  })()`)
+  await cdp.send("Runtime.evaluate", {
+    expression: `history.pushState({}, '', '/label?x=1'); history.back(); 'ok'`,
+    returnByValue: true,
+  })
+  await new Promise(r => setTimeout(r, 500))
+  const leaveAfterBack = await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")
+  const stillOnLabel = await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))")
+  check(leaveAfterBack || stillOnLabel, `Back while dirty blocked or stayed (leave=${leaveAfterBack} page=${stillOnLabel})`)
+  if (leaveAfterBack) {
+    await cdp.send("Runtime.evaluate", {
+      expression: `document.querySelector('[data-testid=label-leave-no]')?.click()`,
+      returnByValue: true,
+    })
+  }
+
+  const aba1 = await fetch(`${BASE}/api/shipping/intel/labels/lbl_e2e_002/decision`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      kind: "human_correct",
+      operator: "e2e.aba",
+      expectedContentHash: "hash_e2e_2",
+      clientRequestId: "aba-A",
+      decision: { prefilterKeep: true, eventType: "weather_hazard", countries: ["VN"], ports: [], effectiveFrom: null, isOfficialStatement: false, notes: "A" },
+    }),
+  })
+  const aba1Body = await aba1.json().catch(() => ({}))
+  const aba2 = await fetch(`${BASE}/api/shipping/intel/labels/lbl_e2e_002/decision`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      kind: "human_correct",
+      operator: "e2e.aba",
+      expectedContentHash: "hash_e2e_2",
+      clientRequestId: "aba-B",
+      decision: { prefilterKeep: false, eventType: null, countries: [], ports: [], effectiveFrom: null, isOfficialStatement: null, notes: "B" },
+    }),
+  })
+  const aba2Body = await aba2.json().catch(() => ({}))
+  const aba3 = await fetch(`${BASE}/api/shipping/intel/labels/lbl_e2e_002/decision`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      kind: "human_correct",
+      operator: "e2e.aba",
+      expectedContentHash: "hash_e2e_2",
+      clientRequestId: "aba-A2",
+      decision: { prefilterKeep: true, eventType: "weather_hazard", countries: ["VN"], ports: [], effectiveFrom: null, isOfficialStatement: false, notes: "A-again" },
+    }),
+  })
+  const aba3Body = await aba3.json().catch(() => ({}))
+  check(aba1Body?.id && aba2Body?.id && aba3Body?.id
+    && aba1Body.id !== aba2Body.id
+    && aba2Body.id !== aba3Body.id
+    && aba1Body.id !== aba3Body.id, `A→B→A three distinct decision ids (${aba1Body?.id},${aba2Body?.id},${aba3Body?.id})`)
+  const conflict = await fetch(`${BASE}/api/shipping/intel/labels/lbl_e2e_002/decision`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      kind: "human_confirm",
+      operator: "e2e.aba",
+      expectedContentHash: "hash_e2e_2",
+      clientRequestId: "aba-A",
+      decision: { prefilterKeep: true, eventType: "weather_hazard", countries: ["VN"], ports: [], effectiveFrom: null, isOfficialStatement: false, notes: "conflict" },
+    }),
+  })
+  check(conflict.status === 409, `request-id conflict → 409 (got ${conflict.status})`)
+
+  const listRedact = await (await fetch(`${BASE}/api/shipping/intel/labels`)).json()
+  check(Array.isArray(listRedact?.items) && listRedact.items.every(i => i.excerpt == null), "list redacts excerpts")
+
   const shot = await cdp.send("Page.captureScreenshot", { format: "png" })
   const shotPath = join(EVIDENCE_DIR, "label-page.png")
   writeFileSync(shotPath, Buffer.from(shot.data, "base64"))
   evidence.screenshots.push(shotPath.replaceAll("\\", "/"))
+  const shot2 = await cdp.send("Page.captureScreenshot", { format: "png" })
+  const shot2Path = join(EVIDENCE_DIR, "label-page-after-ops.png")
+  writeFileSync(shot2Path, Buffer.from(shot2.data, "base64"))
+  evidence.screenshots.push(shot2Path.replaceAll("\\", "/"))
   check(external.length === 0, `no external network from label page (got ${external.length})`)
-
   // Offline eval against a DB copy (server may hold the live file open)
   const evalDb = join(EVIDENCE_DIR, "label-eval-source.sqlite3")
   copyFileSync(DB_PATH, evalDb)

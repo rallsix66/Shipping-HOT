@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
     })
   } catch (error) {
     if (error instanceof LabelInputError) {
-      const code = error.message === "content_hash_mismatch" ? 409 : 400
+      const code = error.message === "content_hash_mismatch" || error.message === "client_request_id_conflict" ? 409 : 400
       throw createError({ statusCode: code, statusMessage: error.message })
     }
     throw createError({ statusCode: 503, statusMessage: "label_save_failed" })

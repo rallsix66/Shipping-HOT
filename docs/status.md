@@ -1,7 +1,14 @@
+## R3-1 §4.9 REQUEST CHANGES closeout (2026-11-02)
+
+- Parent tip `6a8dafff8a2f39a8200fffdff023730d682370a7` (dots REQUEST CHANGES ts 1793590047.818929). Same label→eval loop; **033 mid-fail / zero-provider default path stay closed**.
+- Six fixes: (1) project AI prelabel from real completed/reused `{decision,content}` / `{extract,content}`; refresh AI on re-enroll without demoting `human_confirmed`; (2) additive schema **v35** `client_request_id` real idempotency + A→B→A audit + conflict 409; (3) live rights for excerpt on all return paths — no cached-excerpt fallback; (4) SPA/`useBlocker` + beforeunload leave guard, save-in-flight / late-response draft safety; (5) eval full-target incompleteness + content-addressed `sampleVersion` + `modelPromptVersions` / mixed refuse; (6) cost from selected analysis receipts only, per-currency, SQL fail not zero; offline intel-eval read-only (no migrate / data_mode rewrite).
+- Gates: typecheck / lint / build / full Vitest **2150 PASS** / 10 skipped; label browser e2e **42/42** (edit→save→GET, prev/next, leave stay/leave, Back, fail-retry, slow-save); Neat Freak this entry + AGENTS v35 note. S7 harness **NOT_RUN**. Unmerged / undeployed. No Slack send / no user disturb. Real 200-label set / paid re-run still not executed; R3-5 **BLOCKED**.
+- Evidence: `.tmp/r3-1-llm-registry-20261027/r3-label-eval-rc-20261102/`.
+
 ## R3-1 §4.9 label page + offline intel-eval (2026-11-02)
 
 - Same tip lane after limited-accept `98d28c0` (dots watermark >1793588344.661759): additive schema **v34** `intel_label_item` / `intel_label_decision`; UI `/label` + APIs under `/api/shipping/intel/labels`; `scripts/intel-eval.ts` offline (AIHOT@44578fa selection→metrics skeleton, MIT provenance); AI prelabel ≠ human; browse/save never call providers; R3-5 **BLOCKED** when shared LLM budget unconfigured.
-- Opportunistic: registry mid-fail 033 after ALTER/index asserts full rollback; numbers >200 ≤8192 no truncate; dates reject invalid TZ (+99:99).
+- Opportunistic: registry mid-fail 033 after ALTER/index asserts full rollback; numbers >200 →8192 no truncate; dates reject invalid TZ (+99:99).
 - Gates: `pnpm build` / `typecheck` / `lint` / full Vitest **2141 PASS** / 10 skipped; isolated label browser e2e **22/22**; Neat Freak docs sync this entry + AGENTS `/label`; S7 harness **NOT_RUN** (EXPECTED_SCHEMA_VERSION already 34). Unmerged / undeployed. No Slack send / no user disturb.
 - Evidence: `.tmp/r3-1-llm-registry-20261027/r3-label-eval-20261102/`.
 

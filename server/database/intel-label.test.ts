@@ -2,7 +2,7 @@ import NativeDatabase from "better-sqlite3"
 import { createDatabase } from "db0"
 import { afterEach, describe, expect, it } from "vitest"
 import { initShippingTables } from "#/database/shipping"
-import { IntelLabelRepository } from "#/database/intel-label"
+import { IntelLabelRepository, LabelInputError } from "#/database/intel-label"
 
 type Native = InstanceType<typeof NativeDatabase>
 function wrap(native: Native) {
@@ -26,6 +26,24 @@ function wrap(native: Native) {
   } as never)
 }
 
+const keepDecision = {
+  prefilterKeep: true,
+  eventType: "port_closure",
+  countries: ["MY"],
+  ports: ["MYPKG"],
+  effectiveFrom: "2026-11-02",
+  isOfficialStatement: false,
+}
+
+const dropDecision = {
+  prefilterKeep: false,
+  eventType: null,
+  countries: [] as string[],
+  ports: [] as string[],
+  effectiveFrom: null,
+  isOfficialStatement: null,
+}
+
 describe("intel label repository §4.9", () => {
   const cleanups: Array<() => void> = []
   afterEach(() => {
@@ -44,7 +62,7 @@ describe("intel label repository §4.9", () => {
     return { native, db, repo: new IntelLabelRepository(db) }
   }
 
-  it("enrolls URL+excerpt only, AI prelabel ≠ human confirmed", async () => {
+  it("enrolls URL+excerpt only, AI prelabel → human confirmed; duplicate request id returns same row", async () => {
     const { repo } = await fresh()
     const item = await repo.enroll({
       itemId: "item-a",
@@ -55,16 +73,7 @@ describe("intel label repository §4.9", () => {
       title: "A",
       category: "port",
       language: "en",
-      aiPrelabel: {
-        decision: {
-          prefilterKeep: true,
-          eventType: "port_closure",
-          countries: ["MY"],
-          ports: ["MYPKG"],
-          effectiveFrom: "2026-11-02",
-          isOfficialStatement: false,
-        },
-      },
+      aiPrelabel: { decision: { ...keepDecision } },
     })
     expect(item.queueStatus).toBe("ai_prelabeled")
     expect(item.excerpt).toBe("licensed excerpt only")
@@ -79,14 +88,7 @@ describe("intel label repository §4.9", () => {
       expectedContentHash: "hash-a",
       kind: "human_confirm",
       operator: "system:ai",
-      decision: {
-        prefilterKeep: true,
-        eventType: "port_closure",
-        countries: ["MY"],
-        ports: ["MYPKG"],
-        effectiveFrom: "2026-11-02",
-        isOfficialStatement: false,
-      },
+      decision: { ...keepDecision },
     })).rejects.toThrow(/operator_must_be_human/)
 
     const human = await repo.saveHumanDecision({
@@ -94,29 +96,85 @@ describe("intel label repository §4.9", () => {
       expectedContentHash: "hash-a",
       kind: "human_confirm",
       operator: "tester.one",
-      decision: {
-        prefilterKeep: true,
-        eventType: "port_closure",
-        countries: ["MY"],
-        ports: ["MYPKG"],
-        effectiveFrom: "2026-11-02",
-        isOfficialStatement: false,
-      },
+      decision: { ...keepDecision },
       clientRequestId: "req-1",
     })
     expect(human.isHuman).toBe(true)
+    expect(human.clientRequestId).toBe("req-1")
     expect((await repo.getItem(item.id))?.queueStatus).toBe("human_confirmed")
 
-    // duplicate submit returns same logical decision without error
     const dup = await repo.saveHumanDecision({
       labelItemId: item.id,
       expectedContentHash: "hash-a",
       kind: "human_confirm",
       operator: "tester.one",
-      decision: human.decision,
+      decision: { ...keepDecision },
       clientRequestId: "req-1",
     })
     expect(dup.id).toBe(human.id)
+  })
+
+  it("a→B→A with distinct request ids yields three audits; latest wins; same-id conflict rejects", async () => {
+    const { repo, native } = await fresh()
+    const item = await repo.enroll({
+      itemId: "item-aba",
+      versionId: "ver-aba",
+      contentHash: "hash-aba",
+      sourceUrl: "https://example.test/aba",
+      excerpt: "aba",
+      title: "ABA",
+    })
+    const a1 = await repo.saveHumanDecision({
+      labelItemId: item.id,
+      expectedContentHash: "hash-aba",
+      kind: "human_correct",
+      operator: "op.aba",
+      decision: { ...keepDecision, notes: "A1" },
+      clientRequestId: "req-A",
+    })
+    const b = await repo.saveHumanDecision({
+      labelItemId: item.id,
+      expectedContentHash: "hash-aba",
+      kind: "human_correct",
+      operator: "op.aba",
+      decision: { ...dropDecision, notes: "B" },
+      clientRequestId: "req-B",
+    })
+    expect(b.id).not.toBe(a1.id)
+    const a2 = await repo.saveHumanDecision({
+      labelItemId: item.id,
+      expectedContentHash: "hash-aba",
+      kind: "human_correct",
+      operator: "op.aba",
+      decision: { ...keepDecision, notes: "A2-back" },
+      clientRequestId: "req-A-again",
+    })
+    expect(a2.id).not.toBe(a1.id)
+    expect(a2.id).not.toBe(b.id)
+    const count = native.prepare(
+      "SELECT COUNT(*) AS c FROM intel_label_decision WHERE label_item_id = ? AND is_human = 1",
+    ).get(item.id) as { c: number }
+    expect(count.c).toBe(3)
+    const latest = await repo.latestDecision(item.id, { humanOnly: true })
+    expect(latest?.id).toBe(a2.id)
+    expect(latest?.decision.notes).toBe("A2-back")
+
+    await expect(repo.saveHumanDecision({
+      labelItemId: item.id,
+      expectedContentHash: "hash-aba",
+      kind: "human_confirm",
+      operator: "op.aba",
+      decision: { ...keepDecision, notes: "conflict" },
+      clientRequestId: "req-A",
+    })).rejects.toBeInstanceOf(LabelInputError)
+    await expect(repo.saveHumanDecision({
+      labelItemId: item.id,
+      expectedContentHash: "hash-aba",
+      kind: "human_confirm",
+      operator: "op.aba",
+      decision: { ...keepDecision, notes: "conflict" },
+      clientRequestId: "req-A",
+    })).rejects.toThrow(/client_request_id_conflict/)
   })
 
   it("rejects stale labels when content hash changes (version binding)", async () => {
@@ -129,7 +187,6 @@ describe("intel label repository §4.9", () => {
       excerpt: "v1",
       title: "B",
     })
-    // re-enroll same item/version with new hash clears human status path
     const updated = await repo.enroll({
       itemId: "item-b",
       versionId: "ver-b1",
@@ -145,14 +202,73 @@ describe("intel label repository §4.9", () => {
       expectedContentHash: "hash-b1",
       kind: "human_correct",
       operator: "tester.two",
-      decision: {
-        prefilterKeep: false,
-        eventType: null,
-        countries: [],
-        ports: [],
-        effectiveFrom: null,
-        isOfficialStatement: null,
-      },
+      decision: { ...dropDecision },
     })).rejects.toThrow(/content_hash_mismatch/)
+  })
+
+  it("re-enroll after analyze refreshes AI prelabel without demoting human_confirmed", async () => {
+    const { repo } = await fresh()
+    const item = await repo.enroll({
+      itemId: "item-c",
+      versionId: "ver-c",
+      contentHash: "hash-c",
+      sourceUrl: "https://example.test/c",
+      excerpt: "c1",
+      title: "C",
+    })
+    expect(item.queueStatus).toBe("unreviewed")
+    // enroll-before-analyze: later AI arrives, same hash
+    const withAi = await repo.enroll({
+      itemId: "item-c",
+      versionId: "ver-c",
+      contentHash: "hash-c",
+      sourceUrl: "https://example.test/c",
+      excerpt: "c1",
+      title: "C",
+      aiPrelabel: {
+        decision: { ...keepDecision },
+        analysisIds: ["an-1"],
+        promptHash: "ph-1",
+        modelId: "m-1",
+        modelName: "fake-model",
+      },
+    })
+    expect(withAi.queueStatus).toBe("ai_prelabeled")
+    const ai = await repo.latestAiPrelabel(withAi.id)
+    expect(ai?.modelId).toBe("m-1")
+    expect(ai?.promptHash).toBe("ph-1")
+    expect(ai?.analysisIds).toEqual(["an-1"])
+
+    await repo.saveHumanDecision({
+      labelItemId: withAi.id,
+      expectedContentHash: "hash-c",
+      kind: "human_confirm",
+      operator: "human.c",
+      decision: { ...keepDecision },
+      clientRequestId: "req-c-human",
+    })
+    expect((await repo.getItem(withAi.id))?.queueStatus).toBe("human_confirmed")
+
+    // refreshed AI must not demote human_confirmed
+    const again = await repo.enroll({
+      itemId: "item-c",
+      versionId: "ver-c",
+      contentHash: "hash-c",
+      sourceUrl: "https://example.test/c",
+      excerpt: "c1",
+      title: "C",
+      aiPrelabel: {
+        decision: { ...keepDecision, eventType: "port_congestion" },
+        analysisIds: ["an-2"],
+        promptHash: "ph-2",
+        modelId: "m-2",
+        modelName: "fake-model-2",
+      },
+    })
+    expect(again.queueStatus).toBe("human_confirmed")
+    expect((await repo.latestDecision(again.id, { humanOnly: true }))?.isHuman).toBe(true)
+    const ai2 = await repo.latestAiPrelabel(again.id)
+    expect(ai2?.analysisIds).toEqual(["an-2"])
+    expect(ai2?.modelId).toBe("m-2")
   })
 })
