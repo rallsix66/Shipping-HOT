@@ -13,8 +13,10 @@ import type { ClipAudit } from "@shared/manual-clip"
 import { initShippingTables } from "#/database/shipping"
 import { admitModelPayload } from "#/intel/llm/model-payload-gate"
 import {
+  type StoredMaterialSnapshot,
   type TrustedModelUseEvidence,
   createFixtureTrustedEvidenceSource,
+  createFixtureTrustedMaterialSource,
   parseStrictInstant,
   tryVerifyExactVersionEvidence,
 } from "#/intel/llm/exact-version-evidence-verifier"
@@ -80,7 +82,23 @@ function baseEvidence(overrides: Partial<TrustedModelUseEvidence> = {}): Trusted
   }
 }
 
+function baseMaterial(overrides: Partial<StoredMaterialSnapshot> = {}): StoredMaterialSnapshot {
+  return {
+    itemId: "item-1",
+    versionId: "ver-1",
+    contentHash: "hash-1",
+    readableScope: "full",
+    ...overrides,
+  }
+}
+
 function baseInput(overrides: Record<string, unknown> = {}) {
+  const {
+    materialSource: overrideMaterialSource,
+    ...rest
+  } = overrides
+  const materialSource = (overrideMaterialSource as ReturnType<typeof createFixtureTrustedMaterialSource> | undefined)
+    ?? createFixtureTrustedMaterialSource([baseMaterial()])
   return {
     itemId: "item-1",
     versionId: "ver-1",
@@ -89,9 +107,11 @@ function baseInput(overrides: Record<string, unknown> = {}) {
     step: "prefilter" as const,
     requestedContentScope: "excerpt" as const,
     evidenceId: "ev-fixture-1",
+    // bare persistence must never override materialSource; kept only to prove ignore.
     persistence: "full" as const,
     now: () => T_NOW,
-    ...overrides,
+    ...rest,
+    materialSource,
   }
 }
 
@@ -140,11 +160,19 @@ describe("parseStrictInstant", () => {
   it("accepts explicit Z / offset instants and rejects Date.parse leniency", () => {
     expect(parseStrictInstant("2026-11-01T00:00:00.000Z", "validFrom").ok).toBe(true)
     expect(parseStrictInstant("2026-11-01T08:00:00+08:00", "validFrom").ok).toBe(true)
+    expect(parseStrictInstant("2026-11-01T00:00:00.000+14:00", "validFrom").ok).toBe(true)
+    expect(parseStrictInstant("2026-11-01T00:00:00.000-14:00", "validFrom").ok).toBe(true)
     expect(parseStrictInstant("1", "validFrom").ok).toBe(false)
     expect(parseStrictInstant("2026-02-30T00:00:00.000Z", "validFrom").ok).toBe(false)
     expect(parseStrictInstant("2026-11-01T00:00:00", "validFrom").ok).toBe(false)
     expect(parseStrictInstant("2026-11-01T00:00:00.000+99:00", "validFrom").ok).toBe(false)
     expect(parseStrictInstant("2026-11-01T00:00:00.000UTC", "validFrom").ok).toBe(false)
+    // ±14:01..14:59 must not silently pass under a ±14h cap
+    expect(parseStrictInstant("2026-11-01T00:00:00.000+14:01", "validFrom").ok).toBe(false)
+    expect(parseStrictInstant("2026-11-01T00:00:00.000-14:59", "validFrom").ok).toBe(false)
+    // more than 3 fractional digits must not silently truncate into validity
+    expect(parseStrictInstant("2026-11-01T00:00:00.0001Z", "validFrom").ok).toBe(false)
+    expect(parseStrictInstant("2026-11-01T00:00:00.123456Z", "validFrom").ok).toBe(false)
   })
 })
 
@@ -372,41 +400,96 @@ describe("tryVerifyExactVersionEvidence fail-closed", () => {
     if (!result.ok) expect(result.code).toBe("content_scope_exceeded")
   })
 
-  it("bLOCKED when stored material persistence missing (material scope unverified)", async () => {
+  it("bLOCKED when TrustedMaterialSource missing (material scope unverified)", async () => {
     const source = createFixtureTrustedEvidenceSource([baseEvidence()])
-    const missing = await tryVerifyExactVersionEvidence(baseInput({
-      evidenceSource: source,
-      persistence: undefined,
-    }))
-    const nulled = await tryVerifyExactVersionEvidence(baseInput({
-      evidenceSource: source,
-      persistence: null,
-    }))
+    const missing = await tryVerifyExactVersionEvidence({
+      ...baseInput({ evidenceSource: source }),
+      materialSource: undefined,
+    })
+    const nulled = await tryVerifyExactVersionEvidence({
+      ...baseInput({ evidenceSource: source }),
+      materialSource: null,
+    })
     expect(missing.ok).toBe(false)
     expect(nulled.ok).toBe(false)
     if (!missing.ok) expect(missing.code).toBe("material_scope_unverified")
     if (!nulled.ok) expect(nulled.code).toBe("material_scope_unverified")
   })
 
-  it("bLOCKED when persistence disallowed even if evidence allows full_text", async () => {
+  it("bLOCKED when material record missing / read fails / unreadable", async () => {
+    const source = createFixtureTrustedEvidenceSource([baseEvidence()])
+    const emptyMaterial = createFixtureTrustedMaterialSource([])
+    const missing = await tryVerifyExactVersionEvidence(baseInput({
+      evidenceSource: source,
+      materialSource: emptyMaterial,
+    }))
+    const readFail = await tryVerifyExactVersionEvidence(baseInput({
+      evidenceSource: source,
+      materialSource: {
+        getExact() {
+          throw new Error("boom-material")
+        },
+      },
+    }))
+    const unreadable = await tryVerifyExactVersionEvidence(baseInput({
+      evidenceSource: source,
+      materialSource: createFixtureTrustedMaterialSource([
+        baseMaterial({ readableScope: "unreadable" }),
+      ]),
+    }))
+    expect(missing.ok).toBe(false)
+    expect(readFail.ok).toBe(false)
+    expect(unreadable.ok).toBe(false)
+    if (!missing.ok) expect(missing.code).toBe("material_scope_unverified")
+    if (!readFail.ok) {
+      expect(readFail.code).toBe("material_read_failed")
+      expect(readFail.reason).toContain("boom-material")
+    }
+    if (!unreadable.ok) expect(unreadable.code).toBe("material_scope_unverified")
+  })
+
+  it("bLOCKED on wrong material identity even with matching evidence", async () => {
+    const source = createFixtureTrustedEvidenceSource([baseEvidence()])
+    const wrong = await tryVerifyExactVersionEvidence(baseInput({
+      evidenceSource: source,
+      materialSource: {
+        getExact() {
+          // Returns a different identity than requested / evidence-bound.
+          return baseMaterial({ versionId: "ver-OTHER", readableScope: "full" })
+        },
+      },
+    }))
+    expect(wrong.ok).toBe(false)
+    if (!wrong.ok) expect(wrong.code).toBe("material_scope_unverified")
+  })
+
+  it("bLOCKED when material readable scope disallowed even if evidence allows full_text", async () => {
     const source = createFixtureTrustedEvidenceSource([baseEvidence()])
     const result = await tryVerifyExactVersionEvidence(baseInput({
       step: "extract",
       requestedContentScope: "excerpt",
-      persistence: "disallowed",
       evidenceSource: source,
+      materialSource: createFixtureTrustedMaterialSource([
+        baseMaterial({ readableScope: "disallowed" }),
+      ]),
+      // bare persistence "full" must not override the material read
+      persistence: "full",
     }))
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.code).toBe("content_scope_exceeded")
   })
 
-  it("narrows by excerpt_only persistence; never lets storage produce a grant", async () => {
+  it("narrows by excerpt_only material read; bare persistence cannot override", async () => {
     const source = createFixtureTrustedEvidenceSource([baseEvidence()])
+    const materials = createFixtureTrustedMaterialSource([
+      baseMaterial({ readableScope: "excerpt_only" }),
+    ])
     const tooWide = await tryVerifyExactVersionEvidence(baseInput({
       step: "extract",
       requestedContentScope: "full_text",
-      persistence: "excerpt_only",
       evidenceSource: source,
+      materialSource: materials,
+      persistence: "full",
     }))
     expect(tooWide.ok).toBe(false)
     if (!tooWide.ok) expect(tooWide.code).toBe("content_scope_exceeded")
@@ -414,8 +497,9 @@ describe("tryVerifyExactVersionEvidence fail-closed", () => {
     const narrowedOk = await tryVerifyExactVersionEvidence(baseInput({
       step: "extract",
       requestedContentScope: "excerpt",
-      persistence: "excerpt_only",
       evidenceSource: source,
+      materialSource: materials,
+      persistence: "full",
     }))
     expect(narrowedOk.ok).toBe(true)
     if (narrowedOk.ok) {
@@ -423,11 +507,24 @@ describe("tryVerifyExactVersionEvidence fail-closed", () => {
       expect(narrowedOk.evidenceRef.storedPersistence).toBe("excerpt_only")
     }
 
+    // After material narrows further to disallowed, same evidence must refuse again.
+    materials.upsert(baseMaterial({ readableScope: "disallowed" }))
+    const afterNarrow = await tryVerifyExactVersionEvidence(baseInput({
+      step: "extract",
+      requestedContentScope: "excerpt",
+      evidenceSource: source,
+      materialSource: materials,
+      persistence: "full",
+    }))
+    expect(afterNarrow.ok).toBe(false)
+    if (!afterNarrow.ok) expect(afterNarrow.code).toBe("content_scope_exceeded")
+
     // persistence alone still cannot grant without evidence
     const storageOnly = await tryVerifyExactVersionEvidence(baseInput({
       evidenceId: undefined,
       persistence: "full",
       evidenceSource: source,
+      materialSource: createFixtureTrustedMaterialSource([baseMaterial()]),
     }))
     expect(storageOnly.ok).toBe(false)
     if (!storageOnly.ok) expect(storageOnly.code).toBe("rights_missing")

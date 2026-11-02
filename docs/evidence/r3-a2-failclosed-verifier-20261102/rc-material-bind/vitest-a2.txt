@@ -1,0 +1,52 @@
+A2 rc-material-bind gate: vitest-a2
+timestamp: 2026-11-02 17:59:34 Asia/Shanghai
+baseline_tip: 287473f888103175b2c8e36c5f8fc46a1880c798
+workdir_tip_before: 287473f888103175b2c8e36c5f8fc46a1880c798
+command: pnpm exec vitest run server/intel/llm/exact-version-evidence-verifier.test.ts --reporter=verbose
+
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027
+
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > parseStrictInstant > accepts explicit Z / offset instants and rejects Date.parse leniency 1ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED when evidenceId missing 1ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED when TrustedEvidenceSource absent 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED when evidenceId not found 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED on evidence source read failure 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED on malformed evidence fields 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED on calendar overflow / missing timezone / illegal timezone 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED on malformed revokedAt / validUntil and invalid now() 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > keeps explicit null open-ended validUntil semantics 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED when revoked 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED when expired (validUntil reached) 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED on wrong version / contentHash 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED on wrong model service 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED when step not in allowedSteps (prefilter+extract cannot cover severity) 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED when requested content scope exceeds evidence allowance 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED when TrustedMaterialSource missing (material scope unverified) 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED when material record missing / read fails / unreadable 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED on wrong material identity even with matching evidence 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > bLOCKED when material readable scope disallowed even if evidence allows full_text 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > narrows by excerpt_only material read; bare persistence cannot override 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > hard-denies private_material clip even with matching fixture evidence 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > hard-denies unverified user_declaration even with matching fixture evidence 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > does not grant from caller boolean / public URL / persistence alone 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > allows fixture-trusted exact match without returning a consumable license 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > re-reads source so later revoke / version change cannot be bypassed by prior success 0ms
+ ✓ server/intel/llm/exact-version-evidence-verifier.test.ts > tryVerifyExactVersionEvidence fail-closed > performs zero Provider calls and zero auth-table writes; DB stays under project .tmp 122ms
+
+ Test Files  1 passed (1)
+      Tests  26 passed (26)
+   Start at  18:01:22
+   Duration  647ms (transform 289ms, setup 0ms, import 358ms, tests 129ms, environment 0ms)
+
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/calendar.ts" is used
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" is used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/promo-calendar.ts" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/promo-calendar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/promo-calendar.ts" is used
+
+EXIT_CODE=0

@@ -11,10 +11,10 @@
  * Fixture-trusted evidence ≠ production permit.
  *
  * Content-scope honesty: this API matches requested scope against evidence
- * allowance AND a read-only, precisely-bound stored material persistence signal.
- * Missing / unreadable persistence → BLOCKED. Storage may only narrow; it never
- * produces a grant. disallowed / excerpt_only must not pass solely because
- * evidence allows full_text.
+ * allowance AND a read-only TrustedMaterialSource snapshot (item/version/hash +
+ * current readable scope). Caller-supplied bare persistence enums are ignored and
+ * cannot override the read result. Missing / unreadable / mismatched material →
+ * BLOCKED. Storage may only narrow; it never produces a grant.
  *
  * PRODUCTION BOUNDARY (honest): trusted production evidence ingress / issuer
  * wiring remains unfinished. Only an isolated TrustedEvidenceSource (e.g. test
@@ -51,6 +51,7 @@ export type EvidenceVerifyDenyCode =
   | "service_mismatch"
   | "content_scope_exceeded"
   | "material_scope_unverified"
+  | "material_read_failed"
 
 /**
  * Trusted evidence record shape. Callers MUST obtain this from a TrustedEvidenceSource;
@@ -92,6 +93,36 @@ export interface TrustedEvidenceSource {
   getById: (evidenceId: string) => TrustedModelUseEvidence | null | Promise<TrustedModelUseEvidence | null>
 }
 
+/**
+ * Read-only stored material snapshot bound to an exact item/version/hash.
+ * Fixture-only today — not a production material store / auth library.
+ */
+export interface StoredMaterialSnapshot {
+  itemId: string
+  versionId: string
+  contentHash: string
+  /**
+   * Current effective readable content range for this exact stored material.
+   * "unreadable" means the record exists but the readable range cannot be
+   * determined honestly → verify must BLOCK.
+   */
+  readableScope: StoredMaterialPersistence | "unreadable"
+}
+
+export interface TrustedMaterialSource {
+  /**
+   * Look up one stored material by exact identity. Return null when missing.
+   * Throwing or rejecting → material_read_failed (fail-closed).
+   * Must return the identity it actually read so verify can re-bind; must NOT
+   * invent a wider scope than storage currently exposes.
+   */
+  getExact: (ref: {
+    itemId: string
+    versionId: string
+    contentHash: string
+  }) => StoredMaterialSnapshot | null | Promise<StoredMaterialSnapshot | null>
+}
+
 export interface EvidenceVerifyInput {
   itemId: string
   versionId: string
@@ -108,9 +139,14 @@ export interface EvidenceVerifyInput {
    */
   evidenceSource?: TrustedEvidenceSource | null
   /**
-   * Read-only current stored material persistence for the exact item/version/hash.
-   * Required for content-scope honesty. Missing / null / unreadable →
-   * material_scope_unverified BLOCKED. Storage only narrows; never grants.
+   * Required read-only material source. Absence → material_scope_unverified.
+   * Production material store is not wired; tests supply an in-memory fixture.
+   */
+  materialSource?: TrustedMaterialSource | null
+  /**
+   * @deprecated Ignored for permission / scope. Documented so callers that still
+   * pass a bare persistence enum cannot escalate or override the material read.
+   * Verify binds scope from TrustedMaterialSource only.
    */
   persistence?: StoredMaterialPersistence | null
   /**
@@ -163,9 +199,9 @@ const SCOPE_RANK: Record<IntelContentScope, number> = {
 
 const STEP_SET = new Set<string>(MODEL_USE_VERIFY_STEPS)
 
-/** Strict ISO-8601 instant with explicit timezone (Z or ±HH:MM). */
+/** Strict ISO-8601 instant with explicit timezone (Z or ±HH:MM); fractional seconds at most 3 digits. */
 const STRICT_INSTANT_RE
-  = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?(Z|[+-]\d{2}:\d{2})$/
+  = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?(Z|[+-]\d{2}:\d{2})$/
 
 function deny(code: EvidenceVerifyDenyCode, reason: string): EvidenceVerifyResult {
   return { ok: false, blocked: true, code, reason }
@@ -188,10 +224,12 @@ function parseOffsetMinutes(zone: string): number | null {
   const sign = match[1] === "-" ? -1 : 1
   const hours = Number(match[2])
   const minutes = Number(match[3])
-  // Reject absurd / unknown zones (hours > 14 or minutes >= 60).
+  // Reject absurd / unknown zones. Cap is ±14:00 inclusive; ±14:01..14:59 denied.
   if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null
-  if (hours > 14 || minutes > 59) return null
-  return sign * (hours * 60 + minutes)
+  if (minutes > 59) return null
+  const totalMinutes = hours * 60 + minutes
+  if (totalMinutes > 14 * 60) return null
+  return sign * totalMinutes
 }
 
 /**
@@ -241,8 +279,8 @@ export function parseStrictInstant(value: string, field: string):
   if (offsetMinutes === null) {
     return { ok: false, reason: `${field} has illegal or unknown timezone offset` }
   }
-  // Normalize fractional seconds to milliseconds (truncate beyond ms).
-  const msFrac = Number(fraction.padEnd(3, "0").slice(0, 3))
+  // Fractional seconds: at most 3 digits (regex-enforced); pad to ms, never truncate longer input.
+  const msFrac = Number(fraction.padEnd(3, "0"))
   if (!Number.isFinite(msFrac)) {
     return { ok: false, reason: `${field} fractional seconds malformed` }
   }
@@ -405,10 +443,78 @@ export function createFixtureTrustedEvidenceSource(
 }
 
 /**
+ * In-memory fixture material source for isolated tests. Not a production store.
+ * Keyed by itemId\0versionId\0contentHash. No caching layer.
+ */
+export function createFixtureTrustedMaterialSource(
+  records: Iterable<StoredMaterialSnapshot>,
+): TrustedMaterialSource & {
+  upsert: (record: StoredMaterialSnapshot) => void
+  remove: (ref: { itemId: string, versionId: string, contentHash: string }) => void
+} {
+  const keyOf = (ref: { itemId: string, versionId: string, contentHash: string }) =>
+    `${ref.itemId}\0${ref.versionId}\0${ref.contentHash}`
+  const map = new Map<string, StoredMaterialSnapshot>()
+  for (const record of records) {
+    const shaped = validateStoredMaterialSnapshot(record)
+    if (!shaped.ok) throw new Error(`fixture_material_invalid:${shaped.reason}`)
+    map.set(keyOf(shaped.snapshot), { ...shaped.snapshot })
+  }
+  return {
+    getExact(ref) {
+      const hit = map.get(keyOf(ref))
+      return hit ? { ...hit } : null
+    },
+    upsert(record) {
+      const shaped = validateStoredMaterialSnapshot(record)
+      if (!shaped.ok) throw new Error(`fixture_material_invalid:${shaped.reason}`)
+      map.set(keyOf(shaped.snapshot), { ...shaped.snapshot })
+    },
+    remove(ref) {
+      map.delete(keyOf(ref))
+    },
+  }
+}
+
+function validateStoredMaterialSnapshot(record: unknown):
+  | { ok: true, snapshot: StoredMaterialSnapshot }
+  | { ok: false, reason: string } {
+  if (!record || typeof record !== "object" || Array.isArray(record)) {
+    return { ok: false, reason: "material snapshot is not an object" }
+  }
+  const row = record as Record<string, unknown>
+  const itemId = row.itemId
+  const versionId = row.versionId
+  const contentHash = row.contentHash
+  const readableScope = row.readableScope
+  if (typeof itemId !== "string" || !itemId.trim()) {
+    return { ok: false, reason: "material itemId missing or empty" }
+  }
+  if (typeof versionId !== "string" || !versionId.trim()) {
+    return { ok: false, reason: "material versionId missing or empty" }
+  }
+  if (typeof contentHash !== "string" || !contentHash.trim()) {
+    return { ok: false, reason: "material contentHash missing or empty" }
+  }
+  if (!(
+    readableScope === "full"
+    || readableScope === "excerpt_only"
+    || readableScope === "disallowed"
+    || readableScope === "unreadable"
+  )) {
+    return { ok: false, reason: "material readableScope malformed" }
+  }
+  return {
+    ok: true,
+    snapshot: { itemId, versionId, contentHash, readableScope },
+  }
+}
+
+/**
  * Fail-closed verify. Order: clip hard-deny → evidence presence → source read →
- * shape → binding → service → step → content scope (evidence ∩ stored persistence) →
- * validity/revoke. Never grants from boolean/URL/persistence alone.
- * Never returns a consumable ExactVersionModelLicense.
+ * shape → binding → service → step → material source read/bind → content scope
+ * (evidence intersect material readableScope) → validity/revoke. Never grants from
+ * boolean/URL/bare persistence alone. Never returns a consumable ExactVersionModelLicense.
  */
 export async function tryVerifyExactVersionEvidence(
   input: EvidenceVerifyInput,
@@ -422,8 +528,8 @@ export async function tryVerifyExactVersionEvidence(
     return deny(clipGate.code, clipGate.reason)
   }
 
-  // Caller boolean / public URL / catalog MUST NOT grant.
-  // persistence is consulted only as a narrowing bound after evidence match — never as a grant.
+  // Caller boolean / public URL / catalog / bare persistence MUST NOT grant.
+  // Material readable scope is bound only via TrustedMaterialSource after evidence match.
 
   const evidenceId = typeof input.evidenceId === "string" ? input.evidenceId.trim() : ""
   if (!evidenceId) {
@@ -460,14 +566,15 @@ export async function tryVerifyExactVersionEvidence(
     return deny("evidence_malformed", "request identity fields missing or empty")
   }
 
-  // Material scope honesty: missing/unreadable stored persistence → BLOCKED.
-  if (!isStoredMaterialPersistence(input.persistence)) {
+  // Bare caller persistence is ignored and cannot override the material read.
+  void input.persistence
+
+  if (!input.materialSource) {
     return deny(
       "material_scope_unverified",
-      "stored material persistence missing or unreadable; cannot claim send scope ≤ actual stored/readable scope",
+      "no TrustedMaterialSource wired; cannot bind send scope to an exact stored material read",
     )
   }
-  const storedPersistence = input.persistence
 
   let raw: TrustedModelUseEvidence | null
   try {
@@ -516,11 +623,67 @@ export async function tryVerifyExactVersionEvidence(
     )
   }
 
+  let materialRaw: StoredMaterialSnapshot | null
+  try {
+    materialRaw = await input.materialSource.getExact({
+      itemId: input.itemId,
+      versionId: input.versionId,
+      contentHash: input.contentHash,
+    })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown material read failure"
+    return deny("material_read_failed", `trusted material source read failed: ${message}`)
+  }
+
+  if (!materialRaw) {
+    return deny(
+      "material_scope_unverified",
+      "exact material record missing from TrustedMaterialSource; cannot bind content scope",
+    )
+  }
+
+  const materialShaped = validateStoredMaterialSnapshot(materialRaw)
+  if (!materialShaped.ok) {
+    return deny("material_scope_unverified", materialShaped.reason)
+  }
+  const material = materialShaped.snapshot
+
+  if (
+    material.itemId !== input.itemId
+    || material.versionId !== input.versionId
+    || material.contentHash !== input.contentHash
+  ) {
+    return deny(
+      "material_scope_unverified",
+      "material snapshot itemId/versionId/contentHash does not match the exact material under analysis",
+    )
+  }
+
+  // Also require material identity to equal the already-bound evidence identity.
+  if (
+    material.itemId !== evidence.itemId
+    || material.versionId !== evidence.versionId
+    || material.contentHash !== evidence.contentHash
+  ) {
+    return deny(
+      "material_scope_unverified",
+      "material snapshot identity does not match bound evidence identity",
+    )
+  }
+
+  if (material.readableScope === "unreadable" || !isStoredMaterialPersistence(material.readableScope)) {
+    return deny(
+      "material_scope_unverified",
+      "stored material readable scope unreadable; cannot claim send scope vs actual stored/readable scope",
+    )
+  }
+  const storedPersistence = material.readableScope
+
   const persistenceMax = persistenceCeiling(storedPersistence)
   if (persistenceMax === null) {
     return deny(
       "content_scope_exceeded",
-      "stored material persistence is disallowed; storage scope only narrows and cannot admit model-send",
+      "stored material readable scope is disallowed; storage scope only narrows and cannot admit model-send",
     )
   }
 
@@ -528,7 +691,7 @@ export async function tryVerifyExactVersionEvidence(
   if (SCOPE_RANK[input.requestedContentScope] > SCOPE_RANK[effectiveContentScope]) {
     return deny(
       "content_scope_exceeded",
-      `requestedContentScope ${input.requestedContentScope} exceeds effective scope ${effectiveContentScope} (evidence ${evidence.allowedContentScope} ∩ persistence ${storedPersistence})`,
+      `requestedContentScope ${input.requestedContentScope} exceeds effective scope ${effectiveContentScope} (evidence ${evidence.allowedContentScope} intersect material ${storedPersistence})`,
     )
   }
 

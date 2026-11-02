@@ -12,13 +12,14 @@
 | `server/intel/llm/exact-version-evidence-verifier.ts` | 无 license 返回；`parseStrictInstant`；persistence 收窄 |
 | `server/intel/llm/exact-version-evidence-verifier.test.ts` | 夹具 24；测试 DB 在项目 `.tmp` |
 | `docs/design/r3-a2-exactversion-evidence-boundary-draft.md` | RC 三点落地说明 |
-| `docs/evidence/r3-a2-failclosed-verifier-20261102/rc-tighten/` | 本片门禁与 neat |
+| `docs/evidence/r3-a2-failclosed-verifier-20261102/rc-tighten/` | 上轮 RC tighten 门禁与 neat |
+| `docs/evidence/r3-a2-failclosed-verifier-20261102/rc-material-bind/` | 本片：素材来源注入 + 非空 UTF-8 门禁日志 |
 
 ## 三点落地
 
 1. **无 license 返回**：成功仅 `evidenceRef` + `productionAuthorized:false` + `licenseIssued:false`；正向测试断言 `admitModelPayload` 不能凭 evidenceRef 放行；不放宽旧 gate。
 2. **严格时间**：`validFrom`/`validUntil`/`revokedAt` 真实日历 + 显式时区；拒绝 `"1"`、日期溢出、无时区、非法时区、撤销畸形、now 无效/抛错；显式 `null` 开放期限保留。
-3. **内容范围写实**：要求只读 `persistence`；缺失 → `material_scope_unverified`；有效范围 = evidence ∩ persistence；`disallowed`/`excerpt_only` 不得因 full-text evidence 整体放行；存储只收窄永不产生许可。
+3. **内容范围写实**：注入 `TrustedMaterialSource`；有效范围 = evidence ∩ material.readableScope；裸 `persistence` 不能覆盖；缺/错/不可读 → BLOCKED。
 
 ## 契约要点
 
@@ -29,9 +30,9 @@
 5. 正向分支仅隔离可信夹具；夹具成功 ≠ 生产有权；核验结果 ≠ 新创建授权 / 可消费 license
 6. 无结果缓存绕过后续撤销或版本变化
 
-## 测试覆盖（24）
+## 测试覆盖（26+）
 
-含原负例/正例 + 严格时间 + persistence 缺失/disallowed/excerpt_only 收窄 + 成功无 license 且不可送入旧 gate + 项目 `.tmp` DB。
+含原负例/正例 + 严格时间（含 ±14:01 拒绝、小数秒≤3）+ TrustedMaterialSource 绑定/错身份/收窄/裸 persistence 无效 + 成功无 license 且不可送入旧 gate + 项目 `.tmp` DB。
 
 ## 文档声明
 

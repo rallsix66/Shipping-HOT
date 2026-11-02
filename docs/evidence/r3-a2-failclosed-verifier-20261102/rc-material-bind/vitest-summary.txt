@@ -1,0 +1,2 @@
+vitest-a2: 26/26 PASS
+vitest-full: 2235 passed | 10 skipped (2245) PASS
