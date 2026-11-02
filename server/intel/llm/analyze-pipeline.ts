@@ -69,6 +69,14 @@ export interface ExtractedIntel {
   numbers: Record<string, string | number | null>
   isOfficialStatement: boolean | null
   isFirstParty: boolean | null
+  /** Issuing body from material; null when unknown. Never invent. */
+  publisher: string | null
+  /** Explicit document/reference number; null when unknown. Never invent. */
+  documentNumber: string | null
+  /** Declared status subset; null when unknown. Never invent; never output "expired". */
+  status: "rumor" | "draft" | "published" | "effective" | "revised" | "repealed" | null
+  /** Explicit platform evidence only; null when unknown. Never infer from eventType alone. */
+  platform: "tiktok_shop" | "shopee" | "lazada" | null
   dimensions: DimensionScores
   /** Explicit routine-notice evidence from extract when present. */
   routineNotice?: boolean | null
@@ -229,6 +237,34 @@ function asStrictNullableBool(value: unknown): boolean | null | undefined {
   return undefined
 }
 
+const POLICY_STATUS_SET = new Set(["rumor", "draft", "published", "effective", "revised", "repealed"])
+const PLATFORM_ID_SET = new Set(["tiktok_shop", "shopee", "lazada"])
+
+/** Missing key → null; wrong type → undefined (fail-closed). */
+function asOptionalPolicyStatus(value: unknown): ExtractedIntel["status"] | undefined {
+  if (value === undefined || value === null) return null
+  if (typeof value !== "string") return undefined
+  const s = value.trim().toLowerCase()
+  if (!POLICY_STATUS_SET.has(s)) return null
+  return s as ExtractedIntel["status"]
+}
+
+function asOptionalPlatform(value: unknown): ExtractedIntel["platform"] | undefined {
+  if (value === undefined || value === null) return null
+  if (typeof value !== "string") return undefined
+  const s = value.trim().toLowerCase()
+  if (!PLATFORM_ID_SET.has(s)) return null
+  return s as ExtractedIntel["platform"]
+}
+
+function asOptionalNullableTrimmed(value: unknown, max = 500): string | null | undefined {
+  if (value === undefined || value === null) return null
+  if (typeof value !== "string") return undefined
+  const s = value.trim()
+  if (!s) return null
+  return s.length > max ? s.slice(0, max) : s
+}
+
 /** numbers must be a plain object (not array); values string|number|null only. No silent truncate. */
 const NUMBERS_STRING_MAX = 8192
 function asStrictNumbersMap(value: unknown): Record<string, string | number | null> | null {
@@ -323,6 +359,12 @@ export function parseExtractOutput(raw: unknown): ExtractedIntel | null {
   const isFirstParty = asStrictNullableBool(obj.isFirstParty)
   if (isOfficialStatement === undefined || isFirstParty === undefined) return null
 
+  const publisher = asOptionalNullableTrimmed(obj.publisher, 300)
+  const documentNumber = asOptionalNullableTrimmed(obj.documentNumber, 200)
+  const status = asOptionalPolicyStatus(obj.status)
+  const platform = asOptionalPlatform(obj.platform)
+  if (publisher === undefined || documentNumber === undefined || status === undefined || platform === undefined) return null
+
   let routineNotice: boolean | null | undefined = null
   if ("routineNotice" in obj) {
     routineNotice = asStrictNullableBool(obj.routineNotice)
@@ -342,6 +384,10 @@ export function parseExtractOutput(raw: unknown): ExtractedIntel | null {
     numbers,
     isOfficialStatement,
     isFirstParty,
+    publisher,
+    documentNumber,
+    status,
+    platform,
     dimensions: { impact, scope, urgency, actionability },
     routineNotice: routineNotice ?? null,
   }

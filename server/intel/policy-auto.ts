@@ -25,6 +25,7 @@ import { PolicyError } from "#/database/policy"
 import { selectConsistentAnalysisRun } from "#/intel/label-service"
 import { readIntelMaterial } from "#/intel/material-read"
 import { type DatedParagraph, pageContentFingerprint } from "#/intel/policy-page-diff"
+import { parseExtractOutput } from "#/intel/llm/analyze-pipeline"
 
 export type PolicyAutoEventType = "customs_rule" | "trade_policy" | "platform_rule"
 
@@ -125,6 +126,39 @@ function candidateFingerprintKey(candidate: PolicyAutoCandidate): string {
  * Rights-narrow every persist path: platform never stores fullText; excerpt/metadata scopes strip body.
  * Call before pending JSON, audit detail, and create/revise.
  */
+function clipExcerpt(text: string | null | undefined, max = 280): string | null {
+  const s = trimOrNull(text ?? null)
+  if (!s) return null
+  return s.length <= max ? s : `${s.slice(0, max - 1).trimEnd()}…`
+}
+
+/** Persist only date+hash (+ allowed excerpt text). Never stash forbidden full page text in paragraphs. */
+function sanitizePageParagraphsForPersist(
+  paragraphs: DatedParagraph[] | undefined,
+  scope: string | null,
+  sourceType: PolicySourceType,
+): DatedParagraph[] | undefined {
+  if (!paragraphs?.length) return paragraphs
+  const allowFullText = scope === "full_text" && sourceType !== "platform"
+  const allowExcerpt = scope === "excerpt" && sourceType !== "platform"
+  return paragraphs.map((p) => {
+    const date = String(p.date || "").trim()
+    const hash = String(p.hash || "").trim()
+    let text = ""
+    if (allowFullText) {
+      text = normalizePersistText(p.text)
+    } else if (allowExcerpt) {
+      text = clipExcerpt(p.text, 280) ?? ""
+    }
+    // Platform / metadata_only: identity only (date + hash); text cleared.
+    return { date, hash, text }
+  })
+}
+
+function normalizePersistText(raw: string | null | undefined): string {
+  return String(raw ?? "").replace(/\s+/g, " ").trim()
+}
+
 export function sanitizeCandidateForPersist(candidate: PolicyAutoCandidate): PolicyAutoCandidate {
   const scope = candidate.contentScope ?? null
   const next: PolicyAutoCandidate = {
@@ -136,7 +170,7 @@ export function sanitizeCandidateForPersist(candidate: PolicyAutoCandidate): Pol
     basisText: candidate.basisText?.trim() ?? "",
     bodyExcerpt: trimOrNull(candidate.bodyExcerpt ?? null),
     fullText: trimOrNull(candidate.fullText ?? null),
-    pageParagraphs: candidate.pageParagraphs ? [...candidate.pageParagraphs] : undefined,
+    pageParagraphs: undefined,
     analysisIds: Array.isArray(candidate.analysisIds) ? [...candidate.analysisIds] : [],
   }
 
@@ -144,7 +178,7 @@ export function sanitizeCandidateForPersist(candidate: PolicyAutoCandidate): Pol
     const fromFull = next.fullText
     next.fullText = null
     if (!next.bodyExcerpt && fromFull) {
-      next.bodyExcerpt = fromFull.length <= 280 ? fromFull : `${fromFull.slice(0, 279).trimEnd()}…`
+      next.bodyExcerpt = clipExcerpt(fromFull, 280)
     }
   }
 
@@ -154,9 +188,15 @@ export function sanitizeCandidateForPersist(candidate: PolicyAutoCandidate): Pol
   } else if (scope === "excerpt") {
     next.fullText = null
     if (next.bodyExcerpt && next.bodyExcerpt.length > 280) {
-      next.bodyExcerpt = `${next.bodyExcerpt.slice(0, 279).trimEnd()}…`
+      next.bodyExcerpt = clipExcerpt(next.bodyExcerpt, 280)
     }
   }
+
+  next.pageParagraphs = sanitizePageParagraphsForPersist(
+    candidate.pageParagraphs,
+    scope,
+    next.sourceType,
+  )
 
   return next
 }
@@ -279,6 +319,11 @@ export class PolicyAutoService {
     invokeCount += 1
     // Sanitize before any branch that may persist (pending / audit / policy).
     const candidate = sanitizeCandidateForPersist(candidateIn)
+
+    // Same source operation (intelVersionId + contentHash) replay returns prior result; does not rewrite current.
+    const priorEarly = await this.findPriorSourceOpResult(candidate)
+    if (priorEarly) return priorEarly
+
     const gate = this.precheck(candidate)
     if (gate) {
       if (gate.outcome === "needs_human_confirm") {
@@ -299,6 +344,10 @@ export class PolicyAutoService {
 
     try {
       return await this.policies.runInTransaction(async () => {
+        // Re-check source-op inside the write lock (concurrent same-op converges).
+        const priorLocked = await this.findPriorSourceOpResult(candidate)
+        if (priorLocked) return priorLocked
+
         const matches = await this.policies.findExactIdentity(candidate.countryCode, publisher, documentNumber)
         if (matches.length > 1) {
           const pendingId = await this.enqueuePending(candidate, "ambiguous_identity", now)
@@ -493,11 +542,15 @@ export class PolicyAutoService {
     const rawOut = extractRow.output
     if (!rawOut || typeof rawOut !== "object" || Array.isArray(rawOut)) return { ok: false, reason: "extract_invalid" }
     const extractWrap = rawOut as Record<string, unknown>
-    const extract = (extractWrap.extract && typeof extractWrap.extract === "object" && !Array.isArray(extractWrap.extract))
-      ? extractWrap.extract as Record<string, unknown>
+    const extractRaw = (extractWrap.extract && typeof extractWrap.extract === "object" && !Array.isArray(extractWrap.extract))
+      ? extractWrap.extract
       : extractWrap
 
-    const eventTypeRaw = asString(extract.eventType)
+    // Authority entry must use the same parseExtractOutput contract as the offline pipeline.
+    const extract = parseExtractOutput(extractRaw)
+    if (!extract) return { ok: false, reason: "extract_parse_failed" }
+
+    const eventTypeRaw = extract.eventType
     if (!eventTypeRaw || !POLICY_EVENT_TYPES.has(eventTypeRaw)) {
       return { ok: false, reason: "event_type_not_policy" }
     }
@@ -507,43 +560,33 @@ export class PolicyAutoService {
     const countryCode = countries.find(c => Object.prototype.hasOwnProperty.call(policyCountries, c)) as PolicyCountry | undefined
     if (!countryCode) return { ok: false, reason: "country_evidence_insufficient" }
 
-    // Publisher / document number: only explicit extract evidence — never invent from title.
-    const documentNumber = asString(extract.documentNumber)
+    // Publisher / document number: only parser-accepted explicit evidence — never invent from title.
+    const documentNumber = trimOrNull(extract.documentNumber)
       ?? asString((extract.numbers as Record<string, unknown> | undefined)?.documentNumber)
-    const publisher = asString(extract.publisher)
+    const publisher = trimOrNull(extract.publisher)
 
     const isOfficialStatement = extract.isOfficialStatement === true
-    const isFirstParty = extract.isFirstParty === true
+    // Platform only from explicit extract.platform — never guess from eventType.
+    let platform: PolicyPlatform | null = extract.platform
     let sourceType: PolicySourceType
-    let platform: PolicyPlatform | null = null
-    if (eventType === "platform_rule") {
+    if (isOfficialStatement) {
+      // Government / regulator formal notice. Platform self-pages are NOT official.
+      sourceType = "official"
+      platform = null
+    } else if (platform != null) {
+      // Explicit platform-identity evidence → platform source (not government).
       sourceType = "platform"
-      platform = "tiktok_shop"
-    } else if (isOfficialStatement) {
-      sourceType = "official"
-    } else if (isFirstParty) {
-      sourceType = "official"
     } else {
+      // Media / rumor path. isFirstParty alone does NOT upgrade to official.
       sourceType = "media"
     }
 
-    // Status: media → rumor; otherwise only when extract carries an explicit declared status string.
+    // Status: media → rumor; otherwise only parser-accepted declared status. Never map expired→repealed.
     let status: PolicyDeclaredStatus | null = null
-    const statusRaw = asString(extract.status)
     if (sourceType === "media") {
       status = "rumor"
-    } else if (
-      statusRaw === "published"
-      || statusRaw === "effective"
-      || statusRaw === "draft"
-      || statusRaw === "rumor"
-      || statusRaw === "revised"
-      || statusRaw === "repealed"
-    ) {
-      status = statusRaw
-    } else if (statusRaw === "expired") {
-      // Display-only status; persist as repealed (terminal).
-      status = "repealed"
+    } else if (extract.status) {
+      status = extract.status
     }
 
     const effectiveAt = civilDate(extract.effectiveFrom)
@@ -654,6 +697,52 @@ export class PolicyAutoService {
     }
   }
 
+  /**
+   * Source-op identity = intelVersionId + contentHash.
+   * Replay of an already-handled intel version returns its original outcome/version and does not mutate current.
+   * A *new* intel version/hash whose content regresses to historical A may still create a new policy version.
+   */
+  private async findPriorSourceOpResult(candidate: PolicyAutoCandidate): Promise<PolicyAutoResult | null> {
+    const versionId = trimOrNull(candidate.intelVersionId ?? null)
+    const contentHash = trimOrNull(candidate.contentHash ?? null)
+    if (!versionId || !contentHash) return null
+
+    const row = await this.db.prepare(
+      `SELECT outcome, reason, policy_id, version_id, detail_json
+       FROM policy_auto_audit
+       WHERE intel_version_id = ? AND content_hash = ?
+       ORDER BY created_at ASC, id ASC
+       LIMIT 1`,
+    ).get(versionId, contentHash) as {
+      outcome: string
+      reason: string | null
+      policy_id: string | null
+      version_id: string | null
+      detail_json: string | null
+    } | undefined
+    if (!row) return null
+
+    const outcome = row.outcome as PolicyAutoOutcome
+    const detail = row.detail_json ? JSON.parse(String(row.detail_json)) as { pendingId?: string | null } : {}
+    const result: PolicyAutoResult = {
+      outcome,
+      reason: row.reason ?? undefined,
+      policyId: row.policy_id ?? undefined,
+      versionId: row.version_id ?? undefined,
+      pendingId: detail.pendingId ?? undefined,
+    }
+
+    if (row.policy_id) {
+      try {
+        const detailView = await this.policies.detail(row.policy_id, new Date(0))
+        if (detailView?.record) result.record = detailView.record
+      } catch {
+        /* best-effort attach */
+      }
+    }
+    return result
+  }
+
   private precheck(candidate: PolicyAutoCandidate): PolicyAutoResult | null {
     if (!candidate.eventType || !(candidate.eventType in EVENT_CATEGORY)) {
       return { outcome: "rejected", reason: "invalid_event_type" }
@@ -663,7 +752,8 @@ export class PolicyAutoService {
         return { outcome: "rejected", reason: "platform_out_of_auto_scope" }
       }
       if (candidate.platform !== "tiktok_shop") {
-        return { outcome: "rejected", reason: "platform_required_tiktok_shop" }
+        // Unknown / missing platform evidence → human; never invent TikTok from eventType.
+        return { outcome: "needs_human_confirm", reason: "platform_evidence_insufficient" }
       }
     }
     if (candidate.sourceType === "media") {

@@ -1,9 +1,9 @@
-## R3-8 政策库自动生成（仅离线）(2026-11-02) — RC after dots REQUEST CHANGES on `3fbac06`
+## R3-8 政策库自动生成（仅离线）(2026-11-02) — RC2 after dots REQUEST CHANGES on `e3409e45`
 
-- Slice §4.11 / R3-8 only — **not** full R3 pass. Real 200-label set / real effect&cost still unrun; R3-5 **BLOCKED**; S7 harness **NOT_RUN**; unmerged / undeployed.
-- Schema **v37** pending/audit + **v38** additive `candidate_fp` + partial unique pending index. `PolicyAutoService`: authoritative `applyFromExactIntel` from exact item/version/contentHash + consistent analysis + rights; `sanitizeCandidateForPersist` on every write (pending/audit/create/revise); nestable IMMEDIATE/SAVEPOINT atomic policy+audit / pending+audit; write-chain mutex; current-version fingerprint (+applicableTimezone, current pageFp) so A→B→A bumps; TikTok page-diff splits before normalize (plain multi-date HTML fixtures).
-- Same-slice: removed prod Shell hidden `shell-nav-policies-query-hash`; e2e harness stamps real Shell Link; leave-no clears `intendedHrefRef`; `mergeLeaveFromHref` restores search+hash; GET zero-model via invoke counters.
-- Gates: typecheck / lint / build / full Vitest 2182 / label browser e2e 90/90 / Neat Freak. Evidence: `docs/evidence/r3-8-policy-auto-20261102/`. Zero live crawl / paid / keys / new sources. No Slack send from agent.
+- Slice §4.11 / R3-8 only — **not** full R3 pass. Real 200-label set / real effect&cost still unrun; R3-5 **BLOCKED**; S7 harness **NOT_RUN** (EXPECTED_SCHEMA_VERSION=39 synced only); unmerged / undeployed.
+- Schema **v37** pending/audit + **v38** safe `candidate_fp` backfill before unique index + **v39** repair for already-v38 IFNULL indexes. `PolicyAutoService`: extract-v2 + `parseExtractOutput` (publisher/documentNumber/status/platform); authority entry uses parser; trust-based sourceType (no eventType→TikTok; isFirstParty≠official; expired≠repealed); `sanitizeCandidateForPersist` strips `pageParagraphs[].text` under rights; source-op idempotency by intelVersionId+contentHash (same-op replay keeps current B); nestable IMMEDIATE/SAVEPOINT + write-chain mutex; current-version fingerprint.
+- GET honesty: real h3 list/detail handlers in `policies-read-http.test.ts` (paid_receipt/provider_usage flat; policy-auto invoke 0). Label e2e still stamps real Shell Link; leave-no clears `intendedHrefRef`.
+- Gates: typecheck / lint / build / full Vitest 2187 / label browser e2e 90/90 / Neat Freak. Evidence: `docs/evidence/r3-8-policy-auto-20261102/rc2/`. Zero live crawl / paid / keys / new sources. No Slack send from agent.
 
 ## R3-1 §4.9 RC4 REQUEST CHANGES closeout (2026-11-02)
 

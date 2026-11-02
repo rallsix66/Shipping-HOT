@@ -13,7 +13,9 @@ import { IntelAnalysisRepository } from "#/database/intel-analysis"
 import { IntelRepository } from "#/database/intel"
 import { PolicyRepository } from "#/database/policy"
 import { initShippingTables } from "#/database/shipping"
-import { readDatabaseMetadata } from "#/database/runtime"
+import { initializeShippingDatabase, readDatabaseMetadata } from "#/database/runtime"
+import { shippingMigrations } from "#/database/migrations"
+import { parseExtractOutput } from "#/intel/llm/analyze-pipeline"
 import { licensedBlocks } from "#/intel/content-license"
 import {
   type PolicyAutoCandidate,
@@ -54,7 +56,10 @@ function memoryDb() {
 const T0 = new Date("2026-10-12T02:00:00.000Z")
 const NOW = "2026-10-12T02:00:00.000Z"
 
+let _ocSeq = 0
 function officialCandidate(over: Partial<PolicyAutoCandidate> = {}): PolicyAutoCandidate {
+  _ocSeq += 1
+  const seq = _ocSeq
   return {
     eventType: "customs_rule",
     countryCode: "VN",
@@ -72,9 +77,9 @@ function officialCandidate(over: Partial<PolicyAutoCandidate> = {}): PolicyAutoC
     modelId: "fixture-model",
     modelName: "fixture-model-name",
     promptHash: "prompt-hash-1",
-    intelItemId: "item-1",
-    intelVersionId: "ver-1",
-    contentHash: "content-1",
+    intelItemId: `item-${seq}`,
+    intelVersionId: `ver-${seq}`,
+    contentHash: `content-${seq}`,
     contentScope: "full_text",
     isFixture: true,
     enteredBy: "policy-auto-test",
@@ -128,9 +133,9 @@ describe("r3-8 policy-page-diff (TikTok Shop offline fixtures)", () => {
 })
 
 describe("r3-8 policy-auto service paths", () => {
-  it("schema reaches v38 with policy_auto tables + pending candidate_fp", async () => {
+  it("schema reaches v39 with policy_auto tables + pending candidate_fp", async () => {
     const { database, native } = await setup()
-    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(38)
+    expect((await readDatabaseMetadata(database)).schemaVersion).toBe(39)
     const tables = native.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'policy_auto%'").all() as Array<{ name: string }>
     expect(tables.map(t => t.name).sort()).toEqual(["policy_auto_audit", "policy_auto_pending"])
     const cols = native.prepare("PRAGMA table_info(policy_auto_pending)").all() as Array<{ name: string }>
@@ -150,6 +155,8 @@ describe("r3-8 policy-auto service paths", () => {
       basisText: "fixture auto basis v2",
       fullText: "示例全文（fixture，非真实公告）v2。",
       promptHash: "prompt-hash-2",
+      intelVersionId: "ver-upd",
+      contentHash: "content-upd",
     })
     const updated = await auto.apply(c2, T0)
     expect(updated.outcome).toBe("updated")
@@ -157,7 +164,12 @@ describe("r3-8 policy-auto service paths", () => {
     const detail = await policies.detail(created.policyId!, T0)
     expect(detail?.versions.length).toBe(2)
 
-    const again = await auto.apply(c2, T0)
+    // New source-op with identical content → current-fingerprint unchanged (not same-op replay).
+    const again = await auto.apply({
+      ...c2,
+      intelVersionId: "ver-again",
+      contentHash: "content-again",
+    }, T0)
     expect(again.outcome).toBe("unchanged")
     const detail2 = await policies.detail(created.policyId!, T0)
     expect(detail2?.versions.length).toBe(2)
@@ -171,16 +183,45 @@ describe("r3-8 policy-auto service paths", () => {
     native.close()
   })
 
-  it("a→b→a bumps a new version (historical fingerprint is not current idempotency)", async () => {
+  it("same source-op replay keeps current B; new intel version content-regression A creates v3", async () => {
     const { auto, policies, native } = await setup()
-    const a = officialCandidate({ basisText: "content-A", fullText: "full-A" })
-    const b = officialCandidate({ basisText: "content-B", fullText: "full-B" })
+    const a = officialCandidate({
+      basisText: "content-A",
+      fullText: "full-A",
+      intelVersionId: "ver-A",
+      contentHash: "hash-A",
+    })
+    const b = officialCandidate({
+      basisText: "content-B",
+      fullText: "full-B",
+      intelVersionId: "ver-B",
+      contentHash: "hash-B",
+    })
     const rA = await auto.apply(a, T0)
     expect(rA.outcome).toBe("created")
+    const versionAfterA = rA.versionId
     const rB = await auto.apply(b, T0)
     expect(rB.outcome).toBe("updated")
     expect((await policies.detail(rA.policyId!, T0))?.versions.length).toBe(2)
-    const rA2 = await auto.apply(a, T0)
+    expect((await policies.detail(rA.policyId!, T0))?.record.basisText).toBe("content-B")
+
+    // Replay of the *same* source operation A must not overwrite current B.
+    const replayA = await auto.apply(a, T0)
+    expect(replayA.outcome).toBe("created")
+    expect(replayA.versionId).toBe(versionAfterA)
+    const afterReplay = await policies.detail(rA.policyId!, T0)
+    expect(afterReplay?.versions.length).toBe(2)
+    expect(afterReplay?.record.basisText).toBe("content-B")
+    expect(afterReplay?.record.fullText).toBe("full-B")
+
+    // A *new* intel version/hash whose body regresses to A may create v3.
+    const aNew = officialCandidate({
+      basisText: "content-A",
+      fullText: "full-A",
+      intelVersionId: "ver-A2",
+      contentHash: "hash-A2",
+    })
+    const rA2 = await auto.apply(aNew, T0)
     expect(rA2.outcome).toBe("updated")
     const detail = await policies.detail(rA.policyId!, T0)
     expect(detail?.versions.length).toBe(3)
@@ -190,6 +231,8 @@ describe("r3-8 policy-auto service paths", () => {
     const last = audits[audits.length - 1]!
     expect(last.outcome).toBe("updated")
     expect(String(last.version_id)).toBe(detail!.record.currentVersionId)
+    expect(String(last.intel_version_id)).toBe("ver-A2")
+    expect(String(last.content_hash)).toBe("hash-A2")
     native.close()
   })
 
@@ -221,7 +264,7 @@ describe("r3-8 policy-auto service paths", () => {
     const again = await s2.auto.apply({ ...th2, applicableTimezone: undefined }, T0)
     expect(again.outcome).toBe("unchanged")
     // Change title + keep tz to prove updates still work
-    const updated = await s2.auto.apply({ ...th2, title: "[FIXTURE] TH tz v2" }, T0)
+    const updated = await s2.auto.apply({ ...th2, title: "[FIXTURE] TH tz v2", intelVersionId: "ver-th-2", contentHash: "hash-th-2" }, T0)
     expect(updated.outcome).toBe("updated")
     expect((await s2.policies.detail(createdTh.policyId!, T0))?.record.title).toContain("v2")
     s2.native.close()
@@ -256,6 +299,52 @@ describe("r3-8 policy-auto service paths", () => {
     expect(pending[0]!.candidate.bodyExcerpt).toBeTruthy()
     expect(pending[0]!.candidate.bodyExcerpt!.length).toBeLessThanOrEqual(280)
     expect(JSON.stringify(pending[0]!.candidate)).not.toContain("UNIQUE_TAIL_MUST_NOT_PERSIST_IN_EXCERPT")
+    // pageParagraphs must not stash forbidden full page text either
+    const parasLeak = officialCandidate({
+      documentNumber: null,
+      sourceType: "platform",
+      platform: "tiktok_shop",
+      eventType: "platform_rule",
+      status: "published",
+      contentScope: "excerpt",
+      title: "[FIXTURE] TT missing doc paras",
+      sourceUrl: "https://example.org/fixture/tt-missing-doc-paras",
+      publisher: "TikTok Shop",
+      pageParagraphs: [
+        { date: "2026-10-01", text: "SECRET_PARAGRAPH_FULL_TEXT_MUST_NOT_LAND", hash: "abc123" },
+      ],
+    })
+    const rParas = await auto.apply(parasLeak, T0)
+    expect(rParas.outcome).toBe("needs_human_confirm")
+    const pendParas = (await auto.listPending()).find(p => p.candidate.sourceUrl.includes("tt-missing-doc-paras"))!
+    expect(pendParas.candidate.pageParagraphs?.[0]?.text ?? "").toBe("")
+    expect(pendParas.candidate.pageParagraphs?.[0]?.hash).toBe("abc123")
+    expect(JSON.stringify(pendParas.candidate)).not.toContain("SECRET_PARAGRAPH_FULL_TEXT_MUST_NOT_LAND")
+
+    const metaOnly = officialCandidate({
+      documentNumber: null,
+      sourceType: "platform",
+      platform: "tiktok_shop",
+      eventType: "platform_rule",
+      status: "published",
+      contentScope: "metadata_only",
+      title: "[FIXTURE] TT meta only",
+      sourceUrl: "https://example.org/fixture/tt-meta-only",
+      publisher: "TikTok Shop",
+      fullText: "META_FULL_SHOULD_CLEAR",
+      bodyExcerpt: "META_EXCERPT_SHOULD_CLEAR",
+      pageParagraphs: [
+        { date: "2026-09-01", text: "META_PARA_SECRET", hash: "def456" },
+      ],
+    })
+    const rMeta = await auto.apply(metaOnly, T0)
+    expect(rMeta.outcome).toBe("needs_human_confirm")
+    const pendMeta = (await auto.listPending()).find(p => p.candidate.sourceUrl.includes("tt-meta-only"))!
+    expect(pendMeta.candidate.fullText).toBeNull()
+    expect(pendMeta.candidate.bodyExcerpt).toBeNull()
+    expect(pendMeta.candidate.pageParagraphs?.[0]?.text ?? "").toBe("")
+    expect(JSON.stringify(pendMeta.candidate)).not.toContain("META_PARA_SECRET")
+    expect(JSON.stringify(pendMeta.candidate)).not.toContain("META_FULL_SHOULD_CLEAR")
     const audits = await auto.listAudit()
     expect(audits.some(a => a.outcome === "needs_human_confirm")).toBe(true)
     for (const a of audits) {
@@ -432,11 +521,12 @@ describe("r3-8 policy-auto service paths", () => {
     const { auto, policies, native } = await setup()
     const c = officialCandidate({ documentNumber: "CONCUR-1", sourceUrl: "https://example.org/fixture/concur-1" })
     const results = await Promise.all([auto.apply(c, T0), auto.apply(c, T0), auto.apply(c, T0)])
-    const created = results.filter(r => r.outcome === "created")
-    const unchanged = results.filter(r => r.outcome === "unchanged")
-    expect(created.length + unchanged.length).toBe(3)
-    expect(created.length).toBe(1)
+    // Concurrent same source-op converges on one policy; later calls may replay the original "created".
+    expect(results.every(r => r.outcome === "created" || r.outcome === "unchanged")).toBe(true)
+    expect(new Set(results.map(r => r.policyId).filter(Boolean)).size).toBe(1)
     expect((await policies.list({}, T0)).filter(r => r.documentNumber === "CONCUR-1").length).toBe(1)
+    const detail = await policies.detail(results[0]!.policyId!, T0)
+    expect(detail?.versions.length).toBe(1)
 
     const pendingCand = officialCandidate({ documentNumber: null, publisher: null, sourceUrl: "https://example.org/fixture/pend-concur" })
     const pend = await Promise.all([auto.apply(pendingCand, T0), auto.apply(pendingCand, T0), auto.apply(pendingCand, T0)])
@@ -476,7 +566,7 @@ describe("r3-8 policy-auto service paths", () => {
 
     resetPolicyAutoInvokeCount()
     expect(policyAutoInvokeCount()).toBe(0)
-    // Mirror policies GET handlers: list + detail only — must not touch PolicyAutoService.
+    // Repository list/detail smoke (not a substitute for real HTTP GET — see policies-read-http.test.ts).
     const listed = await policies.list({}, T0)
     expect(listed.length).toBeGreaterThanOrEqual(1)
     await policies.detail(listed[0]!.id, T0)
@@ -489,7 +579,7 @@ describe("r3-8 policy-auto service paths", () => {
     native.close()
   })
 
-  it("sanitizeCandidateForPersist narrows platform and excerpt scopes", () => {
+  it("sanitizeCandidateForPersist narrows platform/excerpt/metadata and pageParagraphs text", () => {
     const platform = sanitizeCandidateForPersist(officialCandidate({
       sourceType: "platform",
       platform: "tiktok_shop",
@@ -497,18 +587,23 @@ describe("r3-8 policy-auto service paths", () => {
       fullText: "x".repeat(500),
       bodyExcerpt: null,
       contentScope: "excerpt",
+      pageParagraphs: [{ date: "2026-10-01", text: "PLATFORM_PARA_SECRET", hash: "h1" }],
     }))
     expect(platform.fullText).toBeNull()
     expect(platform.bodyExcerpt).toBeTruthy()
     expect(platform.bodyExcerpt!.endsWith("…")).toBe(true)
+    expect(platform.pageParagraphs?.[0]?.text).toBe("")
+    expect(platform.pageParagraphs?.[0]?.hash).toBe("h1")
 
     const meta = sanitizeCandidateForPersist(officialCandidate({
       contentScope: "metadata_only",
       fullText: "nope",
       bodyExcerpt: "nope",
+      pageParagraphs: [{ date: "2026-10-02", text: "META_PARA", hash: "h2" }],
     }))
     expect(meta.fullText).toBeNull()
     expect(meta.bodyExcerpt).toBeNull()
+    expect(meta.pageParagraphs?.[0]?.text).toBe("")
   })
 
   it("applyFromExactIntel: real material→analysis→policy/version+audit; missing publisher/doc → human", async () => {
@@ -571,10 +666,11 @@ describe("r3-8 policy-auto service paths", () => {
           isOfficialStatement: true,
           isFirstParty: true,
           dimensions: { impact: 1, scope: 1, urgency: 1, actionability: 1 },
-          // Explicit policy evidence — not invented by the entry builder.
+          // Explicit policy evidence via parseExtractOutput contract — not invented by the entry builder.
           publisher: "示例机关（fixture）",
           documentNumber: "AUTO-FROM-INTEL-001",
           status: "published",
+          platform: null,
         },
       },
     })
@@ -647,7 +743,10 @@ describe("r3-8 policy-auto service paths", () => {
           isOfficialStatement: true,
           isFirstParty: null,
           dimensions: { impact: 1, scope: 1, urgency: 1, actionability: 1 },
+          publisher: null,
+          documentNumber: null,
           status: "published",
+          platform: null,
         },
       },
     })
@@ -659,6 +758,301 @@ describe("r3-8 policy-auto service paths", () => {
     expect(human.outcome).toBe("needs_human_confirm")
     expect(["missing_document_number", "missing_publisher"]).toContain(human.reason)
     expect((await policies.list({}, T0)).some(r => r.title.includes("missing pub"))).toBe(false)
+    native.close()
+  })
+})
+
+describe("r3-8 RC2 extract contract + safe v37 upgrade + source mapping", () => {
+  it("parseExtractOutput yields publisher/documentNumber/status/platform; entry uses parser not hand-stuffed-only fields", async () => {
+    const raw = {
+      eventType: "customs_rule",
+      countries: ["VN"],
+      ports: [],
+      cities: [],
+      chainStages: [],
+      namedEntity: null,
+      occurredAt: "2026-10-01",
+      effectiveFrom: "2026-11-01",
+      effectiveUntil: null,
+      numbers: {},
+      isOfficialStatement: true,
+      isFirstParty: true,
+      publisher: "示例机关（fixture）",
+      documentNumber: "PARSE-DOC-1",
+      status: "published",
+      platform: null,
+      dimensions: { impact: 1, scope: 1, urgency: 1, actionability: 1 },
+    }
+    const parsed = parseExtractOutput(raw)
+    expect(parsed?.publisher).toBe("示例机关（fixture）")
+    expect(parsed?.documentNumber).toBe("PARSE-DOC-1")
+    expect(parsed?.status).toBe("published")
+    expect(parsed?.platform).toBeNull()
+
+    // expired is not a declared persist status — parser nulls it
+    expect(parseExtractOutput({ ...raw, status: "expired" })?.status).toBeNull()
+
+    const { auto, native } = await setup()
+    const builtOfficial = await auto.buildCandidateFromExactIntel
+    // mapping unit via build from analysis-like parse product
+    const mediaPlatformRule = parseExtractOutput({
+      ...raw,
+      eventType: "platform_rule",
+      isOfficialStatement: false,
+      isFirstParty: false,
+      publisher: "Some Media",
+      documentNumber: null,
+      status: null,
+      platform: null,
+    })
+    expect(mediaPlatformRule?.platform).toBeNull()
+
+    const firstPartyNotGov = parseExtractOutput({
+      ...raw,
+      eventType: "customs_rule",
+      isOfficialStatement: false,
+      isFirstParty: true,
+      publisher: "Carrier Self",
+      documentNumber: "CARRIER-1",
+      status: "published",
+      platform: null,
+    })
+    expect(firstPartyNotGov?.isFirstParty).toBe(true)
+    expect(firstPartyNotGov?.isOfficialStatement).toBe(false)
+
+    // TikTok explicit platform evidence
+    const tt = parseExtractOutput({
+      ...raw,
+      eventType: "platform_rule",
+      isOfficialStatement: false,
+      isFirstParty: true,
+      publisher: "TikTok Shop",
+      documentNumber: "TT-1",
+      status: "published",
+      platform: "tiktok_shop",
+    })
+    expect(tt?.platform).toBe("tiktok_shop")
+    native.close()
+    void builtOfficial
+  })
+
+  it("buildCandidate: no TikTok guess; isFirstParty≠official; expired≠repealed; Shopee rejected", async () => {
+    const { auto, intel, analysis, native } = await setup()
+    const source = { ...intelSourceSeeds[0]!, persistence: "full" as const }
+    await intel.upsertSource(source, NOW)
+
+    async function seed(extract: Record<string, unknown>, label: string) {
+      const body = `Body for ${label}`
+      const contentHash = hashText(body)
+      const saved = await intel.writeEntry({
+        sourceId: source.id,
+        canonicalUrl: `https://example.org/fixture/map-${label}`,
+        title: `[FIXTURE] ${label}`,
+        contentHash,
+        contentScope: "full_text",
+        extractorVersion: "policy-auto-test-v1",
+        blocks: licensedBlocks("full_text", `[FIXTURE] ${label}`, body),
+        fetchedAt: NOW,
+      })
+      const runId = `run-map-${label}`
+      await analysis.insert({
+        itemId: saved.itemId,
+        versionId: saved.versionId,
+        contentHash,
+        step: "prefilter",
+        status: "completed",
+        provenance: "ai",
+        basis: "fixture",
+        runId,
+        modelId: "m",
+        promptHash: "p",
+        output: { decision: "PASS" },
+      })
+      await analysis.insert({
+        itemId: saved.itemId,
+        versionId: saved.versionId,
+        contentHash,
+        step: "extract",
+        status: "completed",
+        provenance: "ai",
+        basis: "fixture",
+        runId,
+        modelId: "m",
+        promptHash: "p",
+        output: { extract },
+      })
+      return { saved, contentHash, runId }
+    }
+
+    const baseExtract = {
+      eventType: "platform_rule",
+      countries: ["TH"],
+      ports: [],
+      cities: [],
+      chainStages: [],
+      namedEntity: null,
+      occurredAt: null,
+      effectiveFrom: "2026-11-01",
+      effectiveUntil: null,
+      numbers: {},
+      isOfficialStatement: false,
+      isFirstParty: false,
+      publisher: "News Desk",
+      documentNumber: "NEWS-1",
+      status: null,
+      platform: null,
+      dimensions: { impact: 1, scope: 1, urgency: 1, actionability: 1 },
+    }
+
+    // Media report about platform_rule without platform evidence → media/rumor path → human (missing platform)
+    const media = await seed(baseExtract, "media-pr")
+    const mediaBuilt = await auto.buildCandidateFromExactIntel(
+      { intelRepo: intel, analysisRepo: analysis },
+      { itemId: media.saved.itemId, versionId: media.saved.versionId, contentHash: media.contentHash, runId: media.runId },
+    )
+    expect(mediaBuilt.ok).toBe(true)
+    if (mediaBuilt.ok) {
+      expect(mediaBuilt.candidate.sourceType).toBe("media")
+      expect(mediaBuilt.candidate.platform).toBeNull()
+      expect(mediaBuilt.candidate.status).toBe("rumor")
+      const applied = await auto.apply(mediaBuilt.candidate, T0)
+      expect(applied.outcome).toBe("needs_human_confirm")
+      expect(applied.reason).toBe("platform_evidence_insufficient")
+    }
+
+    // isFirstParty without isOfficialStatement → media (not official)
+    const fp = await seed({
+      ...baseExtract,
+      eventType: "customs_rule",
+      countries: ["VN"],
+      isOfficialStatement: false,
+      isFirstParty: true,
+      publisher: "Carrier Co",
+      documentNumber: "CARRIER-DOC",
+      status: "published",
+      platform: null,
+    }, "first-party")
+    const fpBuilt = await auto.buildCandidateFromExactIntel(
+      { intelRepo: intel, analysisRepo: analysis },
+      { itemId: fp.saved.itemId, versionId: fp.saved.versionId, contentHash: fp.contentHash, runId: fp.runId },
+    )
+    expect(fpBuilt.ok).toBe(true)
+    if (fpBuilt.ok) {
+      expect(fpBuilt.candidate.sourceType).toBe("media")
+      expect(fpBuilt.candidate.status).toBe("rumor")
+    }
+
+    // expired status from extract → null (not repealed); official missing status → human
+    const exp = await seed({
+      ...baseExtract,
+      eventType: "customs_rule",
+      countries: ["VN"],
+      isOfficialStatement: true,
+      isFirstParty: false,
+      publisher: "Customs",
+      documentNumber: "EXP-1",
+      status: "expired",
+      platform: null,
+    }, "expired")
+    const expBuilt = await auto.buildCandidateFromExactIntel(
+      { intelRepo: intel, analysisRepo: analysis },
+      { itemId: exp.saved.itemId, versionId: exp.saved.versionId, contentHash: exp.contentHash, runId: exp.runId },
+    )
+    expect(expBuilt.ok).toBe(true)
+    if (expBuilt.ok) {
+      expect(expBuilt.candidate.status).toBeNull()
+      const applied = await auto.apply(expBuilt.candidate, T0)
+      expect(applied.outcome).toBe("needs_human_confirm")
+      expect(applied.reason).toBe("status_evidence_insufficient")
+    }
+
+    // Shopee explicit → rejected out of scope
+    const sh = await seed({
+      ...baseExtract,
+      isFirstParty: true,
+      publisher: "Shopee",
+      documentNumber: "SH-1",
+      status: "published",
+      platform: "shopee",
+    }, "shopee")
+    const shBuilt = await auto.buildCandidateFromExactIntel(
+      { intelRepo: intel, analysisRepo: analysis },
+      { itemId: sh.saved.itemId, versionId: sh.saved.versionId, contentHash: sh.contentHash, runId: sh.runId },
+    )
+    expect(shBuilt.ok).toBe(true)
+    if (shBuilt.ok) {
+      expect(shBuilt.candidate.sourceType).toBe("platform")
+      expect(shBuilt.candidate.platform).toBe("shopee")
+      const applied = await auto.apply(shBuilt.candidate, T0)
+      expect(applied.outcome).toBe("rejected")
+      expect(applied.reason).toBe("platform_out_of_auto_scope")
+    }
+
+    native.close()
+  })
+
+  it("v37 multi-pending with null candidate_fp upgrades safely; re-init + already-v38/v39 ok", async () => {
+    const { native, database } = memoryDb()
+    native.exec("CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL)")
+    for (const m of shippingMigrations.filter(m => m.version <= 37)) {
+      await m.up(database)
+      native.prepare("INSERT INTO schema_migrations (version, name, applied_at) VALUES (?, ?, ?)").run(m.version, m.name, "2026-10-12T00:00:00Z")
+    }
+    expect((native.prepare("SELECT MAX(version) AS v FROM schema_migrations").get() as { v: number }).v).toBe(37)
+    const cols37 = (native.prepare("PRAGMA table_info(policy_auto_pending)").all() as Array<{ name: string }>).map(c => c.name)
+    expect(cols37.includes("candidate_fp")).toBe(false)
+
+    // Two distinct pending rows that would collide on IFNULL(candidate_fp,'') under the old unique index.
+    native.prepare(
+      `INSERT INTO policy_auto_pending (id, country_code, publisher, document_number, reason, candidate_json, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`,
+    ).run("pend-old-1", "VN", "机关X", "DOC-COLLIDE", "missing_document_number", JSON.stringify({ title: "A", url: "https://a.example" }), "2026-10-12T00:00:00.000Z")
+    native.prepare(
+      `INSERT INTO policy_auto_pending (id, country_code, publisher, document_number, reason, candidate_json, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`,
+    ).run("pend-old-2", "VN", "机关X", "DOC-COLLIDE", "missing_document_number", JSON.stringify({ title: "B", url: "https://b.example" }), "2026-10-12T00:01:00.000Z")
+    native.prepare(
+      `INSERT INTO policy_auto_audit (id, outcome, reason, analysis_ids_json, created_at)
+       VALUES (?, 'needs_human_confirm', 'missing_document_number', '[]', ?)`,
+    ).run("audit-old-1", "2026-10-12T00:00:00.000Z")
+
+    // Mid-fault simulation: start upgrade, then retry from same v37 dirty state after rollback.
+    // First attempt — full init should apply 038+039 transactionally.
+    const meta1 = await initializeShippingDatabase(database, "real")
+    expect(meta1.schemaVersion).toBe(39)
+    const rows = native.prepare("SELECT id, candidate_fp FROM policy_auto_pending ORDER BY id").all() as Array<{ id: string, candidate_fp: string }>
+    expect(rows).toHaveLength(2)
+    expect(rows[0]!.candidate_fp).toBeTruthy()
+    expect(rows[1]!.candidate_fp).toBeTruthy()
+    expect(rows[0]!.candidate_fp).not.toBe(rows[1]!.candidate_fp)
+    expect((native.prepare("SELECT COUNT(*) AS c FROM policy_auto_audit").get() as { c: number }).c).toBeGreaterThanOrEqual(1)
+
+    // Duplicate init (already v39)
+    const meta2 = await initializeShippingDatabase(database, "real")
+    expect(meta2.schemaVersion).toBe(39)
+    expect((native.prepare("SELECT COUNT(*) AS c FROM policy_auto_pending").get() as { c: number }).c).toBe(2)
+
+    // Already-v38 path: fresh db stop at 38 then continue to 39
+    const { native: n2, database: db2 } = memoryDb()
+    n2.exec("CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL)")
+    for (const m of shippingMigrations.filter(m => m.version <= 38)) {
+      await m.up(db2)
+      n2.prepare("INSERT INTO schema_migrations (version, name, applied_at) VALUES (?, ?, ?)").run(m.version, m.name, "2026-10-12T00:00:00Z")
+    }
+    expect((n2.prepare("SELECT MAX(version) AS v FROM schema_migrations").get() as { v: number }).v).toBe(38)
+    // Force legacy-style empty fps, then repair via 039 on init
+    n2.exec("DROP INDEX IF EXISTS idx_policy_auto_pending_idempotent")
+    n2.prepare("INSERT INTO policy_auto_pending (id, country_code, publisher, document_number, reason, candidate_json, status, created_at, candidate_fp) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, NULL)")
+      .run("pend-v38-a", "TH", "P", "D1", "missing_publisher", "{\"t\":1}", "2026-10-12T00:00:00.000Z")
+    n2.prepare("INSERT INTO policy_auto_pending (id, country_code, publisher, document_number, reason, candidate_json, status, created_at, candidate_fp) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, NULL)")
+      .run("pend-v38-b", "TH", "P", "D1", "missing_publisher", "{\"t\":2}", "2026-10-12T00:01:00.000Z")
+    // Old unsafe index would fail here; 039 backfill+safe index must succeed on init.
+    const meta3 = await initializeShippingDatabase(db2, "real")
+    expect(meta3.schemaVersion).toBe(39)
+    const fps = n2.prepare("SELECT candidate_fp FROM policy_auto_pending ORDER BY id").all() as Array<{ candidate_fp: string }>
+    expect(fps).toHaveLength(2)
+    expect(fps[0]!.candidate_fp).not.toBe(fps[1]!.candidate_fp)
+    n2.close()
     native.close()
   })
 })

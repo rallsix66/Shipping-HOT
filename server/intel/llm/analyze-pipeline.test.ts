@@ -117,6 +117,10 @@ const extractJson = JSON.stringify({
   numbers: { delayDays: "3 days", waitingDays: null },
   isOfficialStatement: false,
   isFirstParty: true,
+  publisher: null,
+  documentNumber: null,
+  status: null,
+  platform: null,
   dimensions: { impact: 7, scope: 5, urgency: 6, actionability: 4 },
 })
 
@@ -208,6 +212,11 @@ describe("industry selection helpers", () => {
     expect(SEVERITY_SCORE_PROMPT.hash).toMatch(/^[a-f0-9]{64}$/)
     expect(EXTRACT_PROMPT.text).toContain("isOfficialStatement")
     expect(EXTRACT_PROMPT.text).toContain("isFirstParty")
+    expect(EXTRACT_PROMPT.id).toBe("extract-v2")
+    expect(EXTRACT_PROMPT.text).toContain("publisher")
+    expect(EXTRACT_PROMPT.text).toContain("documentNumber")
+    expect(EXTRACT_PROMPT.text).toContain("platform")
+    expect(EXTRACT_PROMPT.text).toContain("Do NOT output expired")
     expect(EXTRACT_PROMPT.text).toContain("do not conflate")
     expect(EXTRACT_PROMPT.text).toContain("government or regulator")
     expect(EXTRACT_PROMPT.text).toContain("Carrier/port/platform self-announcements are NOT official")
@@ -428,7 +437,7 @@ describe("runOfflineAnalyze offline chain", () => {
     cleanups.push(() => native.close())
     const db = wrap(native)
     await initShippingTables(db, "mock")
-    expect((await import("#/database/runtime")).latestSchemaVersion).toBe(38)
+    expect((await import("#/database/runtime")).latestSchemaVersion).toBe(39)
     const store = secrets()
     await setupRegistry(db, store)
     const intel = new IntelRepository(db)

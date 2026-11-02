@@ -1,0 +1,29 @@
+R3-8 REQUEST CHANGES round-2 gates (Asia/Shanghai wall clock ~2026-11-02 14:35)
+
+pnpm typecheck  PASS
+pnpm lint       PASS
+pnpm build      PASS
+pnpm test / vitest run  PASS  173 files / 2187 passed / 10 skipped  (vitest-full.txt)
+label browser e2e (scripts/e2e-r3-1-label-browser.mjs)  PASS  90/90  (label-browser-e2e.txt)
+  - production Shell has no hidden policies-query-hash Link
+  - harness stamps search+hash onto real Shell policies Link
+  - leave-no clears intendedHref (Back does not reuse prior hash)
+  - R3-5 boundary remains BLOCKED (asserted)
+  - policies-read-http.test.ts: real h3 GET list+detail; paid_receipt/provider_usage flat; policy-auto invoke 0
+S7 integrated harness  NOT_RUN (EXPECTED_SCHEMA_VERSION synced to 39 only)
+Neat Freak             done (evidence + status sync; no destructive cleanup)
+
+Schema: v39 additive repair (039-policy-auto-pending-idempotent-repair) after safe 038 backfill+index
+
+RC2 items closed:
+1. extract-v2 + parseExtractOutput publisher/documentNumber/status/platform; buildCandidateFromExactIntel uses parser; no eventType→TikTok; isFirstParty≠official; expired≠repealed; unknown→human; Shopee/Lazada out
+2. sanitizeCandidateForPersist strips pageParagraphs[].text (hash/date only under platform/metadata); pending asserts
+3. 038 backfill before unique index; 039 repairs already-v38 IFNULL index; v37 multi-pending upgrade/re-init/v38→v39 tested
+4. findPriorSourceOpResult by intelVersionId+contentHash: same-op replay returns prior, does not overwrite current B; new version/hash A regression creates v3
+5. GET: real handlers via policies-read-http.test.ts (not Mirror-only)
+
+Explicit non-claims:
+- real 200 human label set / real accuracy&cost NOT RUN
+- R3-5 BLOCKED; S7 NOT_RUN; unmerged; undeployed
+- zero live crawl / paid / keys / new sources / Slack send
+- parent baseline tip e3409e45b2c49f1af14d571e89745f519fb9e2c2

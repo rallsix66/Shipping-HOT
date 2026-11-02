@@ -254,7 +254,7 @@ async function main() {
     }
   }, 60000)
   if (!ready) throw new Error(`server not ready; log: ${serverLogPath}`)
-  check(ready?.database?.schemaVersion === 38, `schema v38 after init (got ${ready?.database?.schemaVersion})`)
+  check(ready?.database?.schemaVersion === 39, `schema v39 after init (got ${ready?.database?.schemaVersion})`)
 
   await seedLabels()
 
