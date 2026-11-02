@@ -1,0 +1,3 @@
+pnpm exec vitest run server/intel/llm/offline-analyze-policy.test.ts
+Test Files  1 passed (1)
+Tests  11 passed (11)

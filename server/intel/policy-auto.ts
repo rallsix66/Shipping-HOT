@@ -101,6 +101,11 @@ const EVENT_CATEGORY: Record<PolicyAutoEventType, PolicyCategory> = {
 
 const POLICY_EVENT_TYPES = new Set<string>(["customs_rule", "trade_policy", "platform_rule"])
 
+/** True only for event types PolicyAutoService will consider for auto入库. */
+export function isPolicyAutoEventType(value: string | null | undefined): value is PolicyAutoEventType {
+  return typeof value === "string" && POLICY_EVENT_TYPES.has(value)
+}
+
 let invokeCount = 0
 
 /** Actual call counter for browse-GET zero-model assertions (not string/import checks). */

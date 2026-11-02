@@ -116,13 +116,14 @@ describe("policies actual HTTP GET zero-model guard", () => {
     await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve))
     base = `http://127.0.0.1:${(server.address() as { port: number }).port}`
     outbound = []
-    vi.stubGlobal("fetch", (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
+    const passthroughFetch = originalFetch as (input: Parameters<typeof fetch>[0], init?: RequestInit) => ReturnType<typeof fetch>
+    vi.stubGlobal("fetch", ((input: Parameters<typeof fetch>[0], init?: RequestInit) => {
       if (new URL(String(input)).origin !== base) {
         outbound.push(String(input))
         throw new Error("External fetch forbidden")
       }
-      return originalFetch(input, init)
-    })
+      return passthroughFetch(input, init)
+    }) as typeof fetch)
     native.exec("PRAGMA query_only=ON")
     resetPolicyAutoInvokeCount()
   })
@@ -138,12 +139,12 @@ describe("policies actual HTTP GET zero-model guard", () => {
 
   it("list + detail GET do not grow receipts/provider usage or invoke policy-auto", async () => {
     expect(policyAutoInvokeCount()).toBe(0)
-    const listRes = await fetch(`${base}/api/shipping/policies`)
+    const listRes = await fetch(`${base}/api/shipping/policies`) as Response
     expect(listRes.status).toBe(200)
     const listBody = await listRes.json() as { records: Array<{ id: string }> }
     expect(listBody.records.some(r => r.id === policyId)).toBe(true)
 
-    const detailRes = await fetch(`${base}/api/shipping/policies/${encodeURIComponent(policyId)}`)
+    const detailRes = await fetch(`${base}/api/shipping/policies/${encodeURIComponent(policyId)}`) as Response
     expect(detailRes.status).toBe(200)
     const detailBody = await detailRes.json() as { record: { id: string } }
     expect(detailBody.record.id).toBe(policyId)

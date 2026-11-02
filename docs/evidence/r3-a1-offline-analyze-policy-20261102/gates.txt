@@ -1,0 +1,13 @@
+A1 offline analyze→policy orchestration gates (2026-11-02 Asia/Shanghai)
+
+baseline tip: da2ea5a40658056c74a234e882b005bf1be3f206
+typecheck: PASS (pnpm typecheck)
+lint: PASS (pnpm lint)
+build: PASS (pnpm build)
+vitest A1 targeted: 11/11 PASS (offline-analyze-policy.test.ts)
+vitest full: 2202 passed | 10 skipped (174 files)
+S7: NOT_RUN
+R3-5: BLOCKED
+A2 ExactVersion issuer: NOT WIRED
+production enable: OFF (enablePolicyAuto default false; no HTTP/cron/GET)
+merge/deploy: NOT DONE

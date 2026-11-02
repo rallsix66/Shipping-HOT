@@ -2,11 +2,13 @@
 
 先交复核，**不直接扩范围**。需要真实模型/人工/费用的单项标 **BLOCKED**。
 
+**更新（A1）**：离线显式分析→政策编排已接线；生产仍未启用；A2 颁发器未接通。
+
 ## A. 仍可零付费完成的接线缺口
 
 | # | 缺口 | 现状 | 最小建议（需 dots 批准后再做） | 风险 |
 |---|---|---|---|---|
-| A1 | 分析完成 → 政策自动入库 | `applyFromExactIntel` 仅测试调用 | 在**离线** `runOfflineAnalyze` 成功且 extract 为政策类之后，可选 hook 调用 `applyFromExactIntel`（同进程注入 license/analysis ids）；配 feature flag 默认关；单测覆盖 | 勿接到 GET/浏览；勿开默认生产开关 |
+| A1 | 分析完成 → 政策自动入库 | **已交付（本片）**：`runOfflineAnalyzeThenPolicy` + `retryPolicyApplyFromExactRun`；默认关；假 Provider 单测 11/11；证据 `docs/evidence/r3-a1-offline-analyze-policy-20261102/` | 完成：离线显式编排。**生产仍未启用** | 勿接到 GET/浏览；勿开默认生产开关；**A2 仍未接通** |
 | A2 | ExactVersion 颁发器（进程内） | 仅测试手工构造 | 增加**窄** factory：仅接受已校验 rights 的 item/version/hash，返回 license；仍不开放 HTTP 随意申请 | 防止 bare `modelUsePermitted=true` |
 | A3 | 受控分析触发入口（非浏览） | 无 HTTP/任务 | 增加显式 operator-only `POST`（或脚本）调用 `runOfflineAnalyze`，强制 license+预算闸；GET 仍零分析 | 需权限模型；默否认 |
 | A4 | 标注 enroll 批量/筛选辅助 | 单条 enroll API 已有 | 只读「候选入队」列表（已有 intel item、已授权摘录），仍人工点选 enroll | 不自动爬取 |
@@ -25,8 +27,8 @@
 
 ## C. 建议的最小下一片（供复核，不执行）
 
-**建议名**：`R3-wire-policy-auto-after-offline-analyze`（零付费）
-**仅含**：A1 + A2 单测/假 Provider；默认 flag 关；补充矩阵行「生产仍未启用」。
-**不含**：R4、真实预算、真实 200 集、merge/deploy、开放浏览触发。
+**A1 已执行**（离线编排已接线，生产仍未启用）。
+**下一片候选**：A2 ExactVersion 窄颁发器（仍零付费；不开放 HTTP 随意申请）± A3 受控 operator 触发。
+**不含**：R4、真实预算、真实 200 集、merge/deploy、开放浏览触发、默认生产开。
 
 若 dots 希望先只合并文档收口、接线另开切片，本包亦可止于矩阵+证据。

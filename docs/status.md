@@ -1,3 +1,12 @@
+## A1 离线显式分析→政策编排 (2026-11-02)
+
+- Baseline tip（R3-6 隔离浏览专项限定接受）：`da2ea5a40658056c74a234e882b005bf1be3f206`.
+- Delivered: `runOfflineAnalyzeThenPolicy` / `retryPolicyApplyFromExactRun` / `decidePolicyApplyAfterAnalyze`；`enablePolicyAuto` **默认 false**；env alone 不启用；无 HTTP/cron/GET 触发。
+- Fake Provider + isolated DB 单测 **11/11**（默认关/显式开、非政策、BLOCK、Provider 失败、缺文号人工、重复不重付费/不重复版本、政策写失败可重试、无许可/无预算在 Provider 前停止）。
+- **口径：离线编排已接线，生产仍未启用**；**A2 ExactVersion 颁发器未接通**（仍仅注入可验证 license）。
+- Gates: typecheck / lint / build / full Vitest **2202 PASS** / 10 skipped；S7 **NOT_RUN**；R3-5 **BLOCKED**；未 merge/deploy；未打扰用户；未发 Slack。
+- Evidence: `docs/evidence/r3-a1-offline-analyze-policy-20261102/`；矩阵/接线缺口已更新。
+
 ## R3-6 RC 补证（provider-spy + 逐页查询）(2026-11-02)
 
 - Baseline tip before this commit: `701121eb7bfcc30b022e08e1cb9d4efaa38bbaaf`. Prior strengthen 50/50 retained as historical script result, **not** as meeting RC stronger conditions.
