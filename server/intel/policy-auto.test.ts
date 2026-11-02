@@ -209,6 +209,8 @@ describe("r3-8 policy-auto service paths", () => {
     const replayA = await auto.apply(a, T0)
     expect(replayA.outcome).toBe("created")
     expect(replayA.versionId).toBe(versionAfterA)
+    // Helper must not attach current B's record as if it were prior A (version/content stay consistent or omit record).
+    expect(replayA.record).toBeUndefined()
     const afterReplay = await policies.detail(rA.policyId!, T0)
     expect(afterReplay?.versions.length).toBe(2)
     expect(afterReplay?.record.basisText).toBe("content-B")
@@ -534,6 +536,72 @@ describe("r3-8 policy-auto service paths", () => {
     const ids = new Set(pend.map(r => r.pendingId))
     expect(ids.size).toBe(1)
     expect((await auto.listPending()).length).toBe(1)
+    native.close()
+  })
+
+  it("two PolicyAutoService/PolicyRepository instances on shared db converge (connection lock)", async () => {
+    const { database, native } = await setup()
+    const policiesA = new PolicyRepository(database)
+    const policiesB = new PolicyRepository(database)
+    const autoA = new PolicyAutoService(database, policiesA)
+    const autoB = new PolicyAutoService(database, policiesB)
+    const c = officialCandidate({
+      documentNumber: "CONCUR-2INST",
+      sourceUrl: "https://example.org/fixture/concur-2inst",
+      intelVersionId: "ver-2inst",
+      contentHash: "hash-2inst",
+    })
+    const results = await Promise.all([autoA.apply(c, T0), autoB.apply(c, T0), autoA.apply(c, T0), autoB.apply(c, T0)])
+    expect(results.every(r => r.outcome === "created" || r.outcome === "unchanged")).toBe(true)
+    expect(new Set(results.map(r => r.policyId).filter(Boolean)).size).toBe(1)
+    const list = await policiesA.list({}, T0)
+    expect(list.filter(r => r.documentNumber === "CONCUR-2INST").length).toBe(1)
+    const detail = await policiesB.detail(results[0]!.policyId!, T0)
+    expect(detail?.versions.length).toBe(1)
+    native.close()
+  })
+
+  it("txn fault + successful rejected audit still allows retry of same version/hash", async () => {
+    const { auto, policies, native, database } = await setup()
+    const realPrepare = database.prepare.bind(database)
+    let auditInserts = 0
+    ;(database as unknown as { prepare: typeof database.prepare }).prepare = ((sql: string) => {
+      const stmt = realPrepare(sql)
+      if (typeof sql === "string" && sql.includes("INSERT INTO policy_auto_audit")) {
+        return {
+          all: (...p: unknown[]) => stmt.all(...p as never[]),
+          get: (...p: unknown[]) => stmt.get(...p as never[]),
+          run: async (...p: unknown[]) => {
+            auditInserts += 1
+            // First audit INSERT (inside the create txn) fails → rollback; catch then writes rejected (2nd) successfully.
+            if (auditInserts === 1) throw new Error("simulated_first_audit_fault")
+            return stmt.run(...p as never[])
+          },
+        }
+      }
+      return stmt
+    }) as typeof database.prepare
+
+    const c = officialCandidate({
+      documentNumber: "REJECT-RETRY-1",
+      sourceUrl: "https://example.org/fixture/reject-retry-1",
+      intelVersionId: "ver-reject-retry",
+      contentHash: "hash-reject-retry",
+    })
+    await expect(auto.apply(c, T0)).rejects.toThrow(/simulated_first_audit_fault/)
+    expect((await policies.list({}, T0)).some(r => r.documentNumber === "REJECT-RETRY-1")).toBe(false)
+    const auditsAfterFault = await auto.listAudit()
+    expect(auditsAfterFault.some(a => a.outcome === "rejected" && String(a.content_hash) === "hash-reject-retry")).toBe(true)
+
+    // Rejected must NOT be treated as a completed source-op — retry with same version/hash succeeds.
+    const retried = await auto.apply(c, T0)
+    expect(retried.outcome).toBe("created")
+    expect((await policies.list({}, T0)).some(r => r.documentNumber === "REJECT-RETRY-1")).toBe(true)
+    const createdAudits = await auto.listAudit(retried.policyId)
+    expect(createdAudits.some(a => a.outcome === "created")).toBe(true)
+    // Rejected audit from the failed attempt has null policy_id (txn rolled back) — still retained globally.
+    const allAudits = await auto.listAudit()
+    expect(allAudits.some(a => a.outcome === "rejected" && String(a.content_hash) === "hash-reject-retry")).toBe(true)
     native.close()
   })
 
@@ -991,7 +1059,106 @@ describe("r3-8 RC2 extract contract + safe v37 upgrade + source mapping", () => 
     native.close()
   })
 
-  it("v37 multi-pending with null candidate_fp upgrades safely; re-init + already-v38/v39 ok", async () => {
+  it("applyFromExactIntel: wrong-hash analyses cannot form a run; exact bind still creates", async () => {
+    const { auto, policies, intel, analysis, native } = await setup()
+    const source = { ...intelSourceSeeds[0]!, persistence: "full" as const }
+    await intel.upsertSource(source, NOW)
+    const body = "Exact-bind body for hash gate."
+    const contentHash = hashText(body)
+    const wrongHash = hashText(`${body}|wrong`)
+    const saved = await intel.writeEntry({
+      sourceId: source.id,
+      canonicalUrl: "https://example.org/fixture/policy-auto-hash-bind",
+      title: "[FIXTURE] hash bind",
+      contentHash,
+      contentScope: "full_text",
+      extractorVersion: "policy-auto-test-v1",
+      blocks: licensedBlocks("full_text", "[FIXTURE] hash bind", body),
+      fetchedAt: NOW,
+      publishedAt: "2026-10-01T00:00:00.000Z",
+    })
+
+    const extractPayload = {
+      extract: {
+        eventType: "customs_rule",
+        countries: ["VN"],
+        ports: [],
+        cities: [],
+        chainStages: [],
+        namedEntity: null,
+        occurredAt: "2026-10-01",
+        effectiveFrom: "2026-11-01",
+        effectiveUntil: null,
+        numbers: {},
+        isOfficialStatement: true,
+        isFirstParty: true,
+        dimensions: { impact: 1, scope: 1, urgency: 1, actionability: 1 },
+        publisher: "示例机关（fixture）",
+        documentNumber: "HASH-BIND-001",
+        status: "published",
+        platform: null,
+      },
+    }
+
+    // Complete run under WRONG contentHash only — must not be selected / must not write policy or pending body.
+    const badRun = "run-wrong-hash"
+    for (const step of ["prefilter", "extract"] as const) {
+      await analysis.insert({
+        itemId: saved.itemId,
+        versionId: saved.versionId,
+        contentHash: wrongHash,
+        step,
+        status: "completed",
+        provenance: "ai",
+        basis: "fixture-wrong-hash",
+        runId: badRun,
+        modelId: "model-bad",
+        modelName: "fixture-bad",
+        promptHash: "prompt-bad",
+        output: step === "prefilter" ? { decision: "PASS", content: "ok" } : extractPayload,
+      })
+    }
+    const mismatched = await auto.applyFromExactIntel(
+      { intelRepo: intel, analysisRepo: analysis },
+      { itemId: saved.itemId, versionId: saved.versionId, contentHash, runId: badRun, isFixture: true, enteredBy: "policy-auto-test" },
+      T0,
+    )
+    expect(mismatched.outcome).toBe("rejected")
+    expect(mismatched.reason).toMatch(/analysis_content_hash_mismatch|analysis_run_unselectable|run_not_selectable/)
+    expect((await policies.list({}, T0)).length).toBe(0)
+    expect((await auto.listPending()).length).toBe(0)
+
+    // Exact matching hash run still creates.
+    const goodRun = "run-exact-hash"
+    for (const step of ["prefilter", "extract"] as const) {
+      await analysis.insert({
+        itemId: saved.itemId,
+        versionId: saved.versionId,
+        contentHash,
+        step,
+        status: "completed",
+        provenance: "ai",
+        basis: "fixture-exact-hash",
+        runId: goodRun,
+        modelId: "model-good",
+        modelName: "fixture-good",
+        promptHash: "prompt-good",
+        output: step === "prefilter" ? { decision: "PASS", content: "ok" } : extractPayload,
+      })
+    }
+    const created = await auto.applyFromExactIntel(
+      { intelRepo: intel, analysisRepo: analysis },
+      { itemId: saved.itemId, versionId: saved.versionId, contentHash, runId: goodRun, isFixture: true, enteredBy: "policy-auto-test" },
+      T0,
+    )
+    expect(created.outcome).toBe("created")
+    expect(created.record?.documentNumber).toBe("HASH-BIND-001")
+    const audits = await auto.listAudit(created.policyId)
+    expect(audits.some(a => a.outcome === "created" && String(a.content_hash) === contentHash)).toBe(true)
+    native.close()
+  })
+
+  it("v37 multi-pending upgrades; real mid-fault rollback+retry; legacy IFNULL index repaired by 039", async () => {
     const { native, database } = memoryDb()
     native.exec("CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL)")
     for (const m of shippingMigrations.filter(m => m.version <= 37)) {
@@ -1016,8 +1183,33 @@ describe("r3-8 RC2 extract contract + safe v37 upgrade + source mapping", () => 
        VALUES (?, 'needs_human_confirm', 'missing_document_number', '[]', ?)`,
     ).run("audit-old-1", "2026-10-12T00:00:00.000Z")
 
-    // Mid-fault simulation: start upgrade, then retry from same v37 dirty state after rollback.
-    // First attempt — full init should apply 038+039 transactionally.
+    // Real mid-fault: fail the first 038 candidate_fp backfill UPDATE inside its migration txn → rollback; retry succeeds.
+    const realPrepare = database.prepare.bind(database)
+    let fail038Update = true
+    ;(database as unknown as { prepare: typeof database.prepare }).prepare = ((sql: string) => {
+      const stmt = realPrepare(sql)
+      if (
+        fail038Update
+        && typeof sql === "string"
+        && sql.includes("UPDATE policy_auto_pending SET candidate_fp")
+      ) {
+        return {
+          all: (...p: unknown[]) => stmt.all(...p as never[]),
+          get: (...p: unknown[]) => stmt.get(...p as never[]),
+          run: async () => {
+            fail038Update = false
+            throw new Error("simulated_038_mid_fault")
+          },
+        }
+      }
+      return stmt
+    }) as typeof database.prepare
+
+    await expect(initializeShippingDatabase(database, "real")).rejects.toThrow(/simulated_038_mid_fault/)
+    expect((native.prepare("SELECT MAX(version) AS v FROM schema_migrations").get() as { v: number }).v).toBe(37)
+    expect((native.prepare("PRAGMA table_info(policy_auto_pending)").all() as Array<{ name: string }>).map(c => c.name).includes("candidate_fp")).toBe(false)
+
+    ;(database as unknown as { prepare: typeof database.prepare }).prepare = realPrepare
     const meta1 = await initializeShippingDatabase(database, "real")
     expect(meta1.schemaVersion).toBe(39)
     const rows = native.prepare("SELECT id, candidate_fp FROM policy_auto_pending ORDER BY id").all() as Array<{ id: string, candidate_fp: string }>
@@ -1032,7 +1224,7 @@ describe("r3-8 RC2 extract contract + safe v37 upgrade + source mapping", () => 
     expect(meta2.schemaVersion).toBe(39)
     expect((native.prepare("SELECT COUNT(*) AS c FROM policy_auto_pending").get() as { c: number }).c).toBe(2)
 
-    // Already-v38 path: fresh db stop at 38 then continue to 39
+    // Already-v38 path: preserve legacy IFNULL unique index + a NULL fp row, then 039 repairs.
     const { native: n2, database: db2 } = memoryDb()
     n2.exec("CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL)")
     for (const m of shippingMigrations.filter(m => m.version <= 38)) {
@@ -1040,18 +1232,48 @@ describe("r3-8 RC2 extract contract + safe v37 upgrade + source mapping", () => 
       n2.prepare("INSERT INTO schema_migrations (version, name, applied_at) VALUES (?, ?, ?)").run(m.version, m.name, "2026-10-12T00:00:00Z")
     }
     expect((n2.prepare("SELECT MAX(version) AS v FROM schema_migrations").get() as { v: number }).v).toBe(38)
-    // Force legacy-style empty fps, then repair via 039 on init
+
     n2.exec("DROP INDEX IF EXISTS idx_policy_auto_pending_idempotent")
     n2.prepare("INSERT INTO policy_auto_pending (id, country_code, publisher, document_number, reason, candidate_json, status, created_at, candidate_fp) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, NULL)")
       .run("pend-v38-a", "TH", "P", "D1", "missing_publisher", "{\"t\":1}", "2026-10-12T00:00:00.000Z")
-    n2.prepare("INSERT INTO policy_auto_pending (id, country_code, publisher, document_number, reason, candidate_json, status, created_at, candidate_fp) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, NULL)")
-      .run("pend-v38-b", "TH", "P", "D1", "missing_publisher", "{\"t\":2}", "2026-10-12T00:01:00.000Z")
-    // Old unsafe index would fail here; 039 backfill+safe index must succeed on init.
+    n2.prepare("INSERT INTO policy_auto_pending (id, country_code, publisher, document_number, reason, candidate_json, status, created_at, candidate_fp) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?)")
+      .run("pend-v38-b", "TH", "P", "D1", "missing_publisher", "{\"t\":2}", "2026-10-12T00:01:00.000Z", "pre-existing-fp")
+
+    // Prove IFNULL(NULL,'') hazard: two NULL-ish values cannot share the legacy unique index.
+    n2.prepare("UPDATE policy_auto_pending SET candidate_fp = NULL WHERE id = 'pend-v38-b'").run()
+    let ifnullCreateFailed = false
+    try {
+      n2.exec(`
+        CREATE UNIQUE INDEX idx_policy_auto_pending_idempotent
+          ON policy_auto_pending(status, IFNULL(candidate_fp, ''))
+          WHERE status = 'pending'
+      `)
+    } catch {
+      ifnullCreateFailed = true
+    }
+    expect(ifnullCreateFailed).toBe(true)
+
+    // Honest dirty v38 fixture: legacy IFNULL index present + one NULL fp + one distinct non-null fp.
+    n2.prepare("UPDATE policy_auto_pending SET candidate_fp = 'pre-existing-fp' WHERE id = 'pend-v38-b'").run()
+    n2.exec(`
+      CREATE UNIQUE INDEX idx_policy_auto_pending_idempotent
+        ON policy_auto_pending(status, IFNULL(candidate_fp, ''))
+        WHERE status = 'pending'
+    `)
+    const before039 = (n2.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND name='idx_policy_auto_pending_idempotent'").get() as { sql: string }).sql
+    expect(before039.toUpperCase()).toContain("IFNULL")
+    expect((n2.prepare("SELECT candidate_fp FROM policy_auto_pending WHERE id='pend-v38-a'").get() as { candidate_fp: string | null }).candidate_fp).toBeNull()
+
     const meta3 = await initializeShippingDatabase(db2, "real")
     expect(meta3.schemaVersion).toBe(39)
-    const fps = n2.prepare("SELECT candidate_fp FROM policy_auto_pending ORDER BY id").all() as Array<{ candidate_fp: string }>
+    const fps = n2.prepare("SELECT id, candidate_fp FROM policy_auto_pending ORDER BY id").all() as Array<{ id: string, candidate_fp: string }>
     expect(fps).toHaveLength(2)
+    expect(fps[0]!.candidate_fp).toBeTruthy()
+    expect(fps[1]!.candidate_fp).toBeTruthy()
     expect(fps[0]!.candidate_fp).not.toBe(fps[1]!.candidate_fp)
+    const after039 = (n2.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND name='idx_policy_auto_pending_idempotent'").get() as { sql: string }).sql
+    expect(after039.toUpperCase()).not.toContain("IFNULL")
+    expect(after039).toMatch(/candidate_fp IS NOT NULL/i)
     n2.close()
     native.close()
   })

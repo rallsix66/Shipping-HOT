@@ -23,3 +23,6 @@ See `gates.txt` / `gates-rc.txt`. Label e2e: `label-browser-e2e-rc.txt`. Full vi
 
 ## RC2
 See subdirectory rc2/ for REQUEST CHANGES round-2 on tip e3409e45 (schema v39, extract contract, persist rights, source-op idempotency, real GET).
+
+## RC3
+See subdirectory rc3/ for REQUEST CHANGES round-3 on tip e180dfcf (exact analysis hash bind; completed-only prior reuse + rejected retry; connection-scoped locks; real 038 mid-fault + IFNULL fixture honesty).

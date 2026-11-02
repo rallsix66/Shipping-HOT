@@ -1,0 +1,28 @@
+﻿R3-8 REQUEST CHANGES round-3 gates (Asia/Shanghai wall clock ~2026-11-02 14:55)
+
+pnpm typecheck  PASS
+pnpm lint       PASS
+pnpm build      PASS
+pnpm test / vitest run  PASS  173 files / 2190 passed / 10 skipped  (vitest-full.txt)
+label browser e2e (scripts/e2e-r3-1-label-browser.mjs)  PASS  90/90  (label-browser-e2e.txt)
+  - R3-5 boundary remains BLOCKED (asserted)
+  - intel-eval-report.json retained (status INCOMPLETE / missing samples; prompt extract-v2 unchanged this round)
+S7 integrated harness  NOT_RUN (EXPECTED_SCHEMA_VERSION synced to 39 only)
+Neat Freak             done (evidence + status sync; no destructive cleanup)
+
+Schema: unchanged at v39 (no new migration this RC; additive-only rule held)
+
+RC3 items closed:
+1. Analysis exact bind — buildCandidateFromExactIntel filters itemId/versionId/contentHash BEFORE selectConsistentAnalysisRun; mismatch refuses without policy/pending body; exact bind still creates (service regression)
+2. findPriorSourceOpResult — only completed outcomes (created/updated/unchanged/needs_human_confirm); rejected audits retained but retryable; prior versionId does not attach current B record; txn fault→rejected audit→retry succeeds
+3. Connection-scoped locks — PolicyAutoService writeChain WeakMap by db; PolicyRepository txDepth + top-level BEGIN mutex WeakMap by db; two-instance Promise.all converges
+
+Evidence honesty:
+- Upgrade test now injects real 038 mid-fault (UPDATE candidate_fp throws → txn rollback stays v37 → retry → v39)
+- Already-v38 fixture keeps legacy IFNULL unique index + NULL fp; proves IFNULL two-NULL hazard; 039 drops IFNULL and installs safe partial index after backfill
+
+Explicit non-claims:
+- real 200 human label set / real accuracy&cost NOT RUN
+- R3-5 BLOCKED; S7 NOT_RUN; unmerged; undeployed
+- zero live crawl / paid / keys / new sources / Slack send
+- parent baseline tip e180dfcf0e8fe37b8643ec4f048e8e8f1349c32d

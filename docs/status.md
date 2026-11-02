@@ -1,3 +1,10 @@
+## R3-8 政策库自动生成（仅离线）(2026-11-02) — RC3 after dots REQUEST CHANGES on `e180dfcf`
+
+- Slice §4.11 / R3-8 only — **not** full R3 pass. Real 200-label set / real effect&cost still unrun; R3-5 **BLOCKED**; S7 harness **NOT_RUN** (EXPECTED_SCHEMA_VERSION=39 synced only); unmerged / undeployed.
+- RC3 product fixes on tip `e180dfcf`: (1) analysis exact bind — filter itemId/versionId/contentHash before `selectConsistentAnalysisRun`, refuse mismatch without writing policy/pending body; (2) `findPriorSourceOpResult` reuses only completed outcomes (`created`/`updated`/`unchanged`/`needs_human_confirm`), rejected audit retained but retryable after txn rollback, prior versionId does not attach current B record; (3) connection-scoped `writeChain` + PolicyRepository `txDepth`/BEGIN mutex via WeakMap so two service/repository instances on same db converge.
+- Evidence honesty: upgrade test injects real 038 mid-fault (UPDATE `candidate_fp` → rollback stays v37 → retry → v39); already-v38 fixture keeps legacy IFNULL unique index + NULL fp hazard proven then repaired by 039. Offline eval report retained (INCOMPLETE / missing samples).
+- Gates: typecheck / lint / build / full Vitest **2190** / label browser e2e **90/90** / Neat Freak. Evidence: `docs/evidence/r3-8-policy-auto-20261102/rc3/`. Zero live crawl / paid / keys / new sources. No Slack send from agent.
+
 ## R3-8 政策库自动生成（仅离线）(2026-11-02) — RC2 after dots REQUEST CHANGES on `e3409e45`
 
 - Slice §4.11 / R3-8 only — **not** full R3 pass. Real 200-label set / real effect&cost still unrun; R3-5 **BLOCKED**; S7 harness **NOT_RUN** (EXPECTED_SCHEMA_VERSION=39 synced only); unmerged / undeployed.

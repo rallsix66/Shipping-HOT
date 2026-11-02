@@ -95,18 +95,51 @@ function frozen(row: RecordRow): string | null {
 }
 
 /** Policy repository. Reads are query-only; every write is an explicit call that appends a version and/or change-log entry. */
+/**
+ * Serialize top-level BEGIN IMMEDIATE across PolicyRepository instances that share one db0 connection.
+ * Independent requests must not race into nested BEGIN; intentional nesting still uses SAVEPOINT.
+ */
+const policyTxnTails = new WeakMap<object, Promise<void>>()
+const policyTxDepthByDb = new WeakMap<object, number>()
+
+function policyDbKey(db: Database): object {
+  return db as unknown as object
+}
+
 export class PolicyRepository {
   constructor(private readonly db: Database) {}
 
-  /** Nestable transactions: outer BEGIN IMMEDIATE, inner SAVEPOINT (for atomic policy+side effects). */
-  private txDepth = 0
-
+  /** Nestable transactions: outer BEGIN IMMEDIATE, inner SAVEPOINT (for atomic policy+side effects). Depth is per connection. */
   private async tx<T>(fn: () => Promise<T>): Promise<T> {
-    const nested = this.txDepth > 0
-    const sp = `policy_sp_${this.txDepth}`
+    const key = policyDbKey(this.db)
+    const depth = policyTxDepthByDb.get(key) ?? 0
+    if (depth > 0) {
+      return await this.txAtDepth(fn, depth)
+    }
+    // Top-level: coordinate by shared connection so two repository instances cannot each BEGIN.
+    const previous = policyTxnTails.get(key) ?? Promise.resolve()
+    let release!: () => void
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const tail = previous.then(() => gate)
+    policyTxnTails.set(key, tail)
+    await previous
+    try {
+      return await this.txAtDepth(fn, 0)
+    } finally {
+      release()
+      if (policyTxnTails.get(key) === tail) policyTxnTails.delete(key)
+    }
+  }
+
+  private async txAtDepth<T>(fn: () => Promise<T>, depth: number): Promise<T> {
+    const key = policyDbKey(this.db)
+    const nested = depth > 0
+    const sp = `policy_sp_${depth}`
     if (nested) await this.db.prepare(`SAVEPOINT ${sp}`).run()
     else await this.db.prepare("BEGIN IMMEDIATE").run()
-    this.txDepth += 1
+    policyTxDepthByDb.set(key, depth + 1)
     try {
       const result = await fn()
       if (nested) await this.db.prepare(`RELEASE ${sp}`).run()
@@ -121,7 +154,9 @@ export class PolicyRepository {
       }
       throw error
     } finally {
-      this.txDepth -= 1
+      const next = (policyTxDepthByDb.get(key) ?? 1) - 1
+      if (next <= 0) policyTxDepthByDb.delete(key)
+      else policyTxDepthByDb.set(key, next)
     }
   }
 

@@ -296,18 +296,28 @@ function fingerprintFromRecord(existing: PolicyRecordView, pageFp: string | null
   })
 }
 
-export class PolicyAutoService {
-  /** Serialize apply/entry on one connection — SQLite has no concurrent writers on the same db handle. */
-  private writeChain: Promise<unknown> = Promise.resolve()
+/** Serialize apply/entry across PolicyAutoService instances that share one db0 connection. */
+const policyAutoWriteTails = new WeakMap<object, Promise<unknown>>()
 
+/** Outcomes that mean the source-op completed and may be replayed. Rejected audits stay for forensics but do not block retry. */
+const POLICY_AUTO_COMPLETED_OUTCOMES = new Set<PolicyAutoOutcome>([
+  "created",
+  "updated",
+  "unchanged",
+  "needs_human_confirm",
+])
+
+export class PolicyAutoService {
   constructor(
     private readonly db: Database,
     private readonly policies: PolicyRepository,
   ) {}
 
   private enqueueWrite<T>(fn: () => Promise<T>): Promise<T> {
-    const run = this.writeChain.then(fn, fn)
-    this.writeChain = run.then(() => undefined, () => undefined)
+    const key = this.db as unknown as object
+    const previous = policyAutoWriteTails.get(key) ?? Promise.resolve()
+    const run = previous.then(fn, fn)
+    policyAutoWriteTails.set(key, run.then(() => undefined, () => undefined))
     return run
   }
 
@@ -512,8 +522,21 @@ export class PolicyAutoService {
     }
 
     const rows = await deps.analysisRepo.listForVersion(input.itemId, input.versionId)
-    const mapped = rows.map(r => ({
+    // Bind analyses to the caller exact identity BEFORE run selection — never stitch a
+    // "complete" run from same item/version rows that carry a different contentHash.
+    const bound = rows.filter(r =>
+      r.itemId === input.itemId
+      && r.versionId === input.versionId
+      && r.contentHash === input.contentHash,
+    )
+    if (rows.length > 0 && bound.length === 0) {
+      return { ok: false, reason: "analysis_content_hash_mismatch" }
+    }
+    const mapped = bound.map(r => ({
       id: r.id,
+      itemId: r.itemId,
+      versionId: r.versionId,
+      contentHash: r.contentHash,
       step: r.step,
       status: r.status,
       createdAt: r.createdAt,
@@ -535,6 +558,14 @@ export class PolicyAutoService {
     }
     if (!selection.complete || !selection.runId || !selection.rows.length) {
       return { ok: false, reason: selection.reason || "analysis_run_unselectable" }
+    }
+    // Defense: every selected row must still match the exact identity (no post-filter stitch).
+    if (selection.rows.some(r =>
+      r.itemId !== input.itemId
+      || r.versionId !== input.versionId
+      || r.contentHash !== input.contentHash,
+    )) {
+      return { ok: false, reason: "analysis_identity_mismatch" }
     }
 
     const extractRow = selection.rows.find(r => r.step === "extract" && (r.status === "completed" || r.status === "reused"))
@@ -707,10 +738,13 @@ export class PolicyAutoService {
     const contentHash = trimOrNull(candidate.contentHash ?? null)
     if (!versionId || !contentHash) return null
 
+    // Only reuse successfully completed source-ops. A rejected audit is retained for forensics
+    // but must not permanently short-circuit retry after a rolled-back apply.
     const row = await this.db.prepare(
       `SELECT outcome, reason, policy_id, version_id, detail_json
        FROM policy_auto_audit
        WHERE intel_version_id = ? AND content_hash = ?
+         AND outcome IN ('created', 'updated', 'unchanged', 'needs_human_confirm')
        ORDER BY created_at ASC, id ASC
        LIMIT 1`,
     ).get(versionId, contentHash) as {
@@ -723,6 +757,7 @@ export class PolicyAutoService {
     if (!row) return null
 
     const outcome = row.outcome as PolicyAutoOutcome
+    if (!POLICY_AUTO_COMPLETED_OUTCOMES.has(outcome)) return null
     const detail = row.detail_json ? JSON.parse(String(row.detail_json)) as { pendingId?: string | null } : {}
     const result: PolicyAutoResult = {
       outcome,
@@ -735,7 +770,14 @@ export class PolicyAutoService {
     if (row.policy_id) {
       try {
         const detailView = await this.policies.detail(row.policy_id, new Date(0))
-        if (detailView?.record) result.record = detailView.record
+        // Do not attach the *current* record when it has moved past the audited version
+        // (would present B's content as if it were the prior A outcome).
+        if (
+          detailView?.record
+          && (!row.version_id || detailView.record.currentVersionId === row.version_id)
+        ) {
+          result.record = detailView.record
+        }
       } catch {
         /* best-effort attach */
       }
