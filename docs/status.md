@@ -1,3 +1,11 @@
+## A2 fail-closed 核验 RC tighten（无 license / 严格时间 / 素材范围）(2026-11-02)
+
+- Baseline tip：`264d80809440a36349d968a3e5fd245fb9218639`；dots REQUEST CHANGES ts `1793611831.715999`。
+- 三点落地：① 成功**不**返回可消费 `ExactVersionModelLicense`，仅 `evidenceRef` + `licenseIssued:false`，正向测证明不可送入既有 `admitModelPayload`；不放宽旧 gate。② `parseStrictInstant` 真实日历+显式时区；溢出/无时区/非法时区/撤销畸形/now 异常 → BLOCKED；显式 null 开放期限保留。③ 要求只读 `persistence`；缺失 → `material_scope_unverified`；有效范围 = evidence ∩ persistence；disallowed/excerpt_only 不得因 full-text evidence 整体放行；存储只收窄。
+- 测试 DB 改到项目独立 `.tmp`；夹具单测 **24/24**；**不**写授权记录、**不**接 HTTP/Provider/生产证据源。
+- Evidence: `docs/evidence/r3-a2-failclosed-verifier-20261102/rc-tighten/`。
+- Gates: typecheck / lint / build / related+full Vitest（见该证据目录）；S7 **NOT_RUN**；R3-5 **BLOCKED**；未 merge/deploy；未打扰用户；未发 Slack。
+
 ## A2 fail-closed 证据核验接口 + 夹具（零付费）(2026-11-02)
 
 - Baseline tip：`3e985da224484da86da135622919e1659084b3ca`（A2 Draft 文档已接受）。

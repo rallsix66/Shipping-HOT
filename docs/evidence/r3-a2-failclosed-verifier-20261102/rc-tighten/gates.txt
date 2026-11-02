@@ -1,0 +1,11 @@
+A2 RC tighten gates — 2026-11-02 17:43:27 Asia/Shanghai
+
+baseline: 264d80809440a36349d968a3e5fd245fb9218639
+typecheck: PASS (exit 0)
+lint: PASS (exit 0)
+build: PASS (exit 0)
+vitest A2 exact-version-evidence-verifier: 24/24 PASS
+vitest full: 2233 passed | 10 skipped (2243) PASS
+S7: NOT_RUN
+R3-5: BLOCKED
+merge/deploy: not done
