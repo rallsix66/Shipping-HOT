@@ -1,0 +1,430 @@
+{
+  "tip": "r3-6-browse-zero-pay",
+  "baseUrl": "http://127.0.0.1:4496",
+  "runDir": "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/.tmp/r3-6-browse-zero-pay",
+  "evidenceDir": "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/docs/evidence/r3-acceptance-closeout-20261102",
+  "openPages": [
+    "/",
+    "/ports",
+    "/events",
+    "/policies",
+    "/calendar",
+    "/feed",
+    "/label",
+    "/settings"
+  ],
+  "readonlyApis": [
+    "/api/shipping/health",
+    "/api/shipping/readiness",
+    "/api/shipping/runtime",
+    "/api/shipping/",
+    "/api/shipping/feed",
+    "/api/shipping/calendar",
+    "/api/shipping/tropical-cyclones",
+    "/api/shipping/search/ports",
+    "/api/shipping/intel/sources",
+    "/api/shipping/intel/items",
+    "/api/shipping/intel/manual",
+    "/api/shipping/intel/labels",
+    "/api/shipping/policies",
+    "/api/shipping/llm/providers",
+    "/api/shipping/llm/models",
+    "/api/shipping/llm/bindings",
+    "/api/shipping/llm/shared-budget",
+    "/api/shipping/translation/status",
+    "/api/shipping/translation/secret"
+  ],
+  "detailPages": [
+    "/ports/CNSHK"
+  ],
+  "apiResults": [
+    {
+      "path": "/api/shipping/health",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 1
+    },
+    {
+      "path": "/api/shipping/readiness",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 8
+    },
+    {
+      "path": "/api/shipping/runtime",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 3
+    },
+    {
+      "path": "/api/shipping/",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 6
+    },
+    {
+      "path": "/api/shipping/feed",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 6
+    },
+    {
+      "path": "/api/shipping/calendar",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 3
+    },
+    {
+      "path": "/api/shipping/tropical-cyclones",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 4
+    },
+    {
+      "path": "/api/shipping/search/ports",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 4
+    },
+    {
+      "path": "/api/shipping/intel/sources",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 5
+    },
+    {
+      "path": "/api/shipping/intel/items",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 2
+    },
+    {
+      "path": "/api/shipping/intel/manual",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 7
+    },
+    {
+      "path": "/api/shipping/intel/labels",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 6
+    },
+    {
+      "path": "/api/shipping/policies",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 4
+    },
+    {
+      "path": "/api/shipping/llm/providers",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 6
+    },
+    {
+      "path": "/api/shipping/llm/models",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 5
+    },
+    {
+      "path": "/api/shipping/llm/bindings",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 5
+    },
+    {
+      "path": "/api/shipping/llm/shared-budget",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 6
+    },
+    {
+      "path": "/api/shipping/translation/status",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 7
+    },
+    {
+      "path": "/api/shipping/translation/secret",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 4
+    }
+  ],
+  "pageResults": [
+    {
+      "path": "/",
+      "href": "/",
+      "title": "Shipping HOT",
+      "bodyLen": 1175,
+      "shell": true,
+      "ms": 142
+    },
+    {
+      "path": "/ports",
+      "href": "/ports",
+      "title": "Shipping HOT",
+      "bodyLen": 523,
+      "shell": true,
+      "ms": 57
+    },
+    {
+      "path": "/events",
+      "href": "/events",
+      "title": "Shipping HOT",
+      "bodyLen": 297,
+      "shell": true,
+      "ms": 34
+    },
+    {
+      "path": "/policies",
+      "href": "/policies",
+      "title": "Shipping HOT",
+      "bodyLen": 585,
+      "shell": true,
+      "ms": 46
+    },
+    {
+      "path": "/calendar",
+      "href": "/calendar",
+      "title": "Shipping HOT",
+      "bodyLen": 951,
+      "shell": true,
+      "ms": 51
+    },
+    {
+      "path": "/feed",
+      "href": "/feed",
+      "title": "Shipping HOT",
+      "bodyLen": 597,
+      "shell": true,
+      "ms": 60
+    },
+    {
+      "path": "/label",
+      "href": "/label",
+      "title": "Shipping HOT",
+      "bodyLen": 418,
+      "shell": true,
+      "ms": 40
+    },
+    {
+      "path": "/settings",
+      "href": "/settings",
+      "title": "Shipping HOT",
+      "bodyLen": 2191,
+      "shell": true,
+      "ms": 74
+    },
+    {
+      "path": "/ports/CNSHK",
+      "href": "/ports/CNSHK",
+      "title": "Shipping HOT",
+      "bodyLen": 393,
+      "shell": true,
+      "ms": 26
+    }
+  ],
+  "externalRequests": [],
+  "checks": [
+    {
+      "ok": true,
+      "label": "schema v39 after init (got 39)"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/health -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/readiness -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/runtime -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/ -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/feed -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/calendar -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/tropical-cyclones -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/search/ports -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/intel/sources -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/intel/items -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/intel/manual -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/intel/labels -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/policies -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/llm/providers -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/llm/models -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/llm/bindings -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/llm/shared-budget -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/translation/status -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/translation/secret -> 200"
+    },
+    {
+      "ok": true,
+      "label": "readonly APIs: zero paid_receipt/provider_usage delta (before={\"usageRequestCount\":0,\"usageRows\":0,\"receipts\":0,\"attempts\":0,\"syncRuns\":0} after={\"usageRequestCount\":0,\"usageRows\":0,\"receipts\":0,\"attempts\":0,\"syncRuns\":0})"
+    },
+    {
+      "ok": true,
+      "label": "page / rendered (href=/, bodyLen=1175)"
+    },
+    {
+      "ok": true,
+      "label": "page /ports rendered (href=/ports, bodyLen=523)"
+    },
+    {
+      "ok": true,
+      "label": "page /events rendered (href=/events, bodyLen=297)"
+    },
+    {
+      "ok": true,
+      "label": "page /policies rendered (href=/policies, bodyLen=585)"
+    },
+    {
+      "ok": true,
+      "label": "page /calendar rendered (href=/calendar, bodyLen=951)"
+    },
+    {
+      "ok": true,
+      "label": "page /feed rendered (href=/feed, bodyLen=597)"
+    },
+    {
+      "ok": true,
+      "label": "page /label rendered (href=/label, bodyLen=418)"
+    },
+    {
+      "ok": true,
+      "label": "page /settings rendered (href=/settings, bodyLen=2191)"
+    },
+    {
+      "ok": true,
+      "label": "page /ports/CNSHK rendered (href=/ports/CNSHK, bodyLen=393)"
+    },
+    {
+      "ok": true,
+      "label": "screenshot written"
+    },
+    {
+      "ok": true,
+      "label": "browser zero external HTTP (got 0)",
+      "sample": []
+    },
+    {
+      "ok": true,
+      "label": "browse pages: zero paid_receipt/provider_usage delta (before={\"usageRequestCount\":0,\"usageRows\":0,\"receipts\":0,\"attempts\":0,\"syncRuns\":0} after={\"usageRequestCount\":0,\"usageRows\":0,\"receipts\":0,\"attempts\":0,\"syncRuns\":0})"
+    },
+    {
+      "ok": true,
+      "label": "Provider call counters remain zero (usage=0, attempts=0, receipts=0)"
+    }
+  ],
+  "screenshots": [
+    "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/docs/evidence/r3-acceptance-closeout-20261102/r3-6-browse-last-page.png"
+  ],
+  "notes": [
+    "Not a substitute for S7 integrated acceptance",
+    "No live test-connection; no crawl/runtime jobs",
+    "Provider secrets stripped from env; fake/no-outbound"
+  ],
+  "health": {
+    "database": {
+      "status": "healthy",
+      "schemaVersion": 39,
+      "bootstrapCompletedAt": "2026-11-02T07:21:34.030Z"
+    }
+  },
+  "countersBefore": {
+    "usageRequestCount": 0,
+    "usageRows": 0,
+    "receipts": 0,
+    "attempts": 0,
+    "syncRuns": 0
+  },
+  "countersAfterApis": {
+    "usageRequestCount": 0,
+    "usageRows": 0,
+    "receipts": 0,
+    "attempts": 0,
+    "syncRuns": 0
+  },
+  "countersAfterBrowse": {
+    "usageRequestCount": 0,
+    "usageRows": 0,
+    "receipts": 0,
+    "attempts": 0,
+    "syncRuns": 0
+  },
+  "summary": {
+    "passed": 34,
+    "failed": 0,
+    "total": 34
+  }
+}

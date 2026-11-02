@@ -1,0 +1,43 @@
+R3-6 browse zero-pay PASS  34/34
+schema=39
+before={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0,"syncRuns":0}
+afterApis={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0,"syncRuns":0}
+afterBrowse={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0,"syncRuns":0}
+externalRequests=0
+pages=/,/ports,/events,/policies,/calendar,/feed,/label,/settings,/ports/CNSHK
+apis=19
+NOT a substitute for S7; no live connection test; no crawl
+PASS  schema v39 after init (got 39)
+PASS  GET /api/shipping/health -> 200
+PASS  GET /api/shipping/readiness -> 200
+PASS  GET /api/shipping/runtime -> 200
+PASS  GET /api/shipping/ -> 200
+PASS  GET /api/shipping/feed -> 200
+PASS  GET /api/shipping/calendar -> 200
+PASS  GET /api/shipping/tropical-cyclones -> 200
+PASS  GET /api/shipping/search/ports -> 200
+PASS  GET /api/shipping/intel/sources -> 200
+PASS  GET /api/shipping/intel/items -> 200
+PASS  GET /api/shipping/intel/manual -> 200
+PASS  GET /api/shipping/intel/labels -> 200
+PASS  GET /api/shipping/policies -> 200
+PASS  GET /api/shipping/llm/providers -> 200
+PASS  GET /api/shipping/llm/models -> 200
+PASS  GET /api/shipping/llm/bindings -> 200
+PASS  GET /api/shipping/llm/shared-budget -> 200
+PASS  GET /api/shipping/translation/status -> 200
+PASS  GET /api/shipping/translation/secret -> 200
+PASS  readonly APIs: zero paid_receipt/provider_usage delta (before={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0,"syncRuns":0} after={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0,"syncRuns":0})
+PASS  page / rendered (href=/, bodyLen=1175)
+PASS  page /ports rendered (href=/ports, bodyLen=523)
+PASS  page /events rendered (href=/events, bodyLen=297)
+PASS  page /policies rendered (href=/policies, bodyLen=585)
+PASS  page /calendar rendered (href=/calendar, bodyLen=951)
+PASS  page /feed rendered (href=/feed, bodyLen=597)
+PASS  page /label rendered (href=/label, bodyLen=418)
+PASS  page /settings rendered (href=/settings, bodyLen=2191)
+PASS  page /ports/CNSHK rendered (href=/ports/CNSHK, bodyLen=393)
+PASS  screenshot written
+PASS  browser zero external HTTP (got 0)
+PASS  browse pages: zero paid_receipt/provider_usage delta (before={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0,"syncRuns":0} after={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0,"syncRuns":0})
+PASS  Provider call counters remain zero (usage=0, attempts=0, receipts=0)

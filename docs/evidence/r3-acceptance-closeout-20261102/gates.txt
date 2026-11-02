@@ -1,0 +1,16 @@
+R3 acceptance closeout gates — 2026-11-02
+baseline tip: 2258810ca02f53382f85ba29a2d96bcaeea2fe9c
+scope: docs + R3-6 browse harness only (no product code / schema change)
+
+typecheck / lint / build / full vitest: NOT_REQUIRED this pack (no product/test source change vs tip)
+R3-6 browse zero-pay e2e: PASS 34/34 (scripts/e2e-r3-6-browse-zero-pay.mjs)
+  - open pages: / /ports /events /policies /calendar /feed /label /settings + /ports/CNSHK
+  - readonly APIs: 19 GETs
+  - paid_receipt/provider_usage/attempts flat 0→0; external HTTP 0
+  - SHIPPING_RUNTIME_ENABLED=false; provider secret env stripped
+policies-read-http / intel-read-http: retained prior tip coverage (not re-run as product delta)
+S7 integrated harness: NOT_RUN
+R3-5: BLOCKED (shared budget not user-authorized for live spend)
+merge / deploy: NOT done
+Slack send: NOT done (draft only to parent)
+Neat Freak: see neat-closeout.md

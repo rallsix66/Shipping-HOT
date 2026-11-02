@@ -1,0 +1,46 @@
+# 真实标注集盘点（仅已有授权素材）— 2026-11-02
+
+范围：只盘点操作入口与**已有**授权/夹具素材；**不**代替人工确认、**不**凑 200、**不**新抓源、**不**配置真实密钥或预算。
+
+## 操作入口
+
+| 入口 | 路径 | 说明 |
+|---|---|---|
+| 标注页 UI | `/label`（`IntelLabelPage`） | 筛选 queue/category/language；编辑人工结论；离页确认 |
+| 列表/详情 API | `GET /api/shipping/intel/labels`、`GET .../labels/:id` | 只读浏览；不调 Provider |
+| 入队 | `POST /api/shipping/intel/labels/enroll` | 从已有 item+version 入标注集；可带 category/language；不调 Provider |
+| 人工结论 | `POST .../labels/:id/decision` | 人工确认/纠正；事务保存 |
+| 离线评测 | `scripts/intel-eval.ts` | 只读打开既有 SQLite；缺预算/样本 → INCOMPLETE；R3-5 未配置则 BLOCKED |
+
+## 已有可用素材（授权/夹具）
+
+| 来源 | 数量与构成 | 分类 | 语言 | 性质 |
+|---|---|---|---|---|
+| Label browser e2e 种子（`docs/evidence/r3-8-policy-auto-20261102/rc4/label-eval-source.sqlite3`） | `intel_label_item`=2；`intel_label_decision`=9（含 AI prelabel + 多轮 human_correct） | port×1、weather×1 | en×1、zh×1 | **测试夹具**，非真实 200 集 |
+| Policy-auto / analyze 单测夹具 | 若干合成 item/version/analysis | 政策类合成 | 多为 zh/en fixture | 离线单元测试，不可计真实标注 |
+| 信源目录 `intel_source` 种子（约 51） | 目录级 URL/配置 | 多类信源 | 多语种源站 | **信源配置**，不是已标注样本；无自动入库为 label_item |
+| 主库/生产保留库 | 本工作树隔离证据 **未**读取用户保留库内容做标注统计 | — | — | 不擅自打开保留库凑数 |
+
+**结论**：当前**没有**达到 R3-2 的真实 ≥200 人工复核集；仅有 e2e/单测级授权夹具。
+
+## 分类 / 语言缺口（相对 R3-2）
+
+| 维度 | 目标 | 现有夹具 | 缺口 |
+|---|---|---|---|
+| 政策 | ≥30 | 0（标注表） | 全缺 |
+| 天气 | ≥30 | 1 | 差 ≥29 |
+| 港口 | ≥30 | 1 | 差 ≥29 |
+| 末端派送 | ≥20 | 0 | 全缺 |
+| 中文 | 覆盖 | 1 | 需扩真实样本 |
+| 英文 | 覆盖 | 1 | 需扩真实样本 |
+| 越南文 / 泰文 / 印尼文 | 覆盖 | 0 | 全缺 |
+
+## 后续真实评测所需配置 / 预算条件（盘点，不执行）
+
+1. Settings 中用户**确认**的 `sharedLlmBudget`（金额+ISO 货币）；未配置则 R3-5 保持 **BLOCKED**，禁止真实调用。
+2. 至少 2 家已授权服务商密钥（含 1 家向量，若评测需要）+ 步骤绑定；仅 mock/假配置不足以宣称 R3-1 真实测连。
+3. ExactVersion / 材料权利：每条送模样本需绑定 item/version/contentHash 的许可（当前无生产颁发器）。
+4. 人工复核流程与操作员身份约定；评测只保存 URL/摘录/标注，不存受限全文。
+5. 独立只读评测库路径交给 `intel-eval`；报告需含实际 `paid_receipt` 费用（非估）。
+
+以上条件**本包均未配置/未跑**。

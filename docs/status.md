@@ -1,3 +1,10 @@
+## R3 验收收口（矩阵+证据交审，不进 R4）(2026-11-02)
+
+- Baseline tip（R3-8 离线已接受）：`2258810ca02f53382f85ba29a2d96bcaeea2fe9c`. **Not** full R3 pass; **not** merge approval; no R4.
+- Deliverables for dots review: acceptance matrix R3-1～R3-8 (helper vs production wiring); R3-6 isolated browse zero-pay **34/34**; label-set inventory (ops entry + gaps, no pad-to-200); zero-cost wiring gaps + minimal next-slice suggestion; BLOCKED items listed separately.
+- R3-5 **BLOCKED**; S7 **NOT_RUN**; unmerged / undeployed. No user disturb; no Slack send from agent; no resume shipping-hot-dots.
+- Evidence: `docs/evidence/r3-acceptance-closeout-20261102/`.
+
 ## R3-8 政策库自动生成（仅离线）(2026-11-02) — RC4 after dots REQUEST CHANGES on `c81789ec`
 
 - Slice §4.11 / R3-8 only — **not** full R3 pass. Real 200-label set / real effect&cost still unrun; R3-5 **BLOCKED**; S7 harness **NOT_RUN** (EXPECTED_SCHEMA_VERSION=39 synced only); unmerged / undeployed.
