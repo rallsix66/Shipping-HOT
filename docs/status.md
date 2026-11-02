@@ -1,3 +1,12 @@
+## A2 ExactVersion 送模证据边界方案（docs-only 交审）(2026-11-02)
+
+- Baseline tip（A1 已限定接受，保持）：`b507306fcae81828cc9446ac0b65b96a179fe0da`.
+- **仅文档 + 只读核查**；**未**实现 A2 颁发器；**未**开 HTTP/定时/自动 grant；**未**把 clip 审计 / `source.persistence` / `evidenceId` 升级为 `permitted:true`。
+- 结论：现有 manual clip 审计均为未核验声明；persistence 仅存读范围；`evidenceId` 仍是未来接口；无颁发函数（issuerHits=0）；无证据保持 **BLOCKED**。
+- 交付：最小核验默认拒绝面、未来可信记录字段、用户一次确认选项 A–G、R3 已接受能力与剩余真实阻塞一览。
+- Evidence: `docs/evidence/r3-a2-evidence-boundary-20261102/`；草案 `docs/design/r3-a2-exactversion-evidence-boundary-draft.md`。
+- Gates: docs-only（产品代码相对 b507306 无改）；S7 **NOT_RUN**；R3-5 **BLOCKED**；未 merge/deploy；未打扰用户；未发 Slack。
+
 ## A1 离线显式分析→政策编排 (2026-11-02)
 
 - Baseline tip（R3-6 隔离浏览专项限定接受）：`da2ea5a40658056c74a234e882b005bf1be3f206`.

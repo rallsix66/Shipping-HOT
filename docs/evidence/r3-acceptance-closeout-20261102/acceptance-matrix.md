@@ -3,6 +3,7 @@
 基线 tip（已接受，R3-8 离线切片）：`2258810ca02f53382f85ba29a2d96bcaeea2fe9c`
 R3-6 隔离浏览专项限定接受 tip：`da2ea5a40658056c74a234e882b005bf1be3f206`
 A1（离线显式分析→政策编排）证据：`docs/evidence/r3-a1-offline-analyze-policy-20261102/`（相对 da2ea5a；RC retry 成功终态闸见 `rc-retry-success-gate/`）
+A2 证据边界方案（docs-only 交审，**未实现颁发器**）：`docs/evidence/r3-a2-evidence-boundary-20261102/`；基线 tip `b507306fcae81828cc9446ac0b65b96a179fe0da`
 本包性质：**矩阵 + 证据交审**；**不是**完整 R3 通过、**不是** PR 合并批准、**不进 R4**。
 真实 200 人工集 / 模型效果 / 实际费用仍未验；**R3-5 BLOCKED**；**S7 NOT_RUN**；未合并未部署。
 **口径：离线编排已接线，生产仍未启用。**
@@ -29,7 +30,7 @@ A1（离线显式分析→政策编排）证据：`docs/evidence/r3-a1-offline-a
 
 | 能力 | Helper / 注入 | 生产接线现状 |
 |---|---|---|
-| ExactVersion 权限 | `ExactVersionModelLicense` + `admitModelPayload`；测试内手工构造 license | **无**生产颁发器；**无** HTTP/任务在分析前发放 license |
+| ExactVersion 权限 | `ExactVersionModelLicense` + `admitModelPayload`；测试内手工构造 license | **无**生产颁发器；**无** HTTP/任务在分析前发放 license；**A2 证据边界方案交审中**（不得用 clip/persistence/evidenceId 冒充 permitted） |
 | 总池预算 | `resolveSharedLlmBudgetGate` / Settings `sharedLlmBudget` | **已接通** Settings 读写 + paidRequest 共享闸；真实金额授权仍未做 |
 | 分析触发 | `runOfflineAnalyze(...)`；A1 `runOfflineAnalyzeThenPolicy`（显式调用） | **无** analyze HTTP、**无** BackgroundRuntime 分析任务、GET **永不**分析；A1 仅离线显式入口 |
 | 政策自动入库 | `PolicyAutoService.applyFromExactIntel` / `apply`；**A1** `runOfflineAnalyzeThenPolicy`（`enablePolicyAuto` 默认 false；env alone 不启用） | **离线编排已接线，生产仍未启用**；无 HTTP/cron；GET/浏览 invoke 仍为 0；**A2 颁发器未接通** |

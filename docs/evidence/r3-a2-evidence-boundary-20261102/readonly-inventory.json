@@ -1,0 +1,134 @@
+{
+  "generatedAt": "2026-11-02T08:51:29.946Z",
+  "timezoneNote": "ISO Z; report times in Asia/Shanghai",
+  "baselineTip": "b507306fcae81828cc9446ac0b65b96a179fe0da",
+  "branch": "codex/shipping-hot-r3-1-llm-registry-20261027",
+  "scope": "readonly evidence-boundary inventory; no product issuer wired",
+  "clipAuditVerificationLiteralsOnly": [
+    "user_declaration_unverified",
+    "manual_capture_unverified"
+  ],
+  "note": "No verified/confirmed verification status exists in ClipAudit union; both literals are unverified declarations.",
+  "ExactVersionModelLicense": {
+    "fields": [
+      "itemId",
+      "versionId",
+      "contentHash",
+      "permitted:true",
+      "evidenceId?:string"
+    ],
+    "evidenceIdStatus": "optional opaque future rights-store pointer; no store/issuer implements it",
+    "constructionSites": "test helpers only (analyze-pipeline.test / offline-analyze-policy.test / registry.test)"
+  },
+  "sourcePersistence": {
+    "type": "IntelPersistence = full | excerpt_only | disallowed",
+    "meaning": "storage/read scope cap via content-license + material-read; NOT model-send grant",
+    "materialReadComment": "Internal stored-material read, not an HTTP/model payload"
+  },
+  "admitModelPayloadDenyCodes": [
+    "private_material",
+    "rights_unknown",
+    "rights_missing",
+    "no_model_permission",
+    "license_mismatch"
+  ],
+  "issuerFunctionHits": [],
+  "fileFacts": {
+    "shared/manual-clip.ts": {
+      "bytes": 5346,
+      "sha256": "0af3cb7d6c877ba14f655a05feee3d9f1572b84e5e3532d85e2b81c7700dbd35",
+      "verification_literals": [
+        "user_declaration_unverified",
+        "manual_capture_unverified"
+      ],
+      "mentions_private_material": true,
+      "mentions_ExactVersion": false,
+      "mentions_evidenceId": false,
+      "mentions_persistence": false,
+      "has_issuer_fn": false
+    },
+    "server/intel/manual-clip.ts": {
+      "bytes": 4480,
+      "sha256": "eb5ceb17d27f1797d8be2eb1291000715168b20728b42a26cde2fdd8f67f3322",
+      "verification_literals": [
+        "user_declaration_unverified",
+        "manual_capture_unverified"
+      ],
+      "mentions_private_material": true,
+      "mentions_ExactVersion": false,
+      "mentions_evidenceId": false,
+      "mentions_persistence": false,
+      "has_issuer_fn": false
+    },
+    "server/intel/manual-license.ts": {
+      "bytes": 3308,
+      "sha256": "5cfbce3386e3626f75fd306e0f1c6c24489f0aa43175c371c825f211670b9ba9",
+      "verification_literals": [
+        "manual_capture_unverified",
+        "user_declaration_unverified"
+      ],
+      "mentions_private_material": true,
+      "mentions_ExactVersion": false,
+      "mentions_evidenceId": false,
+      "mentions_persistence": true,
+      "has_issuer_fn": false
+    },
+    "server/intel/content-license.ts": {
+      "bytes": 1662,
+      "sha256": "0d82b435a9b4a7c3c3d4838df605b88e9a3db707ec128a13a50ca292508e1a3c",
+      "verification_literals": [],
+      "mentions_private_material": false,
+      "mentions_ExactVersion": false,
+      "mentions_evidenceId": false,
+      "mentions_persistence": true,
+      "has_issuer_fn": false
+    },
+    "server/intel/material-read.ts": {
+      "bytes": 3632,
+      "sha256": "8b2ffc64ec4c82df8854b18be07cefc238f0aafc16952748067c4662246fec73",
+      "verification_literals": [],
+      "mentions_private_material": false,
+      "mentions_ExactVersion": false,
+      "mentions_evidenceId": false,
+      "mentions_persistence": true,
+      "has_issuer_fn": false
+    },
+    "server/intel/llm/model-payload-gate.ts": {
+      "bytes": 3989,
+      "sha256": "f74d4a948ddfd9abcda54e76ac533e6ceb0da7c7b004cf2436d5644b1dd1579b",
+      "verification_literals": [
+        "user_declaration_unverified"
+      ],
+      "mentions_private_material": true,
+      "mentions_ExactVersion": true,
+      "mentions_evidenceId": true,
+      "mentions_persistence": false,
+      "has_issuer_fn": false
+    },
+    "server/intel/llm/analyze-pipeline.ts": {
+      "bytes": 44460,
+      "sha256": "76d3993e4d768c44d5520894b6355532768472cdfa089fc3d8dfe139aeff3e77",
+      "verification_literals": [],
+      "mentions_private_material": false,
+      "mentions_ExactVersion": true,
+      "mentions_evidenceId": false,
+      "mentions_persistence": false,
+      "has_issuer_fn": false
+    },
+    "server/intel/llm/offline-analyze-policy.ts": {
+      "bytes": 13567,
+      "sha256": "90b7da871d13ddea2de5c472a01ccd85329d07a3f8a6911a0692f2ed4a943040",
+      "verification_literals": [],
+      "mentions_private_material": false,
+      "mentions_ExactVersion": false,
+      "mentions_evidenceId": false,
+      "mentions_persistence": false,
+      "has_issuer_fn": false
+    }
+  },
+  "conclusion": {
+    "mayUpgradeToPermittedTrue": false,
+    "a2IssuerWired": false,
+    "withoutTrustedEvidenceKeep": "BLOCKED"
+  }
+}
