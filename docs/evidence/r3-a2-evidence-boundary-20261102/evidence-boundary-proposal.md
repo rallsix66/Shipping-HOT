@@ -1,6 +1,6 @@
 # A2 证据边界方案 — ExactVersion 送模授权（交审稿 · Draft）
 
-> **Status: Draft**（非 Accepted ADR）。方案通过前**不执行** A2 产品实现。无可信证据时保持 **BLOCKED**。
+> **Status: Draft**（非 Accepted ADR）。只读 fail-closed 核验接口已按单项决定实现（见 `docs/evidence/r3-a2-failclosed-verifier-20261102/`）。**可信生产证据接入/颁发仍未完成**。无可信证据时保持 **BLOCKED**。
 > 复用已有契约（`admitModelPayload` / `ExactVersionModelLicense` / ClipAudit / persistence），**不**新造一套权限系统。
 > 相对 tip `3e420536` 的 RC 文档收紧见同目录 `rc-docs-tighten/`。
 
@@ -106,15 +106,11 @@
 两者**同时**满足才可能 `permitted: true`。缺一即 BLOCKED。
 **不把公开可读当许可**（ADR-010）。
 
-## 5. 用户下一步（仅一项；写入交审，本执行器不询问用户）
+## 5. 用户下一步（状态）
 
-在**尚未拿到下列决定前不编码** A2：
+单项决定（ts `1793610779.487829`）已批准并实施：**零付费、无授权记录写入、无 HTTP** 的 fail-closed 证据核验接口与夹具测试。
 
-> **是否继续做「零付费、无授权记录写入、无 HTTP」的 fail-closed 证据核验接口与夹具测试？**
->
-> 范围仅限：验证**调用方提供的**可信证据是否满足契约；**不**创造证据、**不**实际授权、**不**宣称生产颁发器接通。
-
-本项获批前：只做文档；获批后另开切片实施该核验接口 + 夹具（仍非生产颁发器）。
+**仍未批准**：可信生产证据接入、生产颁发器、真实授权写入、HTTP/UI、真实模型调用。
 
 ## 6. 明确不做
 

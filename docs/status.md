@@ -1,3 +1,14 @@
+## A2 fail-closed 证据核验接口 + 夹具（零付费）(2026-11-02)
+
+- Baseline tip：`3e985da224484da86da135622919e1659084b3ca`（A2 Draft 文档已接受）。
+- 范围确认：dots/用户 ts `1793610779.487829` — 仅零付费进程内核验 + 夹具；**不是**实际授权/真实调用/生产颁发。
+- Delivered: `tryVerifyExactVersionEvidence` / `createFixtureTrustedEvidenceSource`（`exact-version-evidence-verifier.ts`）；夹具单测 **17/17**。
+- 复用 `admitModelPayload` / `ExactVersionModelLicense`；clip private/unknown/unverified **硬拒不放宽**；无可信源/记录 → BLOCKED。
+- **不**写授权记录；**不**开 HTTP/UI/cron/自动 grant；**不**接 Provider；夹具 ≠ 生产有权；核验结果 ≠ 新创建授权。
+- **口径：只读核验接口已实现；可信生产证据接入/颁发仍未完成。**
+- Evidence: `docs/evidence/r3-a2-failclosed-verifier-20261102/`；方案交叉 `docs/evidence/r3-a2-evidence-boundary-20261102/`。
+- Gates: typecheck / lint / build / full Vitest（见该证据目录）；S7 **NOT_RUN**；R3-5 **BLOCKED**；未 merge/deploy；未打扰用户；未发 Slack。
+
 ## A2 ExactVersion 送模证据边界方案（docs-only Draft；RC 收紧）(2026-11-02)
 
 - Parent tip（本 RC 相对）：`3e42053630d098d76e07dd36e415fedc665e39a8`；A1 限定接受 tip 保持：`b507306fcae81828cc9446ac0b65b96a179fe0da`.

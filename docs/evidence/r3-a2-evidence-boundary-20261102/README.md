@@ -1,4 +1,4 @@
-# A2 — ExactVersion 送模授权证据边界方案（Draft 交审，未实现产品）
+# A2 — ExactVersion 送模授权证据边界方案（Draft；核验接口另见 failclosed-verifier）
 
 - 日期：2026-11-02（Asia/Shanghai）
 - 分支：`codex/shipping-hot-r3-1-llm-registry-20261027`
@@ -27,4 +27,4 @@
 - **未**把 `ClipAudit` / `source.persistence` / `evidenceId` 升级成送模许可
 - 测试夹具 `licenseFor(...)` **不能**代表生产许可
 - 不重开 R2、不混 continuous 11、不做 R4
-- **尚未**就「fail-closed 核验接口 + 夹具」获得用户决定 → **未编码**
+- 用户决定已确认（ts `1793610779.487829`）→ 只读核验+夹具见 `docs/evidence/r3-a2-failclosed-verifier-20261102/`；**生产证据接入/颁发仍未完成**

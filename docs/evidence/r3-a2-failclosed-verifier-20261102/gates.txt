@@ -1,0 +1,16 @@
+A2 fail-closed verifier gates — 2026-11-02 Asia/Shanghai
+baseline tip: 3e985da224484da86da135622919e1659084b3ca
+branch: codex/shipping-hot-r3-1-llm-registry-20261027
+
+| Gate | Result |
+|---|---|
+| pnpm typecheck | PASS (exit 0) |
+| pnpm lint | PASS (exit 0) |
+| pnpm build | PASS (exit 0) |
+| vitest targeted (exact-version-evidence-verifier.test.ts) | PASS 17/17 |
+| vitest full | PASS 2226 passed / 10 skipped (175 files) |
+
+Notes:
+- No real keys; no real model calls; no auth-record writes; no HTTP grant surface.
+- S7 NOT_RUN; R3-5 BLOCKED; unmerged / undeployed.
+- Doc statement: read-only verifier implemented; trusted production evidence ingress/issuer unfinished.

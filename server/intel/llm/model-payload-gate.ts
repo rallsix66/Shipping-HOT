@@ -5,7 +5,9 @@
  *
  * PRODUCTION BOUNDARY (honest): this is still an injectable offline helper.
  * It does NOT itself prove a production rights/annotation store, HTTP route, or
- * authoritative total-pool wiring. Callers must supply a verifiable
+ * authoritative total-pool wiring. Read-only fail-closed verify lives in
+ * exact-version-evidence-verifier.ts; trusted production evidence ingress/issuer
+ * remain unfinished. Callers must supply a verifiable
  * ExactVersionModelLicense bound to the exact item/version/contentHash.
  * Passing bare `true` is NOT authorization evidence.
  */
