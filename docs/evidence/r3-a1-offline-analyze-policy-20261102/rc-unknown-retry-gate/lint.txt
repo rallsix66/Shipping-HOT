@@ -1,0 +1,4 @@
+
+> shipping-hot@0.0.41 lint D:\try one\Shipping HOT\.tmp\worktrees\r3-1-llm-registry-20261027
+> eslint
+

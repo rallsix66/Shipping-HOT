@@ -114,6 +114,7 @@ function createScriptedTransport(state: ScriptedState): OpenAiCompatibleTranspor
 
 const prefilterPass = JSON.stringify({ decision: "PASS", reason: "policy ops" })
 const prefilterBlock = JSON.stringify({ decision: "BLOCK", reason: "unrelated" })
+const prefilterUnknown = JSON.stringify({ decision: "UNKNOWN", reason: "ambiguous" })
 const scoreAgree = JSON.stringify({ dimensions: { impact: 7, scope: 5, urgency: 6, actionability: 4 }, rumourOnly: false })
 
 function extractJson(over: Record<string, unknown> = {}) {
@@ -419,6 +420,193 @@ describe("runOfflineAnalyzeThenPolicy A1 orchestration", () => {
     expect((await h.policies.list({}, T0))).toHaveLength(1)
   })
 
+  it("contrast: UNKNOWN full success → policy write fault → retry succeeds; Provider hits unchanged", async () => {
+    const h = await openHarness([
+      prefilterUnknown,
+      extractJson(),
+      scoreAgree,
+      scoreAgree,
+    ])
+    let failOnce = true
+    const real = h.policyAuto
+    const flaky = {
+      applyFromExactIntel: async (
+        deps: Parameters<PolicyAutoService["applyFromExactIntel"]>[0],
+        input: Parameters<PolicyAutoService["applyFromExactIntel"]>[1],
+        now: Date,
+      ) => {
+        if (failOnce) {
+          failOnce = false
+          throw new Error("simulated_policy_write_fault_unknown")
+        }
+        return real.applyFromExactIntel(deps, input, now)
+      },
+    } as PolicyAutoService
+
+    const failed = await runOfflineAnalyzeThenPolicy({
+      ...h.baseInput,
+      enablePolicyAuto: true,
+      policyAuto: flaky,
+    })
+    expect(failed.analyze.ok).toBe(true)
+    if (!failed.analyze.ok) throw new Error("unreachable")
+    expect(failed.analyze.prefilter).toBe("UNKNOWN")
+    expect(failed.policy).toBeNull()
+    expect(failed.policyError).toBe("simulated_policy_write_fault_unknown")
+    const hits = h.transportState.chatHits
+    expect(hits).toBeGreaterThan(0)
+    const runId = failed.analyze.analyses[0]?.runId
+    expect(runId).toBeTruthy()
+
+    const gate = verifyPersistedExactRunAnalyzeSuccess(
+      await h.analysis.listForVersion(failed.analyze.itemId, failed.analyze.versionId),
+      {
+        itemId: failed.analyze.itemId,
+        versionId: failed.analyze.versionId,
+        contentHash: failed.analyze.contentHash,
+        runId: runId!,
+      },
+    )
+    expect(gate).toEqual({ ok: true })
+
+    const retried = await retryPolicyApplyFromExactRun({
+      db: h.db,
+      intelRepo: h.intel,
+      analysisRepo: h.analysis,
+      policyAuto: real,
+      itemId: failed.analyze.itemId,
+      versionId: failed.analyze.versionId,
+      contentHash: failed.analyze.contentHash,
+      runId: runId!,
+      isFixture: true,
+      enteredBy: "a1-retry-unknown",
+      now: () => T0,
+    })
+    expect(retried.outcome).toBe("created")
+    expect(h.transportState.chatHits).toBe(hits)
+    expect((await h.policies.list({}, T0))).toHaveLength(1)
+  })
+
+  it("contrast: empty/wrong runId → retry refuses (no apply)", async () => {
+    const h = await openHarness([
+      prefilterPass,
+      extractJson(),
+      scoreAgree,
+      scoreAgree,
+    ])
+    const result = await runOfflineAnalyzeThenPolicy({ ...h.baseInput, enablePolicyAuto: true })
+    expect(result.analyze.ok).toBe(true)
+    if (!result.analyze.ok) throw new Error("unreachable")
+    expect(result.policy?.outcome).toBe("created")
+    const hits = h.transportState.chatHits
+    const realRunId = result.analyze.analyses[0]?.runId
+    expect(realRunId).toBeTruthy()
+
+    const empty = await retryPolicyApplyFromExactRun({
+      db: h.db,
+      intelRepo: h.intel,
+      analysisRepo: h.analysis,
+      itemId: result.analyze.itemId,
+      versionId: result.analyze.versionId,
+      contentHash: result.analyze.contentHash,
+      runId: "",
+      isFixture: true,
+      now: () => T0,
+    })
+    expect(empty.outcome).toBe("rejected")
+    expect(empty.reason).toBe("analyze_success_unverified:invalid_exact_identity")
+
+    const wrong = await retryPolicyApplyFromExactRun({
+      db: h.db,
+      intelRepo: h.intel,
+      analysisRepo: h.analysis,
+      itemId: result.analyze.itemId,
+      versionId: result.analyze.versionId,
+      contentHash: result.analyze.contentHash,
+      runId: "not-this-run",
+      isFixture: true,
+      now: () => T0,
+    })
+    expect(wrong.outcome).toBe("rejected")
+    expect(wrong.reason).toBe("analyze_success_unverified:run_not_found")
+    expect(h.transportState.chatHits).toBe(hits)
+    expect((await h.policies.list({}, T0))).toHaveLength(1)
+  })
+
+  it("contrast: duplicate retry after success → version not bumped; Provider hits unchanged", async () => {
+    const h = await openHarness([
+      prefilterPass,
+      extractJson(),
+      scoreAgree,
+      scoreAgree,
+    ])
+    let failOnce = true
+    const real = h.policyAuto
+    const flaky = {
+      applyFromExactIntel: async (
+        deps: Parameters<PolicyAutoService["applyFromExactIntel"]>[0],
+        input: Parameters<PolicyAutoService["applyFromExactIntel"]>[1],
+        now: Date,
+      ) => {
+        if (failOnce) {
+          failOnce = false
+          throw new Error("simulated_policy_write_fault_dup")
+        }
+        return real.applyFromExactIntel(deps, input, now)
+      },
+    } as PolicyAutoService
+
+    const failed = await runOfflineAnalyzeThenPolicy({
+      ...h.baseInput,
+      enablePolicyAuto: true,
+      policyAuto: flaky,
+    })
+    expect(failed.analyze.ok).toBe(true)
+    if (!failed.analyze.ok) throw new Error("unreachable")
+    const hits = h.transportState.chatHits
+    const runId = failed.analyze.analyses[0]?.runId
+    expect(runId).toBeTruthy()
+
+    const first = await retryPolicyApplyFromExactRun({
+      db: h.db,
+      intelRepo: h.intel,
+      analysisRepo: h.analysis,
+      policyAuto: real,
+      itemId: failed.analyze.itemId,
+      versionId: failed.analyze.versionId,
+      contentHash: failed.analyze.contentHash,
+      runId: runId!,
+      isFixture: true,
+      enteredBy: "a1-retry-dup",
+      now: () => T0,
+    })
+    expect(first.outcome).toBe("created")
+    const policyId = first.policyId!
+    const versionId = first.versionId!
+    const detailAfterFirst = await h.policies.detail(policyId, T0)
+    expect(detailAfterFirst?.versions).toHaveLength(1)
+
+    const second = await retryPolicyApplyFromExactRun({
+      db: h.db,
+      intelRepo: h.intel,
+      analysisRepo: h.analysis,
+      policyAuto: real,
+      itemId: failed.analyze.itemId,
+      versionId: failed.analyze.versionId,
+      contentHash: failed.analyze.contentHash,
+      runId: runId!,
+      isFixture: true,
+      enteredBy: "a1-retry-dup",
+      now: () => T0,
+    })
+    expect(["created", "unchanged", "updated"]).toContain(second.outcome)
+    expect(second.policyId).toBe(policyId)
+    expect(second.versionId).toBe(versionId)
+    const detailAfterSecond = await h.policies.detail(policyId, T0)
+    expect(detailAfterSecond?.versions).toHaveLength(1)
+    expect(h.transportState.chatHits).toBe(hits)
+    expect((await h.policies.list({}, T0))).toHaveLength(1)
+  })
   it("contrast: severity-1 fail (failOnHit=3) — main no入库; retry same runId refuses (no extract-only bypass)", async () => {
     const h = await openHarness([
       prefilterPass,

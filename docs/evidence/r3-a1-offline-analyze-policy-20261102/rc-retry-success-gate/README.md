@@ -37,3 +37,5 @@ pnpm exec vitest run server/intel/llm/offline-analyze-policy.test.ts
 - 未 merge / 未 deploy；未打扰用户；未发 Slack；未 resume shipping-hot-dots
 - A2 未扩；R3-5 BLOCKED；S7 NOT_RUN
 - 生产仍未启用
+
+> 后续 RC：c-unknown-retry-gate/ 将 prefilter 门从「仅 PASS」修正为「PASS|UNKNOWN + 后续完整成功」；本目录描述的是 901c7fc 当时口径。

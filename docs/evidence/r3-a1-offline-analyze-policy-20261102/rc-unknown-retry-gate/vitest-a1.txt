@@ -1,0 +1,43 @@
+
+ RUN  v4.0.18 D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027
+
+node.exe : Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027
+/shared/annual-calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/sha
+red/calendar.ts" is used
+所在位置 C:\Program Files\nodejs\pnpm.ps1:16 字符: 5
++     & "$basedir/node$exe"  "$basedir/node_modules/corepack/dist/pnpm. ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Duplicated impo...dar.ts" is used:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Duplicated imports "VN", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/annual-
+calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" 
+is used
+Duplicated imports "TH", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/annual-
+calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" 
+is used
+Duplicated imports "MY", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/annual-
+calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" 
+is used
+Duplicated imports "PH", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/annual-
+calendar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" 
+is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/cal
+endar.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/policy.ts" is 
+used
+Duplicated imports "lazada", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/pol
+icy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/promo-calendar.t
+s" is used
+Duplicated imports "tiktok_shop", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/share
+d/policy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/promo-calen
+dar.ts" is used
+Duplicated imports "string", the one from "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/pol
+icy.ts" has been ignored and "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/shared/promo-calendar.t
+s" is used
+ 鉁?server/intel/llm/offline-analyze-policy.test.ts (18 tests) 786ms
+
+ Test Files  1 passed (1)
+      Tests  18 passed (18)
+   Start at  16:40:19
+   Duration  2.07s (transform 709ms, setup 0ms, import 1.09s, tests 786ms, environment 0ms)
+

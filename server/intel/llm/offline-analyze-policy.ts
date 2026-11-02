@@ -237,9 +237,10 @@ function extractEventTypeFromRow(row: IntelAnalysisRecord): string | null {
 
 /**
  * Verify from trusted persisted intel_analysis rows that this exact run reached
- * a complete successful analyze end-state (prefilter PASS + extract + dual
+ * a complete successful analyze end-state (prefilter PASS|UNKNOWN + extract + dual
  * severity, + tiebreak when scores diverge). Caller-claimed success is ignored.
- * Extract-only / failed / incomplete / BLOCK / non-policy → not ok.
+ * UNKNOWN does not exclude (pipeline continues extract/dual severity); BLOCK still
+ * hard-rejects. Extract-only / failed / incomplete / BLOCK / non-policy -> not ok.
  */
 export function verifyPersistedExactRunAnalyzeSuccess(
   rows: IntelAnalysisRecord[],
@@ -288,7 +289,10 @@ export function verifyPersistedExactRunAnalyzeSuccess(
     prefilterOk.slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt)).at(-1)!,
   )
   if (preDecision === "BLOCK") return { ok: false, reason: "prefilter_blocked" }
-  if (preDecision !== "PASS") return { ok: false, reason: "analyze_incomplete:prefilter_not_pass" }
+  // Pipeline contract: only BLOCK stops; PASS and UNKNOWN both continue to extract/dual.
+  if (preDecision !== "PASS" && preDecision !== "UNKNOWN") {
+    return { ok: false, reason: "analyze_incomplete:prefilter_not_pass" }
+  }
 
   const extractOk = okRows("extract")
   if (!extractOk.length) {

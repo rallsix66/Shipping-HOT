@@ -1,0 +1,15 @@
+A1 RC — UNKNOWN success-path retry gate (2026-11-02 Asia/Shanghai)
+
+baseline tip: 901c7fc2c3882a4aecf1f8ce21c1d52dc9160a47
+typecheck: PASS (pnpm typecheck)
+lint: PASS (pnpm lint)
+build: PASS (pnpm build)
+vitest A1 targeted: 18/18 PASS (offline-analyze-policy.test.ts; +3 contrast)
+vitest full: 2209 passed | 10 skipped (174 files)
+S7: NOT_RUN
+R3-5: BLOCKED
+A2 ExactVersion issuer: NOT WIRED
+production enable: OFF
+merge/deploy: NOT DONE
+Slack: NOT SENT
+user disturb: NOT DONE

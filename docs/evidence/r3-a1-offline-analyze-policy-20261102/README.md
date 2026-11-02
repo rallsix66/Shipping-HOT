@@ -43,3 +43,5 @@
 ## RC（dots REQUEST CHANGES）
 
 见子目录 [`rc-retry-success-gate/`](./rc-retry-success-gate/)：`retryPolicyApplyFromExactRun` 改为从持久分析行校验**完整成功终态**后才允许补落库；对照测覆盖 severity 失败/未完成 vs 成功分析+政策写失败重试。
+
+见子目录 [`rc-unknown-retry-gate/`](./rc-unknown-retry-gate/)：`verifyPersistedExactRunAnalyzeSuccess` 按管线契约认可 **PASS|UNKNOWN** 完整成功链的零付费 retry（仍硬拒 BLOCK/失败/缺步）；对照含 UNKNOWN 写故障重试、空/错 runId、重复 retry 不增版本。
