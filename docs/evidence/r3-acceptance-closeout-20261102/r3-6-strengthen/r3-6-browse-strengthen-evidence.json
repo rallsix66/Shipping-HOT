@@ -1,0 +1,557 @@
+{
+  "tip": "r3-6-browse-zero-pay-strengthen",
+  "mode": "seeded-fixture",
+  "historicalEmptySmokeRetained": "docs/evidence/r3-acceptance-closeout-20261102/r3-6-browse-*",
+  "baseUrl": "http://127.0.0.1:4496",
+  "runDir": "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/.tmp/r3-6-browse-zero-pay/runs/run-WrogFJ",
+  "evidenceDir": "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/docs/evidence/r3-acceptance-closeout-20261102/r3-6-strengthen",
+  "openPages": [
+    "/",
+    "/ports",
+    "/events",
+    "/policies",
+    "/calendar",
+    "/feed",
+    "/label",
+    "/settings"
+  ],
+  "readonlyApis": [
+    "/api/shipping/health",
+    "/api/shipping/readiness",
+    "/api/shipping/runtime",
+    "/api/shipping/",
+    "/api/shipping/feed",
+    "/api/shipping/calendar",
+    "/api/shipping/tropical-cyclones",
+    "/api/shipping/search/ports",
+    "/api/shipping/intel/sources",
+    "/api/shipping/intel/items",
+    "/api/shipping/intel/manual",
+    "/api/shipping/intel/labels",
+    "/api/shipping/policies",
+    "/api/shipping/llm/providers",
+    "/api/shipping/llm/models",
+    "/api/shipping/llm/bindings",
+    "/api/shipping/llm/shared-budget",
+    "/api/shipping/translation/status",
+    "/api/shipping/translation/secret"
+  ],
+  "detailPages": [
+    "/ports/CNSHK"
+  ],
+  "apiResults": [
+    {
+      "path": "/api/shipping/health",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 1
+    },
+    {
+      "path": "/api/shipping/readiness",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 7
+    },
+    {
+      "path": "/api/shipping/runtime",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 3
+    },
+    {
+      "path": "/api/shipping/",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 6
+    },
+    {
+      "path": "/api/shipping/feed",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 5
+    },
+    {
+      "path": "/api/shipping/calendar",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 4
+    },
+    {
+      "path": "/api/shipping/tropical-cyclones",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 4
+    },
+    {
+      "path": "/api/shipping/search/ports",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 3
+    },
+    {
+      "path": "/api/shipping/intel/sources",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 6
+    },
+    {
+      "path": "/api/shipping/intel/items",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 4
+    },
+    {
+      "path": "/api/shipping/intel/manual",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 8
+    },
+    {
+      "path": "/api/shipping/intel/labels",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 8
+    },
+    {
+      "path": "/api/shipping/policies",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 4
+    },
+    {
+      "path": "/api/shipping/llm/providers",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 6
+    },
+    {
+      "path": "/api/shipping/llm/models",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 5
+    },
+    {
+      "path": "/api/shipping/llm/bindings",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 5
+    },
+    {
+      "path": "/api/shipping/llm/shared-budget",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 6
+    },
+    {
+      "path": "/api/shipping/translation/status",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 6
+    },
+    {
+      "path": "/api/shipping/translation/secret",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 3
+    },
+    {
+      "path": "/api/shipping/intel/labels/lbl_e2e_001",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 7
+    },
+    {
+      "path": "/api/shipping/policies/policy%3A1637bd95-1926-48b7-9c28-48d7e683d887",
+      "status": 200,
+      "ok": true,
+      "err": null,
+      "ms": 4
+    }
+  ],
+  "pageResults": [
+    {
+      "path": "/",
+      "href": "/",
+      "title": "Shipping HOT",
+      "bodyLen": 1224,
+      "shell": true,
+      "readyOk": true,
+      "errorish": false,
+      "ms": 5286
+    },
+    {
+      "path": "/ports",
+      "href": "/ports",
+      "title": "Shipping HOT",
+      "bodyLen": 717,
+      "shell": true,
+      "readyOk": true,
+      "errorish": false,
+      "ms": 62
+    },
+    {
+      "path": "/events",
+      "href": "/events",
+      "title": "Shipping HOT",
+      "bodyLen": 410,
+      "shell": true,
+      "readyOk": true,
+      "errorish": false,
+      "ms": 5197
+    },
+    {
+      "path": "/policies",
+      "href": "/policies",
+      "title": "Shipping HOT",
+      "bodyLen": 1643,
+      "shell": true,
+      "readyOk": true,
+      "errorish": false,
+      "ms": 296
+    },
+    {
+      "path": "/calendar",
+      "href": "/calendar",
+      "title": "Shipping HOT",
+      "bodyLen": 1570,
+      "shell": true,
+      "readyOk": true,
+      "errorish": false,
+      "ms": 96
+    },
+    {
+      "path": "/feed",
+      "href": "/feed",
+      "title": "Shipping HOT",
+      "bodyLen": 7684,
+      "shell": true,
+      "readyOk": true,
+      "errorish": false,
+      "ms": 106
+    },
+    {
+      "path": "/label",
+      "href": "/label",
+      "title": "Shipping HOT",
+      "bodyLen": 775,
+      "shell": true,
+      "readyOk": true,
+      "errorish": false,
+      "ms": 88
+    },
+    {
+      "path": "/settings",
+      "href": "/settings",
+      "title": "Shipping HOT",
+      "bodyLen": 2685,
+      "shell": true,
+      "readyOk": true,
+      "errorish": false,
+      "ms": 137
+    },
+    {
+      "path": "/ports/CNSHK",
+      "href": "/ports/CNSHK",
+      "title": "Shipping HOT",
+      "bodyLen": 442,
+      "shell": true,
+      "readyOk": true,
+      "errorish": false,
+      "ms": 5085
+    }
+  ],
+  "externalRequests": [],
+  "fakeProvider": {
+    "baseUrl": "https://api.example.invalid/v1",
+    "mode": "non-routable-https-fixture",
+    "recording": "provider_usage.request_count + paid_receipt + paid_receipt_attempt",
+    "hitsBefore": 0,
+    "note": "registry parseProviderBaseUrl forbids http/localhost; fixture key only; no live test-connection",
+    "hitsAfterSeed": 0,
+    "hitsAfterApis": 0,
+    "hitsAfterBrowse": 0,
+    "ledgerAfterBrowse": {
+      "usageRequestCount": 0,
+      "usageRows": 0,
+      "receipts": 0,
+      "attempts": 0
+    }
+  },
+  "checks": [
+    {
+      "ok": true,
+      "label": "schema v39 after init (got 39)"
+    },
+    {
+      "ok": true,
+      "label": "seed policy -> 200",
+      "policyId": "policy:1637bd95-1926-48b7-9c28-48d7e683d887"
+    },
+    {
+      "ok": true,
+      "label": "seed policy returns id"
+    },
+    {
+      "ok": true,
+      "label": "seed policy isFixture=true"
+    },
+    {
+      "ok": true,
+      "label": "seed fake provider -> 200",
+      "providerId": "r36-browse-fake-provider"
+    },
+    {
+      "ok": true,
+      "label": "fake provider secret configured (fixture key, not real)"
+    },
+    {
+      "ok": true,
+      "label": "provider response never echoes raw fixture key"
+    },
+    {
+      "ok": true,
+      "label": "seed fake model -> 200",
+      "modelId": "r36-browse-fake-model"
+    },
+    {
+      "ok": true,
+      "label": "seed extract binding -> 200"
+    },
+    {
+      "ok": true,
+      "label": "ledger before browse all zero (got {\"usageRequestCount\":0,\"usageRows\":0,\"receipts\":0,\"attempts\":0})"
+    },
+    {
+      "ok": true,
+      "label": "fake Provider server-side call count after seed remain 0 (got 0)"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/health -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/readiness -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/runtime -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/ -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/feed -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/calendar -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/tropical-cyclones -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/search/ports -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/intel/sources -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/intel/items -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/intel/manual -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/intel/labels -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/policies -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/llm/providers -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/llm/models -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/llm/bindings -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/llm/shared-budget -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/translation/status -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/translation/secret -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/intel/labels/lbl_e2e_001 -> 200"
+    },
+    {
+      "ok": true,
+      "label": "GET /api/shipping/policies/policy%3A1637bd95-1926-48b7-9c28-48d7e683d887 -> 200"
+    },
+    {
+      "ok": true,
+      "label": "readonly APIs: zero paid_receipt/provider_usage delta (before={\"usageRequestCount\":0,\"usageRows\":0,\"receipts\":0,\"attempts\":0} after={\"usageRequestCount\":0,\"usageRows\":0,\"receipts\":0,\"attempts\":0})"
+    },
+    {
+      "ok": true,
+      "label": "fake Provider server-side call count after APIs remain 0 (got 0)"
+    },
+    {
+      "ok": true,
+      "label": "page / loaded with content assert (href=/, bodyLen=1224, readyOk=true, errorish=false)"
+    },
+    {
+      "ok": true,
+      "label": "page /ports loaded with content assert (href=/ports, bodyLen=717, readyOk=true, errorish=false)"
+    },
+    {
+      "ok": true,
+      "label": "page /events loaded with content assert (href=/events, bodyLen=410, readyOk=true, errorish=false)"
+    },
+    {
+      "ok": true,
+      "label": "page /policies loaded with content assert (href=/policies, bodyLen=1643, readyOk=true, errorish=false)"
+    },
+    {
+      "ok": true,
+      "label": "page /calendar loaded with content assert (href=/calendar, bodyLen=1570, readyOk=true, errorish=false)"
+    },
+    {
+      "ok": true,
+      "label": "page /feed loaded with content assert (href=/feed, bodyLen=7684, readyOk=true, errorish=false)"
+    },
+    {
+      "ok": true,
+      "label": "page /label loaded with content assert (href=/label, bodyLen=775, readyOk=true, errorish=false)"
+    },
+    {
+      "ok": true,
+      "label": "page /settings loaded with content assert (href=/settings, bodyLen=2685, readyOk=true, errorish=false)"
+    },
+    {
+      "ok": true,
+      "label": "page /ports/CNSHK loaded with content assert (href=/ports/CNSHK, bodyLen=442, readyOk=true, errorish=false)"
+    },
+    {
+      "ok": true,
+      "label": "label detail shows lbl_e2e_001 after select"
+    },
+    {
+      "ok": true,
+      "label": "policy detail shows fixture record"
+    },
+    {
+      "ok": true,
+      "label": "screenshot written"
+    },
+    {
+      "ok": true,
+      "label": "browser zero external HTTP (got 0)",
+      "sample": []
+    },
+    {
+      "ok": true,
+      "label": "browse pages: zero paid_receipt/provider_usage delta (before={\"usageRequestCount\":0,\"usageRows\":0,\"receipts\":0,\"attempts\":0} after={\"usageRequestCount\":0,\"usageRows\":0,\"receipts\":0,\"attempts\":0})"
+    },
+    {
+      "ok": true,
+      "label": "ledger counters remain zero (usage=0, attempts=0, receipts=0)"
+    },
+    {
+      "ok": true,
+      "label": "fake Provider server-side call count remains 0 after browse (got 0)"
+    }
+  ],
+  "screenshots": [
+    "D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/docs/evidence/r3-acceptance-closeout-20261102/r3-6-strengthen/r3-6-browse-strengthen-last-page.png"
+  ],
+  "notes": [
+    "Strengthen pass with fixtures; historical empty-DB smoke retained separately",
+    "Not a substitute for S7 integrated acceptance",
+    "No live test-connection; no crawl/runtime jobs",
+    "Provider secrets stripped from env; fake key only; fake Provider HTTP records hits",
+    "RUN_DIR is a fresh mkdtemp under .tmp; refuse overwrite/delete of existing data"
+  ],
+  "health": {
+    "database": {
+      "status": "healthy",
+      "schemaVersion": 39,
+      "bootstrapCompletedAt": "2026-11-02T07:37:01.864Z"
+    }
+  },
+  "seeded": {
+    "policyId": "policy:1637bd95-1926-48b7-9c28-48d7e683d887",
+    "providerId": "r36-browse-fake-provider",
+    "modelId": "r36-browse-fake-model"
+  },
+  "countersBefore": {
+    "usageRequestCount": 0,
+    "usageRows": 0,
+    "receipts": 0,
+    "attempts": 0
+  },
+  "countersAfterApis": {
+    "usageRequestCount": 0,
+    "usageRows": 0,
+    "receipts": 0,
+    "attempts": 0
+  },
+  "labelDetail": {
+    "ready": true
+  },
+  "policyDetail": {
+    "ready": true
+  },
+  "countersAfterBrowse": {
+    "usageRequestCount": 0,
+    "usageRows": 0,
+    "receipts": 0,
+    "attempts": 0
+  },
+  "summary": {
+    "passed": 50,
+    "failed": 0,
+    "total": 50
+  }
+}

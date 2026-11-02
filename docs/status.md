@@ -1,3 +1,9 @@
+## R3-6 同片补强（dots 接受矩阵/缺口后）(2026-11-02)
+
+- Baseline tip：`3313f5c0036a005cba6377a7211837d4c079e9a8`. Matrix + wiring-gaps **accepted**; R3-6 empty smoke kept as historical; strengthen under `docs/evidence/r3-acceptance-closeout-20261102/r3-6-strengthen/` (**50/50**).
+- Fixes: fixture seed (policy/label/fake binding); strict route asserts; Provider ledger call count 0; inventory real-count wording; RUN_DIR fresh mkdtemp + refuse overwrite/delete.
+- **A1 not executed**; R3-5 **BLOCKED**; S7 **NOT_RUN**; no merge/deploy; no user disturb; no Slack send.
+
 ## R3 验收收口（矩阵+证据交审，不进 R4）(2026-11-02)
 
 - Baseline tip（R3-8 离线已接受）：`2258810ca02f53382f85ba29a2d96bcaeea2fe9c`. **Not** full R3 pass; **not** merge approval; no R4.

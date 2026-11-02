@@ -1,0 +1,62 @@
+R3-6 browse zero-pay STRENGTHEN PASS  50/50
+schema=39
+runDir=D:/try one/Shipping HOT/.tmp/worktrees/r3-1-llm-registry-20261027/.tmp/r3-6-browse-zero-pay/runs/run-WrogFJ
+fakeProvider=https://api.example.invalid/v1 hits=0
+before={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0}
+afterApis={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0}
+afterBrowse={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0}
+externalRequests=0
+pages=/,/ports,/events,/policies,/calendar,/feed,/label,/settings,/ports/CNSHK
+apis=21
+historical empty-DB smoke retained at parent evidence dir; this is seeded strengthen
+NOT a substitute for S7; no live connection test; no crawl; A1 not executed
+PASS  schema v39 after init (got 39)
+PASS  seed policy -> 200
+PASS  seed policy returns id
+PASS  seed policy isFixture=true
+PASS  seed fake provider -> 200
+PASS  fake provider secret configured (fixture key, not real)
+PASS  provider response never echoes raw fixture key
+PASS  seed fake model -> 200
+PASS  seed extract binding -> 200
+PASS  ledger before browse all zero (got {"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0})
+PASS  fake Provider server-side call count after seed remain 0 (got 0)
+PASS  GET /api/shipping/health -> 200
+PASS  GET /api/shipping/readiness -> 200
+PASS  GET /api/shipping/runtime -> 200
+PASS  GET /api/shipping/ -> 200
+PASS  GET /api/shipping/feed -> 200
+PASS  GET /api/shipping/calendar -> 200
+PASS  GET /api/shipping/tropical-cyclones -> 200
+PASS  GET /api/shipping/search/ports -> 200
+PASS  GET /api/shipping/intel/sources -> 200
+PASS  GET /api/shipping/intel/items -> 200
+PASS  GET /api/shipping/intel/manual -> 200
+PASS  GET /api/shipping/intel/labels -> 200
+PASS  GET /api/shipping/policies -> 200
+PASS  GET /api/shipping/llm/providers -> 200
+PASS  GET /api/shipping/llm/models -> 200
+PASS  GET /api/shipping/llm/bindings -> 200
+PASS  GET /api/shipping/llm/shared-budget -> 200
+PASS  GET /api/shipping/translation/status -> 200
+PASS  GET /api/shipping/translation/secret -> 200
+PASS  GET /api/shipping/intel/labels/lbl_e2e_001 -> 200
+PASS  GET /api/shipping/policies/policy%3A1637bd95-1926-48b7-9c28-48d7e683d887 -> 200
+PASS  readonly APIs: zero paid_receipt/provider_usage delta (before={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0} after={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0})
+PASS  fake Provider server-side call count after APIs remain 0 (got 0)
+PASS  page / loaded with content assert (href=/, bodyLen=1224, readyOk=true, errorish=false)
+PASS  page /ports loaded with content assert (href=/ports, bodyLen=717, readyOk=true, errorish=false)
+PASS  page /events loaded with content assert (href=/events, bodyLen=410, readyOk=true, errorish=false)
+PASS  page /policies loaded with content assert (href=/policies, bodyLen=1643, readyOk=true, errorish=false)
+PASS  page /calendar loaded with content assert (href=/calendar, bodyLen=1570, readyOk=true, errorish=false)
+PASS  page /feed loaded with content assert (href=/feed, bodyLen=7684, readyOk=true, errorish=false)
+PASS  page /label loaded with content assert (href=/label, bodyLen=775, readyOk=true, errorish=false)
+PASS  page /settings loaded with content assert (href=/settings, bodyLen=2685, readyOk=true, errorish=false)
+PASS  page /ports/CNSHK loaded with content assert (href=/ports/CNSHK, bodyLen=442, readyOk=true, errorish=false)
+PASS  label detail shows lbl_e2e_001 after select
+PASS  policy detail shows fixture record
+PASS  screenshot written
+PASS  browser zero external HTTP (got 0)
+PASS  browse pages: zero paid_receipt/provider_usage delta (before={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0} after={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0})
+PASS  ledger counters remain zero (usage=0, attempts=0, receipts=0)
+PASS  fake Provider server-side call count remains 0 after browse (got 0)
