@@ -39,3 +39,7 @@
 - R3-5 **BLOCKED**；S7 **NOT_RUN**
 - R3-6 口径不变：隔离浏览 global-fetch 外呼尝试为零（不推广任意 transport）
 - 矩阵口径：**离线编排已接线，生产仍未启用**；A2 生产授权未接通
+
+## RC（dots REQUEST CHANGES）
+
+见子目录 [`rc-retry-success-gate/`](./rc-retry-success-gate/)：`retryPolicyApplyFromExactRun` 改为从持久分析行校验**完整成功终态**后才允许补落库；对照测覆盖 severity 失败/未完成 vs 成功分析+政策写失败重试。

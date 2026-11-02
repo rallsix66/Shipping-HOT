@@ -27,6 +27,7 @@ import {
   decidePolicyApplyAfterAnalyze,
   retryPolicyApplyFromExactRun,
   runOfflineAnalyzeThenPolicy,
+  verifyPersistedExactRunAnalyzeSuccess,
 } from "#/intel/llm/offline-analyze-policy"
 
 const NOW = "2026-11-02T08:00:00.000Z"
@@ -416,6 +417,143 @@ describe("runOfflineAnalyzeThenPolicy A1 orchestration", () => {
     expect(retried.outcome).toBe("created")
     expect(h.transportState.chatHits).toBe(hits)
     expect((await h.policies.list({}, T0))).toHaveLength(1)
+  })
+
+  it("contrast: severity-1 fail (failOnHit=3) — main no入库; retry same runId refuses (no extract-only bypass)", async () => {
+    const h = await openHarness([
+      prefilterPass,
+      extractJson(),
+      scoreAgree,
+      scoreAgree,
+    ])
+    h.transportState.failOnHit = 3
+    const result = await runOfflineAnalyzeThenPolicy({ ...h.baseInput, enablePolicyAuto: true })
+    expect(result.analyze.ok).toBe(false)
+    if (result.analyze.ok) throw new Error("unreachable")
+    expect(result.analyze.code).toBe("severity_failed")
+    expect(result.policy).toBeNull()
+    expect((await h.policies.list({}, T0)).length).toBe(0)
+
+    const runId = result.analyze.analyses[0]?.runId
+    expect(runId).toBeTruthy()
+    // Persist proves extract succeeded — verify must still refuse incomplete/failed severity.
+    const persisted = await h.analysis.listForVersion(result.analyze.itemId, result.analyze.versionId)
+    const gate = verifyPersistedExactRunAnalyzeSuccess(persisted, {
+      itemId: result.analyze.itemId,
+      versionId: result.analyze.versionId,
+      contentHash: h.contentHash,
+      runId: runId!,
+    })
+    expect(gate.ok).toBe(false)
+    if (gate.ok) throw new Error("unreachable")
+    expect(gate.reason).toMatch(/analyze_failed:severity|analyze_incomplete:severity/)
+
+    const hits = h.transportState.chatHits
+    const retried = await retryPolicyApplyFromExactRun({
+      db: h.db,
+      intelRepo: h.intel,
+      analysisRepo: h.analysis,
+      policyAuto: h.policyAuto,
+      itemId: result.analyze.itemId,
+      versionId: result.analyze.versionId,
+      contentHash: h.contentHash,
+      runId: runId!,
+      isFixture: true,
+      now: () => T0,
+    })
+    expect(retried.outcome).toBe("rejected")
+    expect(retried.reason?.startsWith("analyze_success_unverified:")).toBe(true)
+    expect(h.transportState.chatHits).toBe(hits)
+    expect((await h.policies.list({}, T0)).length).toBe(0)
+  })
+
+  it("contrast: severity-2 fail (failOnHit=4) — dual severity incomplete; retry refuses", async () => {
+    const h = await openHarness([
+      prefilterPass,
+      extractJson(),
+      scoreAgree,
+      scoreAgree,
+    ])
+    h.transportState.failOnHit = 4
+    const result = await runOfflineAnalyzeThenPolicy({ ...h.baseInput, enablePolicyAuto: true })
+    expect(result.analyze.ok).toBe(false)
+    if (result.analyze.ok) throw new Error("unreachable")
+    expect(result.analyze.code).toBe("severity_failed")
+    expect((await h.policies.list({}, T0)).length).toBe(0)
+
+    const runId = result.analyze.analyses[0]?.runId
+    expect(runId).toBeTruthy()
+    const hits = h.transportState.chatHits
+    const retried = await retryPolicyApplyFromExactRun({
+      db: h.db,
+      intelRepo: h.intel,
+      analysisRepo: h.analysis,
+      itemId: result.analyze.itemId,
+      versionId: result.analyze.versionId,
+      contentHash: h.contentHash,
+      runId: runId!,
+      isFixture: true,
+      now: () => T0,
+    })
+    expect(retried.outcome).toBe("rejected")
+    expect(retried.reason).toContain("analyze_success_unverified:")
+    expect(h.transportState.chatHits).toBe(hits)
+    expect((await h.policies.list({}, T0)).length).toBe(0)
+  })
+
+  it("contrast: BLOCK run — retry refuses prefilter_blocked (not extract-gated create)", async () => {
+    const h = await openHarness([prefilterBlock])
+    const result = await runOfflineAnalyzeThenPolicy({ ...h.baseInput, enablePolicyAuto: true })
+    expect(result.analyze.ok).toBe(true)
+    if (!result.analyze.ok) throw new Error("unreachable")
+    expect(result.analyze.status).toBe("skipped_block")
+    const runId = result.analyze.analyses[0]?.runId
+    expect(runId).toBeTruthy()
+
+    const retried = await retryPolicyApplyFromExactRun({
+      db: h.db,
+      intelRepo: h.intel,
+      analysisRepo: h.analysis,
+      itemId: result.analyze.itemId,
+      versionId: result.analyze.versionId,
+      contentHash: result.analyze.contentHash,
+      runId: runId!,
+      isFixture: true,
+      now: () => T0,
+    })
+    expect(retried.outcome).toBe("rejected")
+    expect(retried.reason).toBe("analyze_success_unverified:prefilter_blocked")
+    expect((await h.policies.list({}, T0)).length).toBe(0)
+  })
+
+  it("contrast: non-policy full success — retry refuses event_type_not_policy", async () => {
+    const h = await openHarness([
+      prefilterPass,
+      extractJson({ eventType: "port_congestion", documentNumber: null, publisher: null, countries: ["MY"] }),
+      scoreAgree,
+      scoreAgree,
+    ])
+    const result = await runOfflineAnalyzeThenPolicy({ ...h.baseInput, enablePolicyAuto: true })
+    expect(result.analyze.ok).toBe(true)
+    if (!result.analyze.ok) throw new Error("unreachable")
+    expect(result.policySkippedReason).toBe("event_type_not_policy")
+    const runId = result.analyze.analyses[0]?.runId
+    expect(runId).toBeTruthy()
+
+    const retried = await retryPolicyApplyFromExactRun({
+      db: h.db,
+      intelRepo: h.intel,
+      analysisRepo: h.analysis,
+      itemId: result.analyze.itemId,
+      versionId: result.analyze.versionId,
+      contentHash: result.analyze.contentHash,
+      runId: runId!,
+      isFixture: true,
+      now: () => T0,
+    })
+    expect(retried.outcome).toBe("rejected")
+    expect(retried.reason).toBe("analyze_success_unverified:event_type_not_policy")
+    expect((await h.policies.list({}, T0)).length).toBe(0)
   })
 
   it("wrong contentHash license → denied before Provider", async () => {

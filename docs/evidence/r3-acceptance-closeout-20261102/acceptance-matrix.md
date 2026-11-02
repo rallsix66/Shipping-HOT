@@ -2,7 +2,7 @@
 
 基线 tip（已接受，R3-8 离线切片）：`2258810ca02f53382f85ba29a2d96bcaeea2fe9c`
 R3-6 隔离浏览专项限定接受 tip：`da2ea5a40658056c74a234e882b005bf1be3f206`
-A1（离线显式分析→政策编排）证据：`docs/evidence/r3-a1-offline-analyze-policy-20261102/`（相对 da2ea5a）
+A1（离线显式分析→政策编排）证据：`docs/evidence/r3-a1-offline-analyze-policy-20261102/`（相对 da2ea5a；RC retry 成功终态闸见 `rc-retry-success-gate/`）
 本包性质：**矩阵 + 证据交审**；**不是**完整 R3 通过、**不是** PR 合并批准、**不进 R4**。
 真实 200 人工集 / 模型效果 / 实际费用仍未验；**R3-5 BLOCKED**；**S7 NOT_RUN**；未合并未部署。
 **口径：离线编排已接线，生产仍未启用。**

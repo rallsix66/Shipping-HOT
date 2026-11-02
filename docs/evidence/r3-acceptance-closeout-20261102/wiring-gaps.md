@@ -2,13 +2,13 @@
 
 先交复核，**不直接扩范围**。需要真实模型/人工/费用的单项标 **BLOCKED**。
 
-**更新（A1）**：离线显式分析→政策编排已接线；生产仍未启用；A2 颁发器未接通。
+**更新（A1）**：离线显式分析→政策编排已接线；retry 完整成功终态闸已补；生产仍未启用；A2 颁发器未接通。
 
 ## A. 仍可零付费完成的接线缺口
 
 | # | 缺口 | 现状 | 最小建议（需 dots 批准后再做） | 风险 |
 |---|---|---|---|---|
-| A1 | 分析完成 → 政策自动入库 | **已交付（本片）**：`runOfflineAnalyzeThenPolicy` + `retryPolicyApplyFromExactRun`；默认关；假 Provider 单测 11/11；证据 `docs/evidence/r3-a1-offline-analyze-policy-20261102/` | 完成：离线显式编排。**生产仍未启用** | 勿接到 GET/浏览；勿开默认生产开关；**A2 仍未接通** |
+| A1 | 分析完成 → 政策自动入库 | **已交付 + RC**：`runOfflineAnalyzeThenPolicy` + `retryPolicyApplyFromExactRun`（持久完整成功终态校验）；默认关；单测 15/15；证据 `…/r3-a1-offline-analyze-policy-20261102/` + `rc-retry-success-gate/` | 完成：离线显式编排。**生产仍未启用** | 勿接到 GET/浏览；勿开默认生产开关；**A2 仍未接通** |
 | A2 | ExactVersion 颁发器（进程内） | 仅测试手工构造 | 增加**窄** factory：仅接受已校验 rights 的 item/version/hash，返回 license；仍不开放 HTTP 随意申请 | 防止 bare `modelUsePermitted=true` |
 | A3 | 受控分析触发入口（非浏览） | 无 HTTP/任务 | 增加显式 operator-only `POST`（或脚本）调用 `runOfflineAnalyze`，强制 license+预算闸；GET 仍零分析 | 需权限模型；默否认 |
 | A4 | 标注 enroll 批量/筛选辅助 | 单条 enroll API 已有 | 只读「候选入队」列表（已有 intel item、已授权摘录），仍人工点选 enroll | 不自动爬取 |

@@ -1,0 +1,5 @@
+﻿
+> shipping-hot@0.0.41 typecheck D:\try one\Shipping HOT\.tmp\worktrees\r3-1-llm-registry-20261027
+> tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.clipper.json
+
+
