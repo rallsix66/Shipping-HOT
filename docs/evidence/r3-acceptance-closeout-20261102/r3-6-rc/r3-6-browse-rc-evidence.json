@@ -1,0 +1,569 @@
+{
+  "tip": "r3-6-browse-zero-pay-rc",
+  "mode": "seeded-fixture-with-provider-spy",
+  "runDir": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r3-1-llm-registry-20261027\\.tmp\\r3-6-browse-zero-pay\\runs\\run-cXRBfn",
+  "evidenceDir": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r3-1-llm-registry-20261027\\docs\\evidence\\r3-acceptance-closeout-20261102\\r3-6-rc",
+  "chromeProfile": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r3-1-llm-registry-20261027\\.tmp\\r3-6-browse-zero-pay\\runs\\run-cXRBfn\\chrome-profile",
+  "baseUrl": "http://127.0.0.1:4496",
+  "spy": {
+    "port": 4497,
+    "file": "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r3-1-llm-registry-20261027\\.tmp\\r3-6-browse-zero-pay\\runs\\run-cXRBfn\\provider-spy.json"
+  },
+  "historicalEmptySmokeRetained": "docs/evidence/r3-acceptance-closeout-20261102/r3-6-browse-*",
+  "priorStrengthenRetained": "docs/evidence/r3-acceptance-closeout-20261102/r3-6-strengthen/",
+  "notes": [
+    "RC: independent provider-spy (--import) records/blocks outbound fetch; ledger kept as separate column",
+    "Prior 50/50 strengthen retained as historical script result, not as meeting these stronger conditions",
+    "Per-page CDP Network wait for data queries; timeout/error fails; shell alone is not success",
+    "Chrome profile under project RUN_DIR",
+    "Not a substitute for S7; no live test-connection; no crawl/runtime jobs; A1 not executed"
+  ],
+  "openPages": [
+    "/",
+    "/ports",
+    "/events",
+    "/policies",
+    "/calendar",
+    "/feed",
+    "/label",
+    "/settings"
+  ],
+  "detailPages": [
+    "/ports/port-shekou"
+  ],
+  "seeded": {
+    "policyId": "policy:2f4ad75b-008e-4e43-9955-e208bf18b15c",
+    "providerId": "r36-browse-fake-provider",
+    "modelId": "r36-browse-fake-model"
+  },
+  "apiResults": [
+    {
+      "path": "/api/shipping/health",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/readiness",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/runtime",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/feed",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/calendar",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/tropical-cyclones",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/search/ports",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/intel/sources",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/intel/items",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/intel/manual",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/intel/labels",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/policies",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/llm/providers",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/llm/models",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/llm/bindings",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/llm/shared-budget",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/translation/status",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    },
+    {
+      "path": "/api/shipping/translation/secret",
+      "status": 200,
+      "statusOk": true,
+      "assertOk": true
+    }
+  ],
+  "pageResults": [
+    {
+      "path": "/",
+      "href": "/",
+      "title": "Shipping HOT",
+      "bodyLen": 1254,
+      "shell": true,
+      "loadingLeft": false,
+      "errorish": false,
+      "expectedApis": [],
+      "queryHits": [],
+      "queryError": null,
+      "contentOk": true,
+      "contentError": null,
+      "providerSpyAttemptCount": 0,
+      "ledger": {
+        "usageRequestCount": 0,
+        "usageRows": 0,
+        "receipts": 0,
+        "attempts": 0
+      },
+      "ms": 156
+    },
+    {
+      "path": "/ports",
+      "href": "/ports",
+      "title": "Shipping HOT",
+      "bodyLen": 988,
+      "shell": true,
+      "loadingLeft": false,
+      "errorish": false,
+      "expectedApis": [
+        "/api/shipping",
+        "/api/shipping/ports/port-yantian/weather",
+        "/api/shipping/tropical-cyclones"
+      ],
+      "queryHits": [
+        {
+          "pattern": "/api/shipping",
+          "url": "http://127.0.0.1:4496/api/shipping",
+          "status": 200
+        },
+        {
+          "pattern": "/api/shipping/ports/port-yantian/weather",
+          "url": "http://127.0.0.1:4496/api/shipping/ports/port-yantian/weather",
+          "status": 200
+        },
+        {
+          "pattern": "/api/shipping/tropical-cyclones",
+          "url": "http://127.0.0.1:4496/api/shipping/tropical-cyclones",
+          "status": 200
+        }
+      ],
+      "queryError": null,
+      "contentOk": true,
+      "contentError": null,
+      "providerSpyAttemptCount": 0,
+      "ledger": {
+        "usageRequestCount": 0,
+        "usageRows": 0,
+        "receipts": 0,
+        "attempts": 0
+      },
+      "ms": 166
+    },
+    {
+      "path": "/events",
+      "href": "/events",
+      "title": "Shipping HOT",
+      "bodyLen": 440,
+      "shell": true,
+      "loadingLeft": false,
+      "errorish": false,
+      "expectedApis": [
+        "/api/shipping"
+      ],
+      "queryHits": [
+        {
+          "pattern": "/api/shipping",
+          "url": "http://127.0.0.1:4496/api/shipping",
+          "status": 200
+        }
+      ],
+      "queryError": null,
+      "contentOk": true,
+      "contentError": null,
+      "providerSpyAttemptCount": 0,
+      "ledger": {
+        "usageRequestCount": 0,
+        "usageRows": 0,
+        "receipts": 0,
+        "attempts": 0
+      },
+      "ms": 155
+    },
+    {
+      "path": "/policies",
+      "href": "/policies",
+      "title": "Shipping HOT",
+      "bodyLen": 1673,
+      "shell": true,
+      "loadingLeft": false,
+      "errorish": false,
+      "expectedApis": [
+        "/api/shipping/policies"
+      ],
+      "queryHits": [
+        {
+          "pattern": "/api/shipping/policies",
+          "url": "http://127.0.0.1:4496/api/shipping/policies/policy%3A2f4ad75b-008e-4e43-9955-e208bf18b15c",
+          "status": 200
+        }
+      ],
+      "queryError": null,
+      "contentOk": true,
+      "contentError": null,
+      "providerSpyAttemptCount": 0,
+      "ledger": {
+        "usageRequestCount": 0,
+        "usageRows": 0,
+        "receipts": 0,
+        "attempts": 0
+      },
+      "ms": 152
+    },
+    {
+      "path": "/calendar",
+      "href": "/calendar",
+      "title": "Shipping HOT",
+      "bodyLen": 1600,
+      "shell": true,
+      "loadingLeft": false,
+      "errorish": false,
+      "expectedApis": [
+        "/api/shipping/calendar/reference"
+      ],
+      "queryHits": [
+        {
+          "pattern": "/api/shipping/calendar/reference",
+          "url": "http://127.0.0.1:4496/api/shipping/calendar/reference?year=2026",
+          "status": 200
+        }
+      ],
+      "queryError": null,
+      "contentOk": true,
+      "contentError": null,
+      "providerSpyAttemptCount": 0,
+      "ledger": {
+        "usageRequestCount": 0,
+        "usageRows": 0,
+        "receipts": 0,
+        "attempts": 0
+      },
+      "ms": 144
+    },
+    {
+      "path": "/feed",
+      "href": "/feed",
+      "title": "Shipping HOT",
+      "bodyLen": 7714,
+      "shell": true,
+      "loadingLeft": false,
+      "errorish": false,
+      "expectedApis": [
+        "/api/shipping/intel/manual",
+        "/api/shipping/intel/items"
+      ],
+      "queryHits": [
+        {
+          "pattern": "/api/shipping/intel/manual",
+          "url": "http://127.0.0.1:4496/api/shipping/intel/manual",
+          "status": 200
+        },
+        {
+          "pattern": "/api/shipping/intel/items",
+          "url": "http://127.0.0.1:4496/api/shipping/intel/items?limit=50",
+          "status": 200
+        }
+      ],
+      "queryError": null,
+      "contentOk": true,
+      "contentError": null,
+      "providerSpyAttemptCount": 0,
+      "ledger": {
+        "usageRequestCount": 0,
+        "usageRows": 0,
+        "receipts": 0,
+        "attempts": 0
+      },
+      "ms": 138
+    },
+    {
+      "path": "/label",
+      "href": "/label",
+      "title": "Shipping HOT",
+      "bodyLen": 1304,
+      "shell": true,
+      "loadingLeft": false,
+      "errorish": false,
+      "expectedApis": [
+        "/api/shipping/intel/labels"
+      ],
+      "queryHits": [
+        {
+          "pattern": "/api/shipping/intel/labels",
+          "url": "http://127.0.0.1:4496/api/shipping/intel/labels/lbl_e2e_001",
+          "status": 200
+        }
+      ],
+      "queryError": null,
+      "contentOk": true,
+      "contentError": null,
+      "providerSpyAttemptCount": 0,
+      "ledger": {
+        "usageRequestCount": 0,
+        "usageRows": 0,
+        "receipts": 0,
+        "attempts": 0
+      },
+      "ms": 137
+    },
+    {
+      "path": "/settings",
+      "href": "/settings",
+      "title": "Shipping HOT",
+      "bodyLen": 2715,
+      "shell": true,
+      "loadingLeft": false,
+      "errorish": false,
+      "expectedApis": [
+        "/api/shipping",
+        "/api/shipping/llm/providers",
+        "/api/shipping/llm/models",
+        "/api/shipping/llm/bindings",
+        "/api/shipping/llm/shared-budget",
+        "/api/shipping/translation/status",
+        "/api/shipping/translation/secret"
+      ],
+      "queryHits": [
+        {
+          "pattern": "/api/shipping",
+          "url": "http://127.0.0.1:4496/api/shipping",
+          "status": 200
+        },
+        {
+          "pattern": "/api/shipping/llm/providers",
+          "url": "http://127.0.0.1:4496/api/shipping/llm/providers",
+          "status": 200
+        },
+        {
+          "pattern": "/api/shipping/llm/models",
+          "url": "http://127.0.0.1:4496/api/shipping/llm/models",
+          "status": 200
+        },
+        {
+          "pattern": "/api/shipping/llm/bindings",
+          "url": "http://127.0.0.1:4496/api/shipping/llm/bindings",
+          "status": 200
+        },
+        {
+          "pattern": "/api/shipping/llm/shared-budget",
+          "url": "http://127.0.0.1:4496/api/shipping/llm/shared-budget",
+          "status": 200
+        },
+        {
+          "pattern": "/api/shipping/translation/status",
+          "url": "http://127.0.0.1:4496/api/shipping/translation/status",
+          "status": 200
+        },
+        {
+          "pattern": "/api/shipping/translation/secret",
+          "url": "http://127.0.0.1:4496/api/shipping/translation/secret",
+          "status": 200
+        }
+      ],
+      "queryError": null,
+      "contentOk": true,
+      "contentError": null,
+      "providerSpyAttemptCount": 0,
+      "ledger": {
+        "usageRequestCount": 0,
+        "usageRows": 0,
+        "receipts": 0,
+        "attempts": 0
+      },
+      "ms": 140
+    },
+    {
+      "path": "/ports/port-shekou",
+      "href": "/ports/port-shekou",
+      "title": "Shipping HOT",
+      "bodyLen": 988,
+      "shell": true,
+      "loadingLeft": false,
+      "errorish": false,
+      "expectedApis": [
+        "/api/shipping",
+        "/api/shipping/ports/port-shekou/weather",
+        "/api/shipping/tropical-cyclones"
+      ],
+      "queryHits": [
+        {
+          "pattern": "/api/shipping",
+          "url": "http://127.0.0.1:4496/api/shipping",
+          "status": 200
+        },
+        {
+          "pattern": "/api/shipping/ports/port-shekou/weather",
+          "url": "http://127.0.0.1:4496/api/shipping/ports/port-shekou/weather",
+          "status": 200
+        },
+        {
+          "pattern": "/api/shipping/tropical-cyclones",
+          "url": "http://127.0.0.1:4496/api/shipping/tropical-cyclones",
+          "status": 200
+        }
+      ],
+      "queryError": null,
+      "contentOk": true,
+      "contentError": null,
+      "providerSpyAttemptCount": 0,
+      "ledger": {
+        "usageRequestCount": 0,
+        "usageRows": 0,
+        "receipts": 0,
+        "attempts": 0
+      },
+      "ms": 139
+    }
+  ],
+  "countersBefore": {
+    "usageRequestCount": 0,
+    "usageRows": 0,
+    "receipts": 0,
+    "attempts": 0
+  },
+  "countersAfterApis": {
+    "usageRequestCount": 0,
+    "usageRows": 0,
+    "receipts": 0,
+    "attempts": 0
+  },
+  "countersAfterBrowse": {
+    "usageRequestCount": 0,
+    "usageRows": 0,
+    "receipts": 0,
+    "attempts": 0
+  },
+  "providerSpy": {
+    "negativeProbe": {
+      "ok": true,
+      "blocked": true,
+      "errMsg": "E2E_PROVIDER_SPY_BLOCKED https://api.example.invalid/v1/e2e-probe",
+      "attemptCount": 1,
+      "lastAttempt": {
+        "url": "https://api.example.invalid/v1/e2e-probe",
+        "method": "POST",
+        "at": "2026-11-02T07:49:40.807Z",
+        "via": "globalThis.fetch"
+      }
+    },
+    "afterNegativeReset": {
+      "attemptCount": 0,
+      "blocked": 0,
+      "allowedLocal": 0,
+      "attempts": []
+    },
+    "beforeBrowse": {
+      "attemptCount": 0,
+      "blocked": 0,
+      "allowedLocal": 0,
+      "attempts": []
+    },
+    "afterApis": {
+      "attemptCount": 0,
+      "blocked": 0,
+      "allowedLocal": 0,
+      "attempts": []
+    },
+    "afterBrowse": {
+      "attemptCount": 0,
+      "blocked": 0,
+      "allowedLocal": 0,
+      "attempts": []
+    },
+    "fileContents": {
+      "attemptCount": 0,
+      "blocked": 0,
+      "allowedLocal": 0,
+      "attempts": []
+    }
+  },
+  "fakeProvider": {
+    "baseUrl": "https://api.example.invalid/v1",
+    "mode": "non-routable-https-fixture-config-only",
+    "note": "fixture binding only; outbound observation is provider-spy, not this hostname"
+  },
+  "externalRequests": [],
+  "screenshots": [
+    "D:\\try one\\Shipping HOT\\.tmp\\worktrees\\r3-1-llm-registry-20261027\\docs\\evidence\\r3-acceptance-closeout-20261102\\r3-6-rc\\r3-6-browse-rc-last-page.png"
+  ],
+  "summary": {
+    "passed": 48,
+    "failed": 0,
+    "total": 48
+  },
+  "labelDetail": {
+    "ok": true,
+    "id": "lbl_e2e_001"
+  },
+  "policyDetail": {
+    "ok": true,
+    "excerpt": "已生效\npolicy:2f4ad75b-008e-4e43-9955-e208bf18b15c\n[FIXTURE] R3-6 browse policy\n国家 / 平台\n越南 · 无平台 · 海关与税收\n发布方\n示例机关（fixture）\n文号\nR36-BROWSE-001\n发布日\n2026-10-01\n生效日\n2026-11-01\n适用时区\nAsia/Ho_Chi_Minh\n适用范围\n未填\n环节\n未填\n来源\n🏛 官方原文 · 人工录入 · e2e-r3-6-browse\n"
+  }
+}

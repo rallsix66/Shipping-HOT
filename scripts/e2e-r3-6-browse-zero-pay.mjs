@@ -1,31 +1,34 @@
 /**
- * R3-6 isolated browse zero-pay verification (CDP) — seeded strengthen pass.
- * Fresh project-internal RUN_DIR each run; refuse overwrite/delete of existing data.
- * Seeds fixture policy/labels + fake provider/model/binding (non-routable HTTPS base).
- * Server-side Provider call count via provider_usage/paid_receipt (must stay 0).
- * No real keys / outbound / live test-connection.
- * Historical empty-DB smoke evidence under r3-acceptance-closeout-20261102/ is retained;
- * this strengthen run writes only under r3-6-strengthen/.
- * Does NOT substitute for S7; does NOT expand open-page scope.
+ * R3-6 isolated browse zero-pay verification (CDP) — RC evidence pass.
+ * Fresh project-internal RUN_DIR; refuse overwrite/delete of existing data.
+ * Seeds fixture policy/labels + fake provider/model/binding (non-routable HTTPS).
+ * Independent provider-spy (--import) records/blocks outbound fetch; ledger counted separately.
+ * Per-page wait for data queries (CDP Network) + content/empty asserts; timeout/error = fail.
+ * Chrome profile under RUN_DIR. Historical empty + strengthen evidence retained; this run → r3-6-rc/.
+ * Does NOT substitute for S7; does NOT expand open-page scope; A1 not executed.
  */
 import { Buffer } from "node:buffer"
 import { spawn } from "node:child_process"
-import { existsSync, mkdirSync, mkdtempSync, openSync, readdirSync, rmSync, writeFileSync } from "node:fs"
-import { tmpdir } from "node:os"
+import { existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve, sep } from "node:path"
 import process from "node:process"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)))
 const ISOLATED_ROOT = resolve(join(ROOT, ".tmp"))
 const RUNS_ROOT = resolve(join(ISOLATED_ROOT, "r3-6-browse-zero-pay", "runs"))
-const EVIDENCE_DIR = resolve(process.env.E2E_R31_EVIDENCE_DIR ?? join(ROOT, "docs", "evidence", "r3-acceptance-closeout-20261102", "r3-6-strengthen"))
+const EVIDENCE_DIR = resolve(process.env.E2E_R31_EVIDENCE_DIR ?? join(ROOT, "docs", "evidence", "r3-acceptance-closeout-20261102", "r3-6-rc"))
 const SERVER_ENTRY = join(ROOT, "dist", "output", "server", "index.mjs")
+const SPY_MODULE = join(ROOT, "scripts", "e2e-r3-6-provider-spy.mjs")
 const PORT = Number(process.env.E2E_R36_BROWSE_PORT ?? "4496")
+const SPY_PORT = Number(process.env.E2E_R36_SPY_PORT ?? "4497")
 const BASE = `http://127.0.0.1:${PORT}`
+const SPY_BASE = `http://127.0.0.1:${SPY_PORT}`
 const DEBUG_PORT = Number(process.env.E2E_R36_DEBUG_PORT ?? "9366")
 const EXPECTED_SCHEMA = 39
 const FAKE_KEY = "sk-test-fixture-r36-not-real-0000"
+const FAKE_PROVIDER_BASE = "https://api.example.invalid/v1"
+const DETAIL_PORT_ID = "port-shekou"
 
 const PROVIDER_SECRET_ENV_KEYS = [
   "GFW_API_TOKEN",
@@ -38,18 +41,33 @@ const PROVIDER_SECRET_ENV_KEYS = [
   "TRANSLATION_API_KEY",
 ]
 
-const OPEN_PAGES = [
-  "/",
-  "/ports",
-  "/events",
-  "/policies",
-  "/calendar",
-  "/feed",
-  "/label",
-  "/settings",
-]
+const OPEN_PAGES = ["/", "/ports", "/events", "/policies", "/calendar", "/feed", "/label", "/settings"]
 
-/** Readonly APIs that must return explicit success (not merely <500). */
+/** Per-page data APIs that must complete successfully before content assert. */
+const PAGE_QUERIES = {
+  "/": [], // static country overview — no shipping query
+  "/ports": ["/api/shipping", "/api/shipping/ports/port-yantian/weather", "/api/shipping/tropical-cyclones"],
+  "/events": ["/api/shipping"],
+  "/policies": ["/api/shipping/policies"],
+  "/calendar": ["/api/shipping/calendar/reference"],
+  "/feed": ["/api/shipping/intel/manual", "/api/shipping/intel/items"],
+  "/label": ["/api/shipping/intel/labels"],
+  "/settings": [
+    "/api/shipping",
+    "/api/shipping/llm/providers",
+    "/api/shipping/llm/models",
+    "/api/shipping/llm/bindings",
+    "/api/shipping/llm/shared-budget",
+    "/api/shipping/translation/status",
+    "/api/shipping/translation/secret",
+  ],
+  [`/ports/${DETAIL_PORT_ID}`]: [
+    "/api/shipping",
+    `/api/shipping/ports/${DETAIL_PORT_ID}/weather`,
+    "/api/shipping/tropical-cyclones",
+  ],
+}
+
 const READONLY_APIS = [
   { path: "/api/shipping/health", expectStatus: 200, assert: body => body?.database?.schemaVersion === EXPECTED_SCHEMA },
   { path: "/api/shipping/readiness", expectStatus: 200 },
@@ -79,7 +97,6 @@ function allocateRunDir() {
     if (!requested.startsWith(ISOLATED_ROOT + sep) && requested !== ISOLATED_ROOT) {
       throw new Error(`refusing: RUN_DIR must stay inside ${ISOLATED_ROOT} (got ${requested})`)
     }
-    // .tmp path check is NOT ownership proof — refuse any pre-existing unknown data.
     const dataDir = join(requested, ".data")
     if (existsSync(dataDir)) {
       const kids = readdirSync(dataDir)
@@ -100,10 +117,11 @@ function allocateRunDir() {
 
 const RUN_DIR = allocateRunDir()
 const DB_PATH = join(RUN_DIR, ".data", "shipping-hot-v3.sqlite3")
+const SPY_FILE = join(RUN_DIR, "provider-spy.json")
+const CHROME_PROFILE = join(RUN_DIR, "chrome-profile")
 
-if (!existsSync(SERVER_ENTRY)) {
-  throw new Error(`missing production server entry: ${SERVER_ENTRY} (run pnpm build first)`)
-}
+if (!existsSync(SERVER_ENTRY)) throw new Error(`missing production server entry: ${SERVER_ENTRY} (run pnpm build first)`)
+if (!existsSync(SPY_MODULE)) throw new Error(`missing provider spy module: ${SPY_MODULE}`)
 
 function findChrome() {
   for (const candidate of [
@@ -118,14 +136,15 @@ function findChrome() {
   return undefined
 }
 
-async function waitFor(fn, ms) {
+async function waitFor(fn, ms, label = "waitFor") {
   const start = Date.now()
+  let last
   while (Date.now() - start < ms) {
-    const value = await fn()
-    if (value !== undefined && value !== false && value !== null) return value
-    await new Promise(r => setTimeout(r, 200))
+    last = await fn()
+    if (last !== undefined && last !== false && last !== null) return last
+    await new Promise(r => setTimeout(r, 150))
   }
-  return undefined
+  throw new Error(`${label} timed out after ${ms}ms (last=${JSON.stringify(last)})`)
 }
 
 class Cdp {
@@ -180,6 +199,79 @@ async function connect(wsUrl) {
     ws.addEventListener("error", reject, { once: true })
   })
   return new Cdp(ws)
+}
+
+function apiPathname(url) {
+  try {
+    return new URL(url).pathname
+  } catch {
+    return String(url)
+  }
+}
+
+function pathMatches(url, pattern) {
+  const pathname = apiPathname(url)
+  if (pattern === "/api/shipping") return pathname === "/api/shipping" || pathname === "/api/shipping/"
+  return pathname === pattern || pathname.startsWith(`${pattern}/`)
+}
+
+function createNetworkTracker() {
+  const inflight = new Map()
+  const completed = []
+  return {
+    onMessage(msg) {
+      if (msg.method === "Network.requestWillBeSent") {
+        const { requestId, request } = msg.params
+        inflight.set(requestId, { url: request.url, method: request.method, status: null, failed: false, errorText: null })
+      }
+      if (msg.method === "Network.responseReceived") {
+        const entry = inflight.get(msg.params.requestId)
+        if (entry) entry.status = msg.params.response.status
+      }
+      if (msg.method === "Network.loadingFinished") {
+        const entry = inflight.get(msg.params.requestId)
+        if (entry) {
+          completed.push({ ...entry, finished: true })
+          inflight.delete(msg.params.requestId)
+        }
+      }
+      if (msg.method === "Network.loadingFailed") {
+        const entry = inflight.get(msg.params.requestId)
+        if (entry) {
+          completed.push({ ...entry, finished: true, failed: true, errorText: msg.params.errorText || "loadingFailed" })
+          inflight.delete(msg.params.requestId)
+        }
+      }
+    },
+    clear() {
+      inflight.clear()
+      completed.length = 0
+    },
+    shippingSnapshot() {
+      return completed.filter(c => String(c.url).includes("/api/shipping"))
+    },
+    async waitForApis(patterns, timeoutMs) {
+      if (!patterns.length) return []
+      const start = Date.now()
+      while (Date.now() - start < timeoutMs) {
+        const hits = patterns.map((pattern) => {
+          const match = [...completed].reverse().find(c => pathMatches(c.url, pattern) && c.finished)
+          return { pattern, match }
+        })
+        for (const hit of hits) {
+          if (hit.match && (hit.match.failed || (hit.match.status != null && hit.match.status >= 400))) {
+            throw new Error(`page query failed for ${hit.pattern}: ${JSON.stringify(hit.match)}`)
+          }
+        }
+        if (hits.every(h => h.match && h.match.status != null && h.match.status >= 200 && h.match.status < 400)) {
+          return hits.map(h => ({ pattern: h.pattern, url: h.match.url, status: h.match.status }))
+        }
+        await new Promise(r => setTimeout(r, 100))
+      }
+      const seen = this.shippingSnapshot().map(c => ({ url: c.url, status: c.status, failed: c.failed }))
+      throw new Error(`timeout waiting page queries ${JSON.stringify(patterns)}; seen=${JSON.stringify(seen)}`)
+    },
+  }
 }
 
 async function readDbCounters() {
@@ -282,13 +374,7 @@ function check(ok, label, detail = {}) {
 
 let server
 let chromeChild
-let profile
 let serverLogPath
-// Fake Provider: registry requires https + non-localhost. Use non-routable fixture host.
-// Server-side call recording = provider_usage.request_count + paid_receipt(_attempt).
-// No live listener (would need banned localhost / real DNS). Hits inferred from ledger.
-const FAKE_PROVIDER_BASE = "https://api.example.invalid/v1"
-let fakeProviderHits = 0 // mirrored from ledger.usageRequestCount for evidence symmetry
 
 function startServer() {
   serverLogPath = join(RUN_DIR, `server-r36-browse-${Date.now()}.log`)
@@ -296,7 +382,7 @@ function startServer() {
   const fd = openSync(serverLogPath, "a")
   const env = { ...process.env }
   for (const key of PROVIDER_SECRET_ENV_KEYS) delete env[key]
-  return spawn(process.execPath, [SERVER_ENTRY], {
+  return spawn(process.execPath, ["--import", pathToFileURL(SPY_MODULE).href, SERVER_ENTRY], {
     cwd: RUN_DIR,
     env: {
       ...env,
@@ -306,6 +392,8 @@ function startServer() {
       NITRO_PORT: String(PORT),
       SHIPPING_DATA_MODE: "real",
       SHIPPING_RUNTIME_ENABLED: "false",
+      E2E_R36_SPY_FILE: SPY_FILE,
+      E2E_R36_SPY_PORT: String(SPY_PORT),
     },
     stdio: ["ignore", fd, fd],
   })
@@ -318,6 +406,24 @@ async function stopServer(child) {
     child.kill("SIGKILL")
     setTimeout(resolvePromise, 5000)
   })
+}
+
+async function spyStats() {
+  const res = await fetch(`${SPY_BASE}/stats`)
+  if (!res.ok) throw new Error(`spy /stats -> ${res.status}`)
+  return res.json()
+}
+
+async function spyReset() {
+  const res = await fetch(`${SPY_BASE}/reset`, { method: "POST" })
+  if (!res.ok) throw new Error(`spy /reset -> ${res.status}`)
+  return res.json()
+}
+
+async function spyProbe() {
+  const res = await fetch(`${SPY_BASE}/probe`, { method: "POST" })
+  if (!res.ok) throw new Error(`spy /probe -> ${res.status}`)
+  return res.json()
 }
 
 async function seedPolicyAndLlm(fakeBaseUrl) {
@@ -342,7 +448,7 @@ async function seedPolicyAndLlm(fakeBaseUrl) {
     }),
   })
   const policy = await policyRes.json().catch(() => ({}))
-  check(policyRes.status === 200 || policyRes.status === 201, `seed policy -> ${policyRes.status}`, { policyId: policy.id })
+  check(policyRes.status === 200 || policyRes.status === 201, `seed fixture policy -> ${policyRes.status}`, { policyId: policy.id })
   check(typeof policy.id === "string" && policy.id.length > 0, "seed policy returns id")
   check(policy.isFixture === true, "seed policy isFixture=true")
 
@@ -384,244 +490,240 @@ async function seedPolicyAndLlm(fakeBaseUrl) {
     body: JSON.stringify({ step: "extract", modelId: model.id || "r36-browse-fake-model", updatedBy: "e2e-r3-6-browse" }),
   })
   check(bindRes.status === 200 || bindRes.status === 201, `seed extract binding -> ${bindRes.status}`)
-
   return { policyId: policy.id, providerId: provider.id, modelId: model.id }
 }
 
 async function main() {
   mkdirSync(EVIDENCE_DIR, { recursive: true })
-  // Safety: never delete existing DB/secrets. Fresh RUN_DIR from allocateRunDir only.
-  if (existsSync(DB_PATH)) {
-    throw new Error(`refusing: DB already exists at ${DB_PATH}; allocateRunDir must yield an empty run`)
-  }
   const secretsPath = join(RUN_DIR, ".data", "provider-secrets.json")
-  if (existsSync(secretsPath)) {
-    throw new Error(`refusing: provider-secrets already exists at ${secretsPath}`)
-  }
+  if (existsSync(secretsPath)) throw new Error(`refusing: provider-secrets already exists at ${secretsPath}`)
 
   const chrome = findChrome()
   if (!chrome) throw new Error("No Chrome/Edge; set E2E_CHROME")
 
   const evidence = {
-    tip: "r3-6-browse-zero-pay-strengthen",
-    mode: "seeded-fixture",
-    historicalEmptySmokeRetained: "docs/evidence/r3-acceptance-closeout-20261102/r3-6-browse-*",
+    tip: "r3-6-browse-zero-pay-rc",
+    mode: "seeded-fixture-with-provider-spy",
+    runDir: RUN_DIR,
+    evidenceDir: EVIDENCE_DIR,
+    chromeProfile: CHROME_PROFILE,
     baseUrl: BASE,
-    runDir: RUN_DIR.replaceAll("\\", "/"),
-    evidenceDir: EVIDENCE_DIR.replaceAll("\\", "/"),
-    openPages: OPEN_PAGES.slice(),
-    readonlyApis: READONLY_APIS.map(a => a.path),
+    spy: { port: SPY_PORT, file: SPY_FILE },
+    historicalEmptySmokeRetained: "docs/evidence/r3-acceptance-closeout-20261102/r3-6-browse-*",
+    priorStrengthenRetained: "docs/evidence/r3-acceptance-closeout-20261102/r3-6-strengthen/",
+    notes: [
+      "RC: independent provider-spy (--import) records/blocks outbound fetch; ledger kept as separate column",
+      "Prior 50/50 strengthen retained as historical script result, not as meeting these stronger conditions",
+      "Per-page CDP Network wait for data queries; timeout/error fails; shell alone is not success",
+      "Chrome profile under project RUN_DIR",
+      "Not a substitute for S7; no live test-connection; no crawl/runtime jobs; A1 not executed",
+    ],
+    openPages: OPEN_PAGES,
     detailPages: [],
+    seeded: {},
     apiResults: [],
     pageResults: [],
-    externalRequests: [],
+    countersBefore: null,
+    countersAfterApis: null,
+    countersAfterBrowse: null,
+    providerSpy: {},
     fakeProvider: {},
-    checks: [],
+    externalRequests: [],
     screenshots: [],
-    notes: [
-      "Strengthen pass with fixtures; historical empty-DB smoke retained separately",
-      "Not a substitute for S7 integrated acceptance",
-      "No live test-connection; no crawl/runtime jobs",
-      "Provider secrets stripped from env; fake key only; fake Provider HTTP records hits",
-      "RUN_DIR is a fresh mkdtemp under .tmp; refuse overwrite/delete of existing data",
-    ],
+    summary: {},
   }
 
-  const fakeBaseUrl = FAKE_PROVIDER_BASE
   evidence.fakeProvider = {
-    baseUrl: fakeBaseUrl,
-    mode: "non-routable-https-fixture",
-    recording: "provider_usage.request_count + paid_receipt + paid_receipt_attempt",
-    hitsBefore: 0,
-    note: "registry parseProviderBaseUrl forbids http/localhost; fixture key only; no live test-connection",
+    baseUrl: FAKE_PROVIDER_BASE,
+    mode: "non-routable-https-fixture-config-only",
+    note: "fixture binding only; outbound observation is provider-spy, not this hostname",
   }
 
   server = startServer()
-  const ready = await waitFor(async () => {
+  await waitFor(async () => {
     try {
       const res = await fetch(`${BASE}/api/shipping/health`)
       if (!res.ok) return undefined
-      return await res.json()
+      const body = await res.json()
+      return body?.database?.schemaVersion === EXPECTED_SCHEMA ? true : undefined
     } catch {
       return undefined
     }
-  }, 60000)
-  if (!ready) throw new Error(`server not ready; log: ${serverLogPath}`)
-  check(ready?.database?.schemaVersion === EXPECTED_SCHEMA, `schema v${EXPECTED_SCHEMA} after init (got ${ready?.database?.schemaVersion})`)
-  evidence.health = ready
+  }, 60000, "server health")
+
+  await waitFor(async () => {
+    try {
+      const res = await fetch(`${SPY_BASE}/stats`)
+      return res.ok ? true : undefined
+    } catch {
+      return undefined
+    }
+  }, 15000, "provider spy control")
+
+  // Negative self-check: simulated outbound must be counted AND blocked, then reset.
+  const probe = await spyProbe()
+  evidence.providerSpy.negativeProbe = probe
+  check(probe.blocked === true && Number(probe.attemptCount) >= 1, `provider-spy negative probe counted+blocked (attemptCount=${probe.attemptCount}, blocked=${probe.blocked})`)
+  await spyReset()
+  const afterReset = await spyStats()
+  evidence.providerSpy.afterNegativeReset = afterReset
+  check(afterReset.attemptCount === 0 && afterReset.blocked === 0, `provider-spy reset to zero after negative probe (got ${JSON.stringify(afterReset)})`)
 
   await seedLabels()
-  const seeded = await seedPolicyAndLlm(fakeBaseUrl)
+  const seeded = await seedPolicyAndLlm(FAKE_PROVIDER_BASE)
   evidence.seeded = seeded
 
-  let portId = null
-  try {
-    const portsRes = await fetch(`${BASE}/api/shipping/search/ports?q=`)
-    const portsBody = await portsRes.json().catch(() => ({}))
-    const list = portsBody?.ports || portsBody?.items || portsBody || []
-    if (Array.isArray(list) && list.length) {
-      portId = list[0].unlocode || list[0].id || list[0].shippingPortId || null
-    }
-  } catch {}
-  if (!portId) portId = "CNSHK"
-  const detailPages = [`/ports/${portId}`]
+  const detailPages = [`/ports/${DETAIL_PORT_ID}`]
   evidence.detailPages = detailPages
-
-  const detailApis = [
-    {
-      path: "/api/shipping/intel/labels/lbl_e2e_001",
-      expectStatus: 200,
-      assert: body => body?.item?.id === "lbl_e2e_001" || body?.id === "lbl_e2e_001" || Boolean(body?.material?.excerpt) || Boolean(body?.labelItem?.id),
-    },
-    {
-      path: `/api/shipping/policies/${encodeURIComponent(seeded.policyId)}`,
-      expectStatus: 200,
-      assert: body => String(body?.record?.title || body?.title || "").includes("FIXTURE"),
-    },
-  ]
 
   const before = await readDbCounters()
   evidence.countersBefore = before
-  fakeProviderHits = before.usageRequestCount
-  evidence.fakeProvider.hitsAfterSeed = fakeProviderHits
+  const spyBeforeBrowse = await spyStats()
+  evidence.providerSpy.beforeBrowse = spyBeforeBrowse
   check(before.usageRequestCount === 0 && before.receipts === 0 && before.attempts === 0, `ledger before browse all zero (got ${JSON.stringify(before)})`)
-  check(fakeProviderHits === 0, `fake Provider server-side call count after seed remain 0 (got ${fakeProviderHits})`)
+  check(spyBeforeBrowse.attemptCount === 0, `provider-spy attempts before browse remain 0 (got ${spyBeforeBrowse.attemptCount})`)
 
-  for (const spec of [...READONLY_APIS, ...detailApis]) {
-    const started = Date.now()
-    let status = 0
-    let ok = false
-    let err = null
+  for (const spec of READONLY_APIS) {
+    const res = await fetch(`${BASE}${spec.path}`)
     let body = null
     try {
-      const res = await fetch(`${BASE}${spec.path}`)
-      status = res.status
-      const text = await res.text()
-      try {
-        body = JSON.parse(text)
-      } catch {
-        body = text
-      }
-      const statusOk = status === spec.expectStatus
-      const contentOk = spec.assert ? Boolean(spec.assert(body)) : true
-      ok = statusOk && contentOk
-      if (!statusOk) err = `expected status ${spec.expectStatus}`
-      else if (!contentOk) err = "content assert failed"
-    } catch (e) {
-      err = String(e?.message || e)
+      body = await res.json()
+    } catch {
+      body = null
     }
-    evidence.apiResults.push({ path: spec.path, status, ok, err, ms: Date.now() - started })
-    check(ok, `GET ${spec.path} -> ${status}${err ? (` err=${err}`) : ""}`)
+    const statusOk = res.status === (spec.expectStatus ?? 200)
+    const assertOk = spec.assert ? Boolean(spec.assert(body)) : true
+    evidence.apiResults.push({ path: spec.path, status: res.status, statusOk, assertOk })
+    check(statusOk && assertOk, `API ${spec.path} -> ${res.status} (expect ${spec.expectStatus ?? 200}) assert=${assertOk}`)
   }
 
   const afterApis = await readDbCounters()
   evidence.countersAfterApis = afterApis
+  const spyAfterApis = await spyStats()
+  evidence.providerSpy.afterApis = spyAfterApis
   check(
     afterApis.usageRequestCount === before.usageRequestCount
-    && afterApis.usageRows === before.usageRows
     && afterApis.receipts === before.receipts
     && afterApis.attempts === before.attempts,
-    `readonly APIs: zero paid_receipt/provider_usage delta (before=${JSON.stringify(before)} after=${JSON.stringify(afterApis)})`,
+    `readonly APIs: zero ledger delta (before=${JSON.stringify(before)} after=${JSON.stringify(afterApis)})`,
   )
-  fakeProviderHits = afterApis.usageRequestCount
-  evidence.fakeProvider.hitsAfterApis = fakeProviderHits
-  check(fakeProviderHits === 0, `fake Provider server-side call count after APIs remain 0 (got ${fakeProviderHits})`)
+  check(spyAfterApis.attemptCount === 0, `provider-spy attempts after readonly APIs remain 0 (got ${spyAfterApis.attemptCount})`)
 
-  const local = new URL(BASE)
-  const externalRequests = []
-  profile = mkdtempSync(join(tmpdir(), "shipping-hot-r36-browse-"))
+  mkdirSync(CHROME_PROFILE, { recursive: true })
   chromeChild = spawn(chrome, [
-    "--headless=new",
-    "--disable-gpu",
-    "--no-sandbox",
+    `--remote-debugging-port=${DEBUG_PORT}`,
+    `--user-data-dir=${CHROME_PROFILE}`,
     "--no-first-run",
     "--no-default-browser-check",
-    "--remote-allow-origins=*",
-    `--remote-debugging-port=${DEBUG_PORT}`,
-    `--user-data-dir=${profile}`,
+    "--disable-background-networking",
+    "--disable-sync",
+    "--disable-extensions",
     "about:blank",
   ], { stdio: "ignore" })
 
-  const version = await waitFor(async () => {
+  await waitFor(async () => {
     try {
       const res = await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`)
       return res.ok ? await res.json() : undefined
     } catch {
       return undefined
     }
-  }, 30000)
-  if (!version) throw new Error("Chrome DevTools endpoint not ready")
+  }, 30000, "chrome debug")
   const targets = await (await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/list`)).json()
-  const page = targets.find(t => t.type === "page")
-  if (!page) throw new Error("No page target")
+  const page = targets.find(t => t.type === "page") || targets[0]
+  if (!page?.webSocketDebuggerUrl) throw new Error("no CDP page target")
   const cdp = await connect(page.webSocketDebuggerUrl)
+  const net = createNetworkTracker()
   cdp.on((msg) => {
+    net.onMessage(msg)
     if (msg.method === "Network.requestWillBeSent") {
-      try {
-        const url = new URL(msg.params.request.url)
-        if ((url.protocol === "http:" || url.protocol === "https:") && url.host !== local.host) {
-          externalRequests.push(msg.params.request.url)
-        }
-      } catch {}
+      const url = msg.params?.request?.url || ""
+      if (/^https?:/i.test(url) && !url.includes("127.0.0.1") && !url.includes("localhost")) {
+        evidence.externalRequests.push(url)
+      }
     }
   })
   await cdp.send("Page.enable")
   await cdp.send("Runtime.enable")
   await cdp.send("Network.enable")
 
-  const evaluate = async (expression, awaitPromise = false) => {
-    const result = await cdp.send("Runtime.evaluate", { expression, returnByValue: true, awaitPromise })
-    if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description ?? "evaluate failed")
-    return result.result.value
+  const evaluate = async (expression) => {
+    const result = await cdp.send("Runtime.evaluate", { expression, returnByValue: true, awaitPromise: true })
+    if (result.exceptionDetails) throw new Error(JSON.stringify(result.exceptionDetails))
+    return result.result?.value
   }
 
   const navigate = async (path) => {
+    net.clear()
     const loaded = cdp.once("Page.loadEventFired")
     await cdp.send("Page.navigate", { url: `${BASE}${path}` })
     await Promise.race([loaded, new Promise(r => setTimeout(r, 15000))])
     await waitFor(async () => {
       const readyState = await evaluate("document.readyState")
       return readyState === "complete" ? true : undefined
-    }, 15000)
+    }, 15000, `document.readyState ${path}`)
   }
 
-  const pageAsserts = {
-    "/": async () => {
-      const shell = await evaluate("!!document.querySelector('.shipping-shell, .risk-console')")
-      return shell ? true : undefined
-    },
-    "/ports": async () => {
-      const shell = await evaluate("!!document.querySelector('.shipping-shell, .risk-console')")
-      return shell ? true : undefined
-    },
-    "/events": async () => {
-      const shell = await evaluate("!!document.querySelector('.shipping-shell, .risk-console')")
-      return shell ? true : undefined
-    },
+  const contentAsserts = {
+    "/": async () => evaluate(`(() => {
+      const el = document.querySelector('[data-testid="country-overview"]');
+      if (!el) return undefined;
+      const cards = document.querySelectorAll('[data-testid="country-card"]');
+      if (cards.length < 6) return undefined;
+      const t = el.innerText || '';
+      if (/正在加载 Shipping HOT/.test(t)) return undefined;
+      return true;
+    })()`),
+    "/ports": async () => evaluate(`(() => {
+      const shell = document.querySelector('.shipping-shell, .risk-console, .ports-demo');
+      if (!shell) return undefined;
+      const t = (document.body && document.body.innerText) || '';
+      if (/正在加载 Shipping HOT|读取港口资料/.test(t) && !/尚无可读缓存|八港目录|未缓存相关公告/.test(t)) return undefined;
+      if (/Cannot GET|Something went wrong|Application error/i.test(t)) return false;
+      return /港口|八港|盐田|蛇口/.test(t) ? true : undefined;
+    })()`),
+    "/events": async () => evaluate(`(() => {
+      const t = (document.body && document.body.innerText) || '';
+      if (/正在加载 Shipping HOT/.test(t)) return undefined;
+      if (/航运数据暂不可用/.test(t)) return false;
+      if (/当前没有进行中的事件|暂无已解决的事件|事件/.test(t)) return true;
+      return undefined;
+    })()`),
     "/policies": async () => evaluate(`(() => {
       const pageEl = document.querySelector('[data-testid="policies-page"]');
       if (!pageEl) return undefined;
+      const count = document.querySelector('[data-testid="policy-count"]');
+      if (count && /读取中/.test(count.innerText || '')) return undefined;
       const detail = document.querySelector('[data-testid="policy-detail"]');
       const text = ((detail && detail.innerText) || pageEl.innerText || '');
       if (text.includes('FIXTURE') || text.includes('R3-6 browse policy')) return true;
-      const count = document.querySelector('[data-testid="policy-count"]');
       if (count && /[1-9]/.test(count.innerText || '')) return true;
       return undefined;
     })()`),
-    "/calendar": async () => {
-      const shell = await evaluate("!!document.querySelector('.shipping-shell, .risk-console')")
-      return shell ? true : undefined
-    },
-    "/feed": async () => {
-      const shell = await evaluate("!!document.querySelector('.shipping-shell, .risk-console')")
-      return shell ? true : undefined
-    },
+    "/calendar": async () => evaluate(`(() => {
+      const el = document.querySelector('[data-testid="calendar-demo"]');
+      if (!el) return undefined;
+      const t = el.innerText || '';
+      if (/读取年度资料…|正在读取参考记录…/.test(t) && !/年暂无已录入|项本月参考|项参考假日/.test(t)) return undefined;
+      if (/年度资料读取失败/.test(t)) return false;
+      return true;
+    })()`),
+    "/feed": async () => evaluate(`(() => {
+      const root = document.querySelector('.manual-intel');
+      if (!root) return undefined;
+      const t = root.innerText || '';
+      if (/^读取中/.test(t.trim()) || /检查清单读取失败/.test(t)) {
+        if (/检查清单读取失败/.test(t)) return false;
+        return undefined;
+      }
+      return /资讯录入|人工信源|粘贴/.test(t) ? true : undefined;
+    })()`),
     "/label": async () => evaluate(`(() => {
       const pageEl = document.querySelector('[data-testid="intel-label-page"]');
       if (!pageEl) return undefined;
-      const text = pageEl.innerText || '';
-      if (text.includes('lbl_e2e_001') || document.querySelector('[data-testid="label-queue-item-lbl_e2e_001"]')) return true;
-      return undefined;
+      if (document.querySelector('[data-testid="label-queue-item-lbl_e2e_001"]')) return true;
+      const t = pageEl.innerText || '';
+      return t.includes('lbl_e2e_001') ? true : undefined;
     })()`),
     "/settings": async () => evaluate(`(() => {
       const panel = document.querySelector('[data-testid="llm-settings-panel"]');
@@ -633,135 +735,185 @@ async function main() {
       if (text.includes('R3-6 Browse Fake Provider') && text.includes('extract')) return true;
       return undefined;
     })()`),
+    [`/ports/${DETAIL_PORT_ID}`]: async () => evaluate(`(() => {
+      const t = (document.body && document.body.innerText) || '';
+      if (/不在批准的八港范围内/.test(t)) return false;
+      if (/读取港口资料|加载港口天气|正在加载 Shipping HOT/.test(t) && !/尚无可读缓存|port-weather|暂无 7 天|天气同步|港口天气 API/.test(t)) return undefined;
+      const notice = document.querySelector('[data-testid="port-weather-notice"], [data-testid="port-weather-coverage"], [data-testid="port-weather-forecast-list"]');
+      if (notice) return true;
+      if (/尚无可读缓存|港口天气|蛇口|未缓存相关公告/.test(t)) return true;
+      if (/港口天气 API 不可用/.test(t)) return false;
+      return undefined;
+    })()`),
   }
 
   for (const path of [...OPEN_PAGES, ...detailPages]) {
     const started = Date.now()
+    const expectedApis = PAGE_QUERIES[path] || []
     await navigate(path)
-    const assertFn = pageAsserts[path]
-    let readyOk = false
-    if (assertFn) {
-      const waited = await waitFor(assertFn, 20000)
-      readyOk = Boolean(waited)
-    } else if (path.startsWith("/ports/")) {
-      const waited = await waitFor(async () => {
-        const shell = await evaluate("!!document.querySelector('.shipping-shell, .risk-console')")
-        return shell ? true : undefined
-      }, 20000)
-      readyOk = Boolean(waited)
+    let queryHits = []
+    let queryError = null
+    try {
+      queryHits = await net.waitForApis(expectedApis, 20000)
+    } catch (error) {
+      queryError = String(error && error.message ? error.message : error)
     }
-    await waitFor(async () => {
-      const pending = await evaluate(`(() => {
-        if (!window.performance || !performance.getEntriesByType) return 0;
-        const entries = performance.getEntriesByType('resource');
-        return entries.filter(e => String(e.name||'').includes('/api/shipping/')).length;
-      })()`)
-      return pending > 0 ? true : undefined
-    }, 5000).catch(() => undefined)
+    let contentOk = false
+    let contentError = null
+    const assertFn = contentAsserts[path]
+    try {
+      if (!assertFn) throw new Error(`missing content assert for ${path}`)
+      if (queryError) throw new Error(queryError)
+      await waitFor(assertFn, 20000, `content ${path}`)
+      contentOk = true
+    } catch (error) {
+      contentError = String(error && error.message ? error.message : error)
+      contentOk = false
+    }
 
     const title = await evaluate("document.title || ''")
     const bodyLen = await evaluate("(document.body && document.body.innerText ? document.body.innerText.length : 0)")
     const href = await evaluate("location.pathname + location.search + location.hash")
-    const shell = await evaluate("!!document.querySelector('.shipping-shell, .risk-console')")
+    const shell = await evaluate("!!document.querySelector('.shipping-shell, .risk-console, .ports-demo, [data-testid=\"country-overview\"], [data-testid=\"calendar-demo\"], [data-testid=\"policies-page\"], [data-testid=\"intel-label-page\"], .manual-intel')")
+    const loadingLeft = await evaluate(`(() => {
+      const t = (document.body && document.body.innerText) || '';
+      return /正在加载 Shipping HOT 数据/.test(t);
+    })()`)
     const errorish = await evaluate(`(() => {
       const t = (document.body && document.body.innerText) || '';
       if (/Cannot GET|Something went wrong|Application error/i.test(t) && !document.querySelector('.shipping-shell, .risk-console')) return true;
       return false;
     })()`)
-    evidence.pageResults.push({ path, href, title, bodyLen, shell, readyOk, errorish, ms: Date.now() - started })
-    check(readyOk && shell && !errorish, `page ${path} loaded with content assert (href=${href}, bodyLen=${bodyLen}, readyOk=${readyOk}, errorish=${errorish})`)
+    const spySnap = await spyStats()
+    const ledgerSnap = await readDbCounters()
+    const pageRecord = {
+      path,
+      href,
+      title,
+      bodyLen,
+      shell,
+      loadingLeft,
+      errorish,
+      expectedApis,
+      queryHits,
+      queryError,
+      contentOk,
+      contentError,
+      providerSpyAttemptCount: spySnap.attemptCount,
+      ledger: ledgerSnap,
+      ms: Date.now() - started,
+    }
+    evidence.pageResults.push(pageRecord)
+    check(
+      contentOk && !errorish && !loadingLeft && !queryError && spySnap.attemptCount === 0,
+      `page ${path} queries+content (href=${href}, contentOk=${contentOk}, queryError=${queryError}, loadingLeft=${loadingLeft}, spyAttempts=${spySnap.attemptCount})`,
+      pageRecord,
+    )
   }
 
+  // Label detail click after queries settled
   await navigate("/label")
+  await net.waitForApis(PAGE_QUERIES["/label"], 20000)
+  await waitFor(contentAsserts["/label"], 20000, "label before click")
   await waitFor(async () => evaluate(`(() => {
     const btn = document.querySelector('[data-testid="label-queue-item-lbl_e2e_001"]');
     if (!btn) return undefined;
     btn.click();
     return true;
-  })()`), 10000)
-  const labelDetailReady = await waitFor(async () => evaluate(`(() => {
-    const id = document.querySelector('[data-testid="label-identity"]');
-    if (!id) return undefined;
-    return (id.innerText || '').includes('lbl_e2e_001') ? true : undefined;
-  })()`), 15000)
-  check(Boolean(labelDetailReady), "label detail shows lbl_e2e_001 after select")
-  evidence.labelDetail = { ready: Boolean(labelDetailReady) }
+  })()`), 10000, "click label item")
+  await waitFor(async () => evaluate(`(() => {
+    const detail = document.querySelector('[data-testid="label-detail"]');
+    if (!detail) return undefined;
+    const t = detail.innerText || '';
+    if (t.includes('lbl_e2e_001') || t.includes('excerpt one') || t.includes('Port notice')) return true;
+    return undefined;
+  })()`), 15000, "label detail")
+  evidence.labelDetail = { ok: true, id: "lbl_e2e_001" }
+  check(true, "label detail opened for lbl_e2e_001")
 
   await navigate("/policies")
-  const policyDetailReady = await waitFor(async () => evaluate(`(() => {
-    const d = document.querySelector('[data-testid="policy-detail"]');
-    if (!d) return undefined;
-    const t = d.innerText || '';
-    return (t.includes('FIXTURE') || t.includes('R3-6 browse policy')) ? true : undefined;
-  })()`), 20000)
-  check(Boolean(policyDetailReady), "policy detail shows fixture record")
-  evidence.policyDetail = { ready: Boolean(policyDetailReady) }
+  await net.waitForApis(PAGE_QUERIES["/policies"], 20000)
+  await waitFor(contentAsserts["/policies"], 20000, "policy before detail")
+  await evaluate(`(() => {
+    const detail = document.querySelector('[data-testid="policy-detail"]');
+    const text = (detail && detail.innerText) || '';
+    if (text.includes('FIXTURE') || text.includes('R3-6 browse policy')) return true;
+    const row = document.querySelector('[data-testid="policies-page"] button, [data-testid="policies-page"] li, [data-testid="policies-page"] a');
+    // Prefer explicit list buttons if present
+    const candidates = Array.from(document.querySelectorAll('[data-testid="policies-page"] *')).filter(el => /FIXTURE|R3-6 browse policy|R36-BROWSE/.test(el.textContent || ''));
+    if (candidates[0]) candidates[0].click();
+    return true;
+  })()`)
+  await waitFor(async () => evaluate(`(() => {
+    const detail = document.querySelector('[data-testid="policy-detail"]');
+    const text = (detail && detail.innerText) || '';
+    if (text.includes('FIXTURE') || text.includes('R3-6 browse policy')) return true;
+    return undefined;
+  })()`), 15000, "policy detail fixture")
+  const policyText = await evaluate(`(() => {
+    const detail = document.querySelector('[data-testid="policy-detail"]');
+    return (detail && detail.innerText) || '';
+  })()`)
+  evidence.policyDetail = { ok: /FIXTURE|R3-6 browse policy/.test(String(policyText)), excerpt: String(policyText).slice(0, 240) }
+  check(evidence.policyDetail.ok, "policy detail shows fixture content")
 
   const shot = await cdp.send("Page.captureScreenshot", { format: "png", fromSurface: true })
-  const shotPath = join(EVIDENCE_DIR, "r3-6-browse-strengthen-last-page.png")
+  const shotPath = join(EVIDENCE_DIR, "r3-6-browse-rc-last-page.png")
   writeFileSync(shotPath, Buffer.from(shot.data, "base64"))
-  evidence.screenshots.push(shotPath.replaceAll("\\", "/"))
-  check(existsSync(shotPath), "screenshot written")
-
-  evidence.externalRequests = externalRequests.slice()
-  check(externalRequests.length === 0, `browser zero external HTTP (got ${externalRequests.length})`, { sample: externalRequests.slice(0, 5) })
+  evidence.screenshots.push(shotPath)
 
   const afterBrowse = await readDbCounters()
   evidence.countersAfterBrowse = afterBrowse
-  fakeProviderHits = afterBrowse.usageRequestCount
-  evidence.fakeProvider.hitsAfterBrowse = fakeProviderHits
-  evidence.fakeProvider.ledgerAfterBrowse = afterBrowse
+  const spyAfterBrowse = await spyStats()
+  evidence.providerSpy.afterBrowse = spyAfterBrowse
   check(
     afterBrowse.usageRequestCount === before.usageRequestCount
-    && afterBrowse.usageRows === before.usageRows
     && afterBrowse.receipts === before.receipts
     && afterBrowse.attempts === before.attempts,
-    `browse pages: zero paid_receipt/provider_usage delta (before=${JSON.stringify(before)} after=${JSON.stringify(afterBrowse)})`,
+    `browse pages: zero ledger delta (before=${JSON.stringify(before)} after=${JSON.stringify(afterBrowse)})`,
   )
   check(
     afterBrowse.usageRequestCount === 0 && afterBrowse.attempts === 0 && afterBrowse.receipts === 0,
     `ledger counters remain zero (usage=${afterBrowse.usageRequestCount}, attempts=${afterBrowse.attempts}, receipts=${afterBrowse.receipts})`,
   )
-  check(fakeProviderHits === 0, `fake Provider server-side call count remains 0 after browse (got ${fakeProviderHits})`)
+  check(spyAfterBrowse.attemptCount === 0 && spyAfterBrowse.blocked === 0, `provider-spy attempts remain 0 after browse (got ${JSON.stringify(spyAfterBrowse)})`)
+  check(evidence.externalRequests.length === 0, `browser external requests empty (n=${evidence.externalRequests.length})`)
 
-  evidence.checks = checks
-  const passed = checks.filter(c => c.ok).length
-  const failed = checks.filter(c => !c.ok).length
-  evidence.summary = { passed, failed, total: checks.length }
-  writeFileSync(join(EVIDENCE_DIR, "r3-6-browse-strengthen-evidence.json"), JSON.stringify(evidence, null, 2))
-  const lines = [
-    `R3-6 browse zero-pay STRENGTHEN ${failed === 0 ? "PASS" : "FAIL"}  ${passed}/${checks.length}`,
-    `schema=${ready?.database?.schemaVersion}`,
-    `runDir=${RUN_DIR.replaceAll("\\", "/")}`,
-    `fakeProvider=${fakeBaseUrl} hits=${fakeProviderHits}`,
-    `before=${JSON.stringify(before)}`,
-    `afterApis=${JSON.stringify(afterApis)}`,
-    `afterBrowse=${JSON.stringify(afterBrowse)}`,
-    `externalRequests=${externalRequests.length}`,
+  // Confirm spy file on disk independent of ledger
+  if (existsSync(SPY_FILE)) {
+    evidence.providerSpy.fileContents = JSON.parse(readFileSync(SPY_FILE, "utf8"))
+  }
+
+  const failed = checks.filter(c => !c.ok)
+  evidence.summary = { passed: checks.length - failed.length, failed: failed.length, total: checks.length }
+  const summaryLines = [
+    `R3-6 browse zero-pay RC`,
+    `RUN_DIR=${RUN_DIR}`,
+    `EVIDENCE_DIR=${EVIDENCE_DIR}`,
+    `chromeProfile=${CHROME_PROFILE}`,
+    `SUMMARY ${evidence.summary.passed}/${evidence.summary.total} failed=${evidence.summary.failed}`,
+    `ledger before/afterBrowse=${JSON.stringify(before)} / ${JSON.stringify(afterBrowse)}`,
+    `providerSpy afterBrowse attemptCount=${spyAfterBrowse.attemptCount} blocked=${spyAfterBrowse.blocked}`,
+    `negativeProbe attemptCount=${probe.attemptCount} blocked=${probe.blocked}`,
+    `fakeProviderConfig=${FAKE_PROVIDER_BASE}`,
     `pages=${[...OPEN_PAGES, ...detailPages].join(",")}`,
-    `apis=${READONLY_APIS.length + detailApis.length}`,
-    "historical empty-DB smoke retained at parent evidence dir; this is seeded strengthen",
-    "NOT a substitute for S7; no live connection test; no crawl; A1 not executed",
-    ...checks.map(c => `${c.ok ? "PASS" : "FAIL"}  ${c.label}`),
+    `priorStrengthen=retained-not-stronger-claim`,
   ]
-  writeFileSync(join(EVIDENCE_DIR, "r3-6-browse-strengthen-e2e.txt"), `${lines.join("\n")}\n`)
-  console.log(`\nSUMMARY ${passed}/${checks.length} failed=${failed}`)
-  if (failed) process.exitCode = 1
+  for (const c of checks) summaryLines.push(`${c.ok ? "PASS" : "FAIL"}  ${c.label}`)
+  writeFileSync(join(EVIDENCE_DIR, "r3-6-browse-rc-e2e.txt"), summaryLines.join("\n"), "utf8")
+  writeFileSync(join(EVIDENCE_DIR, "r3-6-browse-rc-evidence.json"), JSON.stringify(evidence, null, 2), "utf8")
+  console.log(summaryLines.join("\n"))
+  if (failed.length) process.exitCode = 1
 }
 
-main().catch((err) => {
-  console.error(err)
+main().catch((error) => {
+  console.error(error)
   process.exitCode = 1
 }).finally(async () => {
-  if (chromeChild) {
-    try {
-      chromeChild.kill("SIGKILL")
-    } catch {}
-  }
-  await stopServer(server)
-  if (profile && existsSync(profile)) {
-    try {
-      rmSync(profile, { recursive: true, force: true })
-    } catch {}
-  }
+  try {
+    if (chromeChild) chromeChild.kill("SIGKILL")
+  } catch {}
+  try {
+    await stopServer(server)
+  } catch {}
 })

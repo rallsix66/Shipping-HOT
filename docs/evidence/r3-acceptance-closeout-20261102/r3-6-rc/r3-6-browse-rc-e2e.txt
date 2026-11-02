@@ -1,0 +1,59 @@
+R3-6 browse zero-pay RC
+RUN_DIR=D:\try one\Shipping HOT\.tmp\worktrees\r3-1-llm-registry-20261027\.tmp\r3-6-browse-zero-pay\runs\run-cXRBfn
+EVIDENCE_DIR=D:\try one\Shipping HOT\.tmp\worktrees\r3-1-llm-registry-20261027\docs\evidence\r3-acceptance-closeout-20261102\r3-6-rc
+chromeProfile=D:\try one\Shipping HOT\.tmp\worktrees\r3-1-llm-registry-20261027\.tmp\r3-6-browse-zero-pay\runs\run-cXRBfn\chrome-profile
+SUMMARY 48/48 failed=0
+ledger before/afterBrowse={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0} / {"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0}
+providerSpy afterBrowse attemptCount=0 blocked=0
+negativeProbe attemptCount=1 blocked=true
+fakeProviderConfig=https://api.example.invalid/v1
+pages=/,/ports,/events,/policies,/calendar,/feed,/label,/settings,/ports/port-shekou
+priorStrengthen=retained-not-stronger-claim
+PASS  provider-spy negative probe counted+blocked (attemptCount=1, blocked=true)
+PASS  provider-spy reset to zero after negative probe (got {"attemptCount":0,"blocked":0,"allowedLocal":0,"attempts":[]})
+PASS  seed fixture policy -> 200
+PASS  seed policy returns id
+PASS  seed policy isFixture=true
+PASS  seed fake provider -> 200
+PASS  fake provider secret configured (fixture key, not real)
+PASS  provider response never echoes raw fixture key
+PASS  seed fake model -> 200
+PASS  seed extract binding -> 200
+PASS  ledger before browse all zero (got {"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0})
+PASS  provider-spy attempts before browse remain 0 (got 0)
+PASS  API /api/shipping/health -> 200 (expect 200) assert=true
+PASS  API /api/shipping/readiness -> 200 (expect 200) assert=true
+PASS  API /api/shipping/runtime -> 200 (expect 200) assert=true
+PASS  API /api/shipping/ -> 200 (expect 200) assert=true
+PASS  API /api/shipping/feed -> 200 (expect 200) assert=true
+PASS  API /api/shipping/calendar -> 200 (expect 200) assert=true
+PASS  API /api/shipping/tropical-cyclones -> 200 (expect 200) assert=true
+PASS  API /api/shipping/search/ports -> 200 (expect 200) assert=true
+PASS  API /api/shipping/intel/sources -> 200 (expect 200) assert=true
+PASS  API /api/shipping/intel/items -> 200 (expect 200) assert=true
+PASS  API /api/shipping/intel/manual -> 200 (expect 200) assert=true
+PASS  API /api/shipping/intel/labels -> 200 (expect 200) assert=true
+PASS  API /api/shipping/policies -> 200 (expect 200) assert=true
+PASS  API /api/shipping/llm/providers -> 200 (expect 200) assert=true
+PASS  API /api/shipping/llm/models -> 200 (expect 200) assert=true
+PASS  API /api/shipping/llm/bindings -> 200 (expect 200) assert=true
+PASS  API /api/shipping/llm/shared-budget -> 200 (expect 200) assert=true
+PASS  API /api/shipping/translation/status -> 200 (expect 200) assert=true
+PASS  API /api/shipping/translation/secret -> 200 (expect 200) assert=true
+PASS  readonly APIs: zero ledger delta (before={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0} after={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0})
+PASS  provider-spy attempts after readonly APIs remain 0 (got 0)
+PASS  page / queries+content (href=/, contentOk=true, queryError=null, loadingLeft=false, spyAttempts=0)
+PASS  page /ports queries+content (href=/ports, contentOk=true, queryError=null, loadingLeft=false, spyAttempts=0)
+PASS  page /events queries+content (href=/events, contentOk=true, queryError=null, loadingLeft=false, spyAttempts=0)
+PASS  page /policies queries+content (href=/policies, contentOk=true, queryError=null, loadingLeft=false, spyAttempts=0)
+PASS  page /calendar queries+content (href=/calendar, contentOk=true, queryError=null, loadingLeft=false, spyAttempts=0)
+PASS  page /feed queries+content (href=/feed, contentOk=true, queryError=null, loadingLeft=false, spyAttempts=0)
+PASS  page /label queries+content (href=/label, contentOk=true, queryError=null, loadingLeft=false, spyAttempts=0)
+PASS  page /settings queries+content (href=/settings, contentOk=true, queryError=null, loadingLeft=false, spyAttempts=0)
+PASS  page /ports/port-shekou queries+content (href=/ports/port-shekou, contentOk=true, queryError=null, loadingLeft=false, spyAttempts=0)
+PASS  label detail opened for lbl_e2e_001
+PASS  policy detail shows fixture content
+PASS  browse pages: zero ledger delta (before={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0} after={"usageRequestCount":0,"usageRows":0,"receipts":0,"attempts":0})
+PASS  ledger counters remain zero (usage=0, attempts=0, receipts=0)
+PASS  provider-spy attempts remain 0 after browse (got {"attemptCount":0,"blocked":0,"allowedLocal":0,"attempts":[]})
+PASS  browser external requests empty (n=0)

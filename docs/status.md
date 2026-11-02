@@ -1,3 +1,9 @@
+## R3-6 RC 补证（provider-spy + 逐页查询）(2026-11-02)
+
+- Baseline tip before this commit: `701121eb7bfcc30b022e08e1cb9d4efaa38bbaaf`. Prior strengthen 50/50 retained as historical script result, **not** as meeting RC stronger conditions.
+- Evidence: `docs/evidence/r3-acceptance-closeout-20261102/r3-6-rc/` (**48/48**). Independent `--import` provider-spy (negative probe + block + reset); ledger separate; CDP per-page data-query waits; Chrome profile under RUN_DIR; inventory「本次已核验证据范围」.
+- **A1 not executed**; R3-5 **BLOCKED**; S7 **NOT_RUN**; no merge/deploy; no user disturb; no Slack send.
+
 ## R3-6 同片补强（dots 接受矩阵/缺口后）(2026-11-02)
 
 - Baseline tip：`3313f5c0036a005cba6377a7211837d4c079e9a8`. Matrix + wiring-gaps **accepted**; R3-6 empty smoke kept as historical; strengthen under `docs/evidence/r3-acceptance-closeout-20261102/r3-6-strengthen/` (**50/50**).

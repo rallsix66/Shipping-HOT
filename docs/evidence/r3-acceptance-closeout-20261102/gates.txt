@@ -1,13 +1,13 @@
-R3 acceptance closeout — R3-6 strengthen (2026-11-02 Asia/Shanghai)
+R3 acceptance closeout — R3-6 RC (2026-11-02 Asia/Shanghai)
 
-Product/test source: unchanged this slice (script + docs only) → typecheck/lint/build/vitest NOT required as product gates.
-R3-6 strengthen e2e: node scripts/e2e-r3-6-browse-zero-pay.mjs → 50/50 PASS
-  - seeded fixtures (policy + labels + fake provider/model/binding)
-  - explicit HTTP 200 + content asserts (no status<500 / shell||bodyLen)
-  - provider_usage/paid_receipt/attempts before/after = 0
-  - fake Provider server-side call count (usageRequestCount) = 0
-  - RUN_DIR: fresh mkdtemp under .tmp/r3-6-browse-zero-pay/runs; refuse overwrite when E2E_R36_BROWSE_DIR has .data
-Historical empty-DB smoke retained: r3-6-browse-e2e.txt (34/34)
+Product source: unchanged this slice (e2e scripts + docs only) → typecheck/lint/build/vitest NOT required as product gates.
+R3-6 RC e2e: node scripts/e2e-r3-6-browse-zero-pay.mjs → 48/48 PASS
+  - provider-spy --import: negative probe counted+blocked, reset, then browse attempts=0
+  - ledger provider_usage/paid_receipt/attempts separate column, all zero
+  - per-page CDP Network wait for data queries + content/empty asserts; timeout/error fail
+  - Chrome profile under RUN_DIR/chrome-profile
+  - inventory wording: 本次已核验证据范围
+Historical: empty smoke retained; strengthen 50/50 retained as prior script result (not stronger-claim)
 S7: NOT_RUN
 R3-5: BLOCKED
 A1: NOT EXECUTED
