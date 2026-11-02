@@ -271,4 +271,81 @@ describe("intel label repository §4.9", () => {
     expect(ai2?.analysisIds).toEqual(["an-2"])
     expect(ai2?.modelId).toBe("m-2")
   })
+
+  it("same request-id concurrent saves converge; operator mismatch conflicts; insert+queue is atomic", async () => {
+    const { repo, native } = await fresh()
+    const item = await repo.enroll({
+      itemId: "item-txn",
+      versionId: "ver-txn",
+      contentHash: "hash-txn",
+      sourceUrl: "https://example.test/txn",
+      excerpt: "ex",
+      title: "T",
+      category: "port",
+      language: "en",
+      aiPrelabel: { decision: { ...keepDecision } },
+    })
+
+    const payload = {
+      labelItemId: item.id,
+      expectedContentHash: "hash-txn",
+      kind: "human_correct" as const,
+      operator: "op.concurrent",
+      decision: { ...keepDecision, notes: "same" },
+      clientRequestId: "req-concurrent-1",
+    }
+    const results = await Promise.all([
+      repo.saveHumanDecision(payload),
+      repo.saveHumanDecision(payload),
+      repo.saveHumanDecision(payload),
+    ])
+    expect(new Set(results.map(r => r.id)).size).toBe(1)
+    expect(results.every(r => r.operator === "op.concurrent")).toBe(true)
+    expect(results.every(r => r.decision.notes === "same")).toBe(true)
+    const count = native.prepare(
+      "SELECT COUNT(*) AS n FROM intel_label_decision WHERE label_item_id = ? AND client_request_id = ?",
+    ).get(item.id, "req-concurrent-1") as { n: number }
+    expect(Number(count.n)).toBe(1)
+    const queued = await repo.getItem(item.id)
+    expect(queued?.queueStatus).toBe("human_confirmed")
+
+    await expect(repo.saveHumanDecision({
+      ...payload,
+      operator: "op.other",
+      clientRequestId: "req-concurrent-1",
+    })).rejects.toThrow(/client_request_id_conflict/)
+
+    // Simulate queue UPDATE failure after decision insert: trigger aborts UPDATE → txn rolls back.
+    native.exec(`
+      CREATE TRIGGER IF NOT EXISTS trg_fail_queue_update
+      BEFORE UPDATE OF queue_status ON intel_label_item
+      BEGIN
+        SELECT RAISE(ABORT, 'forced_queue_update_fail');
+      END;
+    `)
+    await expect(repo.saveHumanDecision({
+      labelItemId: item.id,
+      expectedContentHash: "hash-txn",
+      kind: "human_correct",
+      operator: "op.rollback",
+      decision: { ...dropDecision, notes: "should-rollback" },
+      clientRequestId: "req-rollback-1",
+    })).rejects.toThrow(/forced_queue_update_fail/)
+    const rolled = native.prepare(
+      "SELECT COUNT(*) AS n FROM intel_label_decision WHERE client_request_id = ?",
+    ).get("req-rollback-1") as { n: number }
+    expect(Number(rolled.n)).toBe(0)
+
+    native.exec("DROP TRIGGER IF EXISTS trg_fail_queue_update")
+    const retried = await repo.saveHumanDecision({
+      labelItemId: item.id,
+      expectedContentHash: "hash-txn",
+      kind: "human_correct",
+      operator: "op.rollback",
+      decision: { ...dropDecision, notes: "after-retry" },
+      clientRequestId: "req-rollback-1",
+    })
+    expect(retried.decision.notes).toBe("after-retry")
+    expect((await repo.getItem(item.id))?.queueStatus).toBe("human_confirmed")
+  })
 })

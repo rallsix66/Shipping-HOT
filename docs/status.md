@@ -1,3 +1,10 @@
+## R3-1 §4.9 RC2 REQUEST CHANGES closeout (2026-11-02)
+
+- Parent tip `6eb2dc5abb85adfdf9d607a2959b8733b04b638e` (dots REQUEST CHANGES ts 1793591483.616199). Same label→eval loop; **closed RC1 items stay closed** (completed/reused projection, excerpt redaction, eval denominators/sampleVersion, per-currency cost, SQL fail≠zero, 033, offline model chain). No rewrite of executed 034/035.
+- Four fixes: (1) `saveHumanDecision` BEGIN IMMEDIATE txn + unique/busy converge including operator identity; Promise.all same-id + insert/queue-fail rollback+retry tests; (2) label UI draft bound to item/version, abandonDraft on leave-yes, seed only when unbound / same-id already seeded, save blocked until `draftReady`; browser e2e strict GET notes+operator, official option `1`/`0`, real SPA leave + dirty Back, fail→retry, slow-save disable; (3) `selectConsistentAnalysisRun` for projection/analysisIds/receipts/fingerprint (latest extract + matching prefilter ≤ extract); A→B / same-extract-diff-prefilter / old-receipt isolation tests keep human; (4) `intel-eval` true readonly open (`readonly` + `fileMustExist`) with early missing-path nonzero exit — no create file/dir; schema/data hash unchanged on read.
+- Gates: typecheck / lint / build / full Vitest **2155 PASS** / 10 skipped; label browser e2e **59/59**; Neat Freak this entry + AGENTS note. S7 harness **NOT_RUN**. Unmerged / undeployed. No Slack send / no user disturb. Real 200-label set / paid re-run still not executed; R3-5 **BLOCKED**; R3-8 only after label→eval accept.
+- Evidence: `.tmp/r3-1-llm-registry-20261027/r3-label-eval-rc2-20261102/`.
+
 ## R3-1 §4.9 REQUEST CHANGES closeout (2026-11-02)
 
 - Parent tip `6a8dafff8a2f39a8200fffdff023730d682370a7` (dots REQUEST CHANGES ts 1793590047.818929). Same label→eval loop; **033 mid-fail / zero-provider default path stay closed**.

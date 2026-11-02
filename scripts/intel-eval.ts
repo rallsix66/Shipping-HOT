@@ -32,16 +32,62 @@ async function main() {
     process.exit(2)
   }
   const outDir = resolve(process.env.INTEL_EVAL_OUT
-    ?? resolve(ROOT, ".tmp/r3-1-llm-registry-20261027/r3-label-eval-rc-20261102"))
+    ?? resolve(ROOT, ".tmp/r3-1-llm-registry-20261027/r3-label-eval-rc2-20261102"))
   mkdirSync(outDir, { recursive: true })
   const outPath = resolve(outDir, "intel-eval-report.json")
+
+  const dbPathEarly = process.env.SHIPPING_DB_PATH
+  if (dbPathEarly) {
+    const { existsSync } = await import("node:fs")
+    if (!existsSync(dbPathEarly)) {
+      const reason = `eval_db_missing: ${dbPathEarly}`
+      writeFileSync(outPath, JSON.stringify({
+        status: "NOT_RUN",
+        reason,
+        sampleVersion: "missing_db",
+        humanLabeled: 0,
+        paired: 0,
+        missingPredictions: 0,
+        prefilter: {
+          truePositive: 0,
+          falsePositive: 0,
+          falseNegative: 0,
+          trueNegative: 0,
+          missingPrediction: 0,
+          missingLabel: 0,
+          skipped: 0,
+          unknownPrediction: 0,
+          recall: null,
+          precision: null,
+          denominatorRecall: 0,
+          denominatorPrecision: 0,
+          fullSetRecall: null,
+          fullSetRecallDenominator: 0,
+        },
+        fields: [],
+        cost: {
+          budgetConfigured: false,
+          budgetMonthly: null,
+          byCurrency: [],
+          estimatedTotal: null,
+          requestProviderRerun: false,
+          costReadError: reason,
+          r3_5: "BLOCKED",
+        },
+        modelPromptVersions: [],
+        mixedModelPrompt: false,
+      }, null, 2), "utf8")
+      console.log(JSON.stringify({ ok: false, outPath, status: "NOT_RUN", error: reason } satisfies ExitPayload, null, 2))
+      process.exitCode = 1
+      return
+    }
+  }
 
   try {
     const { buildEvalReport, computeSampleVersion, costReportFromInputs } = await import("../server/intel/label-eval.ts")
     const { IntelLabelRepository } = await import("../server/database/intel-label.ts")
     const { latestSchemaVersion, readDatabaseMetadata } = await import("../server/database/runtime.ts")
     const { createDatabase } = await import("db0")
-    const { default: sqlite } = await import("db0/connectors/better-sqlite3")
 
     const dbPath = process.env.SHIPPING_DB_PATH
     if (!dbPath) {
@@ -64,7 +110,71 @@ async function main() {
       return
     }
 
-    const db = createDatabase(sqlite({ path: dbPath }))
+    // True readonly + fileMustExist: never mkdir/create the DB path.
+    const NativeDatabase = (await import("better-sqlite3")).default
+    let native
+    try {
+      native = new NativeDatabase(dbPath, { readonly: true, fileMustExist: true } as { readonly?: boolean })
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
+      const reason = `eval_db_open_readonly_failed: ${msg}`
+      writeFileSync(outPath, JSON.stringify({
+        status: "NOT_RUN",
+        reason,
+        sampleVersion: "error",
+        humanLabeled: 0,
+        paired: 0,
+        missingPredictions: 0,
+        prefilter: {
+          truePositive: 0,
+          falsePositive: 0,
+          falseNegative: 0,
+          trueNegative: 0,
+          missingPrediction: 0,
+          missingLabel: 0,
+          skipped: 0,
+          unknownPrediction: 0,
+          recall: null,
+          precision: null,
+          denominatorRecall: 0,
+          denominatorPrecision: 0,
+          fullSetRecall: null,
+          fullSetRecallDenominator: 0,
+        },
+        fields: [],
+        cost: costReportFromInputs({
+          budgetConfigured: false,
+          budgetMonthly: null,
+          byCurrency: [],
+          estimatedTotal: null,
+          requestProviderRerun: false,
+          costReadError: reason,
+        }),
+        modelPromptVersions: [],
+        mixedModelPrompt: false,
+      }, null, 2), "utf8")
+      console.log(JSON.stringify({ ok: false, outPath, status: "NOT_RUN", error: reason } satisfies ExitPayload, null, 2))
+      process.exitCode = 1
+      return
+    }
+    const db = createDatabase({
+      name: "sqlite",
+      dialect: "sqlite",
+      getInstance: () => native,
+      exec: (sql: string) => native.exec(sql),
+      prepare: (sql: string) => {
+        const statement = native.prepare(sql)
+        return {
+          all: async (...params: (string | number | boolean | null | undefined)[]) => statement.all(...params),
+          get: async (...params: (string | number | boolean | null | undefined)[]) => statement.get(...params),
+          run: async (...params: (string | number | boolean | null | undefined)[]) => {
+            const result = statement.run(...params)
+            return { success: result.changes > 0, changes: result.changes, lastInsertRowid: result.lastInsertRowid }
+          },
+        }
+      },
+      dispose: () => native.close(),
+    } as never)
     // Read-only bootstrap: never initializeShippingDatabase / never rewrite data_mode.
     let meta
     try {
@@ -232,6 +342,9 @@ async function main() {
     })
 
     writeFileSync(outPath, JSON.stringify(report, null, 2), "utf8")
+    try {
+      native.close()
+    } catch { /* ignore */ }
     const failed = Boolean(costReadError) || (report.status === "NOT_RUN" && Boolean(report.reason?.startsWith("eval_")))
     const payload: ExitPayload = {
       ok: !failed && !costReadError,

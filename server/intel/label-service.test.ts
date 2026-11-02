@@ -7,7 +7,7 @@ import { IntelRepository } from "#/database/intel"
 import { IntelAnalysisRepository } from "#/database/intel-analysis"
 import { licensedBlocks } from "#/intel/content-license"
 import { intelSourceSeeds } from "#/intel/sources"
-import { LabelService, decisionFromAnalysisOutputs } from "#/intel/label-service"
+import { LabelService, decisionFromAnalysisOutputs, selectConsistentAnalysisRun } from "#/intel/label-service"
 
 type Native = InstanceType<typeof NativeDatabase>
 function wrap(native: Native) {
@@ -153,8 +153,8 @@ describe("label-service projection + live rights", () => {
     expect(detail.aiPrelabel?.decision.prefilterKeep).toBe(true)
     expect(detail.aiPrelabel?.decision.eventType).toBe("port_closure")
     expect(detail.aiPrelabel?.decision.isOfficialStatement).toBe(true)
-    expect(detail.aiPrelabel?.modelId).toBe("model-ex")
-    expect(detail.aiPrelabel?.promptHash).toBe("prompt-ex")
+    expect(detail.aiPrelabel?.modelId).toBe("prefilter:model-pre|extract:model-ex")
+    expect(detail.aiPrelabel?.promptHash).toBe("prefilter:prompt-pre|extract:prompt-ex")
     expect(detail.aiPrelabel?.analysisIds.length).toBe(2)
     expect(detail.material.excerpt).toBeTruthy()
     expect(detail.material.materialReadFailed).toBe(false)
@@ -205,5 +205,194 @@ describe("label-service projection + live rights", () => {
     expect(failed.material.excerpt).toBeNull()
     expect(failed.item.excerpt).toBeNull()
     expect(failed.item.id).toBe(enrolled.id)
+  })
+
+  it("selectConsistentAnalysisRun prefers latest extract + prefilter at-or-before it", () => {
+    const rows = [
+      { id: "p1", step: "prefilter", status: "completed", createdAt: "2026-11-01T01:00:00.000Z", attemptIndex: 0, modelId: "A", promptHash: "pa" },
+      { id: "e1", step: "extract", status: "completed", createdAt: "2026-11-01T02:00:00.000Z", attemptIndex: 0, modelId: "A", promptHash: "ea" },
+      { id: "p2", step: "prefilter", status: "completed", createdAt: "2026-11-01T03:00:00.000Z", attemptIndex: 0, modelId: "B", promptHash: "pb" },
+      { id: "e2", step: "extract", status: "completed", createdAt: "2026-11-01T04:00:00.000Z", attemptIndex: 0, modelId: "B", promptHash: "eb" },
+      { id: "p3", step: "prefilter", status: "completed", createdAt: "2026-11-01T05:00:00.000Z", attemptIndex: 0, modelId: "C", promptHash: "pc" },
+    ]
+    const selected = selectConsistentAnalysisRun(rows)
+    expect(selected.map(r => r.id)).toEqual(["p2", "e2"])
+  })
+
+  it("a then B re-analysis enrolls B projection/ids/fingerprint; old receipts excluded; human kept", async () => {
+    const { service, intel, analysis } = await fresh()
+    await intel.upsertSource(source, NOW)
+    const saved = await intel.writeEntry({
+      sourceId: source.id,
+      canonicalUrl: "https://example.test/label-ab",
+      title: "A then B",
+      contentHash: hash(body),
+      contentScope: "full_text",
+      extractorVersion: "label-service-test-v1",
+      blocks: licensedBlocks("full_text", "A then B", body),
+      fetchedAt: NOW,
+    })
+    const aPre = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "prefilter",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      modelId: "model-A",
+      modelName: "A",
+      promptHash: "prompt-A-pre",
+      receiptId: "rcpt-old",
+      createdAt: "2026-11-01T01:00:00.000Z",
+      output: { decision: "PASS", content: "a-pre" },
+    })
+    const aEx = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "extract",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      modelId: "model-A",
+      modelName: "A",
+      promptHash: "prompt-A-ex",
+      receiptId: "rcpt-old",
+      createdAt: "2026-11-01T02:00:00.000Z",
+      output: {
+        extract: {
+          eventType: "port_closure",
+          countries: ["MY"],
+          ports: ["MYPKG"],
+          effectiveFrom: "2026-11-01",
+          isOfficialStatement: true,
+        },
+        content: "a-ex",
+      },
+    })
+
+    const first = await service.enrollFromExisting({ itemId: saved.itemId, versionId: saved.versionId })
+    const firstDetail = await service.detail(first.id)
+    expect(firstDetail.aiPrelabel?.decision.eventType).toBe("port_closure")
+    expect(firstDetail.aiPrelabel?.analysisIds.sort()).toEqual([aPre.id, aEx.id].sort())
+    expect(firstDetail.aiPrelabel?.modelId).toContain("model-A")
+
+    await service.saveHuman({
+      labelItemId: first.id,
+      expectedContentHash: hash(body),
+      kind: "human_confirm",
+      operator: "human.keep",
+      decision: {
+        prefilterKeep: true,
+        eventType: "port_closure",
+        countries: ["MY"],
+        ports: ["MYPKG"],
+        effectiveFrom: "2026-11-01",
+        isOfficialStatement: true,
+        notes: "keep-human",
+      },
+      clientRequestId: "keep-human-1",
+    })
+
+    const bPre = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "prefilter",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      modelId: "model-B",
+      modelName: "B",
+      promptHash: "prompt-B-pre",
+      receiptId: "rcpt-new",
+      createdAt: "2026-11-01T03:00:00.000Z",
+      output: { decision: "PASS", content: "b-pre" },
+    })
+    const bEx = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "extract",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      modelId: "model-B",
+      modelName: "B",
+      promptHash: "prompt-B-ex",
+      receiptId: "rcpt-new",
+      createdAt: "2026-11-01T04:00:00.000Z",
+      output: {
+        extract: {
+          eventType: "port_congestion",
+          countries: ["SG"],
+          ports: ["SGSIN"],
+          effectiveFrom: "2026-11-02",
+          isOfficialStatement: false,
+        },
+        content: "b-ex",
+      },
+    })
+
+    const second = await service.enrollFromExisting({ itemId: saved.itemId, versionId: saved.versionId })
+    expect(second.id).toBe(first.id)
+    const secondDetail = await service.detail(second.id)
+    expect(secondDetail.aiPrelabel?.decision.eventType).toBe("port_congestion")
+    expect(secondDetail.aiPrelabel?.decision.countries).toEqual(["SG"])
+    expect(secondDetail.aiPrelabel?.analysisIds.sort()).toEqual([bPre.id, bEx.id].sort())
+    expect(secondDetail.aiPrelabel?.analysisIds).not.toContain(aPre.id)
+    expect(secondDetail.aiPrelabel?.analysisIds).not.toContain(aEx.id)
+    expect(secondDetail.aiPrelabel?.modelId).toBe("prefilter:model-B|extract:model-B")
+    expect(secondDetail.aiPrelabel?.promptHash).toBe("prefilter:prompt-B-pre|extract:prompt-B-ex")
+    expect(secondDetail.humanDecision?.decision.notes).toBe("keep-human")
+    expect(secondDetail.item.queueStatus).toBe("human_confirmed")
+
+    // Same extract model/prompt, different prefilter → fingerprint must differ; ids = that pre + extract.
+    const bPre2 = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "prefilter",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      modelId: "model-B-pre2",
+      modelName: "B2",
+      promptHash: "prompt-B-pre2",
+      receiptId: "rcpt-new",
+      createdAt: "2026-11-01T05:00:00.000Z",
+      output: { decision: "BLOCK", content: "b-pre2" },
+    })
+    const bEx2 = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "extract",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      modelId: "model-B",
+      modelName: "B",
+      promptHash: "prompt-B-ex",
+      receiptId: "rcpt-new",
+      createdAt: "2026-11-01T06:00:00.000Z",
+      output: {
+        extract: {
+          eventType: "port_congestion",
+          countries: ["SG"],
+          ports: ["SGSIN"],
+          effectiveFrom: "2026-11-02",
+          isOfficialStatement: false,
+        },
+        content: "b-ex2",
+      },
+    })
+    const third = await service.enrollFromExisting({ itemId: saved.itemId, versionId: saved.versionId })
+    const thirdDetail = await service.detail(third.id)
+    expect(thirdDetail.aiPrelabel?.analysisIds.sort()).toEqual([bPre2.id, bEx2.id].sort())
+    expect(thirdDetail.aiPrelabel?.promptHash).toBe("prefilter:prompt-B-pre2|extract:prompt-B-ex")
+    expect(thirdDetail.aiPrelabel?.decision.prefilterKeep).toBe(false)
+    expect(thirdDetail.humanDecision?.decision.notes).toBe("keep-human")
   })
 })

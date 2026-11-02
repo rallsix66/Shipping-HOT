@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url"
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)))
 const RUN_DIR = resolve(process.env.E2E_R31_LABEL_DIR ?? join(ROOT, ".tmp", "r3-1-label-browser"))
-const EVIDENCE_DIR = resolve(process.env.E2E_R31_EVIDENCE_DIR ?? join(ROOT, ".tmp", "r3-1-llm-registry-20261027", "r3-label-eval-rc-20261102"))
+const EVIDENCE_DIR = resolve(process.env.E2E_R31_EVIDENCE_DIR ?? join(ROOT, ".tmp", "r3-1-llm-registry-20261027", "r3-label-eval-rc2-20261102"))
 const DB_PATH = join(RUN_DIR, ".data", "shipping-hot-v3.sqlite3")
 const SERVER_ENTRY = join(ROOT, "dist", "output", "server", "index.mjs")
 const PORT = Number(process.env.E2E_R31_LABEL_PORT ?? "4491")
@@ -423,6 +423,11 @@ async function main() {
     const t = await evalStr("document.querySelector('[data-testid=label-identity]')?.innerText || ''")
     return t.includes("lbl_e2e_001") ? true : undefined
   }, 15000)
+  await waitFor(async () => {
+    const ready = await evalStr("document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-draft-ready') || ''")
+    return ready === "1" ? true : undefined
+  }, 15000)
+  check((await evalStr("document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-draft-ready') || ''")) === "1", "draft ready before first edit")
 
   const edited = await evalBool(`(() => {
     const op = document.querySelector('[data-testid=label-operator]');
@@ -438,7 +443,7 @@ async function main() {
     };
     setNative(op, 'e2e.browser');
     setNative(notes, 'browser-correct-notes');
-    setNative(official, 'true');
+    setNative(official, '1');
     return true;
   })()`)
   check(edited, "browser filled operator/notes/official")
@@ -463,12 +468,15 @@ async function main() {
 
   const afterUi = await (await fetch(`${BASE}/api/shipping/intel/labels/lbl_e2e_001`)).json()
   check(afterUi?.humanDecision?.isHuman === true, "GET after UI save has humanDecision")
-  check(afterUi?.humanDecision?.decision?.notes === "browser-correct-notes"
-    || afterUi?.item?.queueStatus === "human_confirmed", `GET notes/status after UI save (notes=${afterUi?.humanDecision?.decision?.notes} status=${afterUi?.item?.queueStatus})`)
+  check(afterUi?.humanDecision?.decision?.notes === "browser-correct-notes", `GET notes after UI save (notes=${afterUi?.humanDecision?.decision?.notes})`)
+  check(afterUi?.humanDecision?.operator === "e2e.browser", `GET operator after UI save (op=${afterUi?.humanDecision?.operator})`)
+  check(afterUi?.humanDecision?.decision?.isOfficialStatement === true, `GET official after UI save (official=${afterUi?.humanDecision?.decision?.isOfficialStatement})`)
+  check(afterUi?.item?.queueStatus === "human_confirmed", `GET queue human_confirmed (status=${afterUi?.item?.queueStatus})`)
   evidence.api.uiSaveReadback = {
     queueStatus: afterUi?.item?.queueStatus,
     notes: afterUi?.humanDecision?.decision?.notes,
     operator: afterUi?.humanDecision?.operator,
+    isOfficialStatement: afterUi?.humanDecision?.decision?.isOfficialStatement,
   }
 
   await cdp.send("Runtime.evaluate", {
@@ -531,6 +539,34 @@ async function main() {
     return t.includes("lbl_e2e_002") ? true : undefined
   }, 10000)
   check((await evalStr("document.querySelector('[data-testid=label-identity]')?.innerText || ''")).includes("lbl_e2e_002"), "leave-yes proceeds to next")
+  await waitFor(async () => {
+    const ready = await evalStr("document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-draft-ready') || ''")
+    const draftItem = await evalStr("document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-draft-item') || ''")
+    return ready === "1" && draftItem.includes("lbl_e2e_002") ? true : undefined
+  }, 10000)
+  const notesAfterLeave = await evalStr("document.querySelector('[data-testid=label-notes]')?.value || ''")
+  check(!notesAfterLeave.includes("unsaved-draft-stay"), `leave-yes abandoned A draft on B (notes=${notesAfterLeave})`)
+  check((await evalStr("document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-draft-ready') || ''")) === "1", "B draft ready after leave-yes")
+  check((await evalStr("document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-draft-item') || ''")).includes("lbl_e2e_002"), "draft bound to B after leave-yes")
+  // Attempt save on B must not carry A's abandoned notes
+  await evalBool(`(() => {
+    const op = document.querySelector('[data-testid=label-operator]');
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    setter?.call(op, 'e2e.after-leave');
+    op.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  })()`)
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-correct]')?.click()`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const msg = await evalStr("document.querySelector('[data-testid=label-message]')?.innerText || ''")
+    return (msg.includes("已纠正") || msg.includes("已确认") || msg.includes("计为人工")) ? true : undefined
+  }, 15000)
+  const afterLeaveSave = await (await fetch(`${BASE}/api/shipping/intel/labels/lbl_e2e_002`)).json()
+  check(afterLeaveSave?.humanDecision?.decision?.notes !== "unsaved-draft-stay", `B save notes not A's draft (notes=${afterLeaveSave?.humanDecision?.decision?.notes})`)
+  check(afterLeaveSave?.humanDecision?.operator === "e2e.after-leave", `B save operator (op=${afterLeaveSave?.humanDecision?.operator})`)
 
   await evalBool(`(() => {
     const notes = document.querySelector('[data-testid=label-notes]');
@@ -581,7 +617,20 @@ async function main() {
     return JSON.stringify({ sawFail, msg, dirty });
   })()`)
   check(failRetry?.sawFail === true, "intercepted save failure fired")
-  check(String(failRetry?.msg || "").includes("失败") || String(failRetry?.msg || "").includes("mismatch") || failRetry?.dirty === "1", `save failure keeps draft (msg=${failRetry?.msg} dirty=${failRetry?.dirty})`)
+  check(String(failRetry?.msg || "").includes("失败") || String(failRetry?.msg || "").includes("mismatch"), `save failure message (msg=${failRetry?.msg})`)
+  check(failRetry?.dirty === "1", `save failure keeps dirty (dirty=${failRetry?.dirty})`)
+  // Retry success after intercepted failure
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-correct]')?.click()`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const msg = await evalStr("document.querySelector('[data-testid=label-message]')?.innerText || ''")
+    return (msg.includes("已纠正") || msg.includes("已确认") || msg.includes("计为人工")) ? true : undefined
+  }, 15000)
+  const afterRetry = await (await fetch(`${BASE}/api/shipping/intel/labels/lbl_e2e_002`)).json()
+  check(afterRetry?.humanDecision?.operator === "e2e.retry", `retry save operator (op=${afterRetry?.humanDecision?.operator})`)
+  check(afterRetry?.item?.queueStatus === "human_confirmed", "retry save confirms queue")
 
   const slowGuard = await evalJson(`(async () => {
     const original = window.fetch.bind(window);
@@ -609,16 +658,22 @@ async function main() {
     notes.dispatchEvent(new Event('input', { bubbles: true }));
     const midDirty = document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty');
     const midSaving = document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-saving');
+    const midCorrectDisabled = document.querySelector('[data-testid=label-correct]')?.disabled === true;
+    const midConfirmDisabled = document.querySelector('[data-testid=label-confirm]')?.disabled === true;
     release();
     await new Promise(r => setTimeout(r, 1200));
     window.fetch = original;
     const afterNotes = document.querySelector('[data-testid=label-notes]')?.value || '';
     const afterDirty = document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty');
-    return JSON.stringify({ midDirty, midSaving, afterNotes, afterDirty });
+    const afterSaving = document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-saving');
+    return JSON.stringify({ midDirty, midSaving, midCorrectDisabled, midConfirmDisabled, afterNotes, afterDirty, afterSaving });
   })()`)
-  check(slowGuard?.midSaving === "1" || slowGuard?.midDirty === "1", `saving/dirty during slow save (midSaving=${slowGuard?.midSaving})`)
-  check(!String(slowGuard?.afterNotes || "").includes("CACHED LEAKED"), `slow-save notes intact (${slowGuard?.afterNotes})`)
+  check(slowGuard?.midSaving === "1", `saving flag during slow save (midSaving=${slowGuard?.midSaving})`)
+  check(slowGuard?.midCorrectDisabled === true && slowGuard?.midConfirmDisabled === true, `controls disabled while saving (correct=${slowGuard?.midCorrectDisabled} confirm=${slowGuard?.midConfirmDisabled})`)
+  check(String(slowGuard?.afterNotes || "") === "slow-save-v1", `slow-save final notes from in-flight snapshot (${slowGuard?.afterNotes})`)
+  check(slowGuard?.afterSaving === "0", `saving cleared after slow save (afterSaving=${slowGuard?.afterSaving})`)
 
+  // Real cross-route SPA leave: leave label for home, then exercise Back stay/leave.
   await evalBool(`(() => {
     const notes = document.querySelector('[data-testid=label-notes]');
     const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
@@ -626,19 +681,80 @@ async function main() {
     notes.dispatchEvent(new Event('input', { bubbles: true }));
     return true;
   })()`)
+  check(await evalBool(`document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty') === '1'`), "dirty before cross-route leave")
   await cdp.send("Runtime.evaluate", {
-    expression: `history.pushState({}, '', '/label?x=1'); history.back(); 'ok'`,
+    expression: `(() => { const a = document.createElement('a'); a.href = '/'; a.textContent = 'home'; a.setAttribute('data-testid','e2e-home-link'); document.body.appendChild(a); a.click(); return 'ok'; })()`,
     returnByValue: true,
   })
-  await new Promise(r => setTimeout(r, 500))
+  await waitFor(async () => {
+    const leave = await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")
+    const left = await evalBool("!document.querySelector('[data-testid=intel-label-page]')")
+    return leave || left ? true : undefined
+  }, 8000)
+  const leaveOnRoute = await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")
+  if (leaveOnRoute) {
+    await cdp.send("Runtime.evaluate", {
+      expression: `document.querySelector('[data-testid=label-leave-no]')?.click()`,
+      returnByValue: true,
+    })
+    await waitFor(async () => {
+      return (await evalBool("!document.querySelector('[data-testid=label-leave-confirm]')")) ? true : undefined
+    }, 5000)
+    check((await evalStr("document.querySelector('[data-testid=label-notes]')?.value || ''")).includes("back-nav-draft"), "cross-route leave-no keeps draft")
+    await cdp.send("Runtime.evaluate", {
+      expression: `document.querySelector('[data-testid=e2e-home-link]')?.click() || (() => { location.href = '/'; return true })()`,
+      returnByValue: true,
+    })
+    await waitFor(async () => {
+      return (await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")) ? true : undefined
+    }, 8000)
+    await cdp.send("Runtime.evaluate", {
+      expression: `document.querySelector('[data-testid=label-leave-yes]')?.click()`,
+      returnByValue: true,
+    })
+  }
+  await waitFor(async () => {
+    return (await evalBool("!document.querySelector('[data-testid=intel-label-page]')")) ? true : undefined
+  }, 10000)
+  check(await evalBool("!document.querySelector('[data-testid=intel-label-page]')"), "left label route after leave-yes")
+  // Navigate back to label and dirty again; browser Back should block via useBlocker
+  await cdp.send("Runtime.evaluate", {
+    expression: `location.href = '${BASE}/label'; 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))")) ? true : undefined
+  }, 15000)
+  await evalBool(`(() => {
+    const notes = document.querySelector('[data-testid=label-notes]');
+    const op = document.querySelector('[data-testid=label-operator]');
+    const nset = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+    const oset = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    oset?.call(op, 'e2e.back');
+    op.dispatchEvent(new Event('input', { bubbles: true }));
+    nset?.call(notes, 'history-back-draft');
+    notes.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  })()`)
+  await cdp.send("Runtime.evaluate", {
+    expression: `history.back(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const leave = await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")
+    const stayed = await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))")
+    return leave || stayed ? true : undefined
+  }, 8000)
   const leaveAfterBack = await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")
   const stillOnLabel = await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))")
-  check(leaveAfterBack || stillOnLabel, `Back while dirty blocked or stayed (leave=${leaveAfterBack} page=${stillOnLabel})`)
+  check(leaveAfterBack === true || stillOnLabel === true, `history.back while dirty blocked or stayed (leave=${leaveAfterBack} page=${stillOnLabel})`)
+  check(!(leaveAfterBack === false && stillOnLabel === false), "must not silently leave label on dirty Back")
   if (leaveAfterBack) {
     await cdp.send("Runtime.evaluate", {
       expression: `document.querySelector('[data-testid=label-leave-no]')?.click()`,
       returnByValue: true,
     })
+    check((await evalStr("document.querySelector('[data-testid=label-notes]')?.value || ''")).includes("history-back-draft"), "Back leave-no keeps draft")
   }
 
   const aba1 = await fetch(`${BASE}/api/shipping/intel/labels/lbl_e2e_002/decision`, {

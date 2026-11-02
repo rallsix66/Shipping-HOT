@@ -36,6 +36,65 @@ function safeJson(raw: string): unknown {
  * - extract: { extract: ExtractedIntel, content }
  * Legacy flat keep/shouldKeep / top-level extract keys are ignored (they never matched storage).
  */
+
+export interface AnalysisIdentityRow {
+  id: string
+  step: string
+  status?: string
+  createdAt: string
+  attemptIndex?: number
+  modelId?: string | null
+  modelName?: string | null
+  promptHash?: string | null
+  receiptId?: string | null
+  output?: unknown
+  outputJson?: string | null
+}
+
+/**
+ * Pick one coherent analyze run (not a cross-run mix of oldest prefilter + newest extract).
+ * Prefer the latest completed/reused extract, then the latest prefilter at-or-before it,
+ * plus severity rows in that window. Prefilter-only (BLOCK) uses the latest prefilter.
+ */
+export function selectConsistentAnalysisRun<T extends AnalysisIdentityRow>(rows: T[]): T[] {
+  const usable = rows.filter(r => !r.status || r.status === "completed" || r.status === "reused")
+  if (!usable.length) return []
+  const byNewest = (a: T, b: T) => {
+    const t = b.createdAt.localeCompare(a.createdAt)
+    if (t !== 0) return t
+    return (b.attemptIndex ?? 0) - (a.attemptIndex ?? 0)
+  }
+  const extracts = usable.filter(r => r.step === "extract").sort(byNewest)
+  const prefilters = usable.filter(r => r.step === "prefilter").sort(byNewest)
+  const picked: T[] = []
+  if (extracts.length) {
+    const extract = extracts[0]!
+    const pre = prefilters.find(p => p.createdAt <= extract.createdAt) ?? null
+    const start = pre?.createdAt ?? extract.createdAt
+    if (pre) picked.push(pre)
+    for (const r of usable) {
+      if ((r.step === "severity" || r.step === "severity_tiebreak")
+        && r.createdAt >= start
+        && r.createdAt <= extract.createdAt) {
+        picked.push(r)
+      }
+    }
+    picked.push(extract)
+  } else if (prefilters.length) {
+    picked.push(prefilters[0]!)
+  } else {
+    return []
+  }
+  const seen = new Set<string>()
+  const deduped: T[] = []
+  for (const r of picked.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || (a.attemptIndex ?? 0) - (b.attemptIndex ?? 0))) {
+    if (seen.has(r.id)) continue
+    seen.add(r.id)
+    deduped.push(r)
+  }
+  return deduped
+}
+
 export function decisionFromAnalysisOutputs(
   outputs: Array<{ step: string, status?: string, output: unknown }>,
 ): { decision: LabelDecisionFields, projected: boolean } {
@@ -226,22 +285,46 @@ export class LabelService {
       r.contentHash === material.version.contentHash
       && (r.status === "completed" || r.status === "reused"),
     )
+    const selected = selectConsistentAnalysisRun(matched.map(r => ({
+      id: r.id,
+      step: r.step,
+      status: r.status,
+      createdAt: r.createdAt,
+      attemptIndex: r.attemptIndex,
+      modelId: r.modelId,
+      modelName: r.modelName,
+      promptHash: r.promptHash,
+      receiptId: r.receiptId,
+      outputJson: r.outputJson,
+    })))
     const { decision, projected } = decisionFromAnalysisOutputs(
-      matched.map(r => ({
+      selected.map(r => ({
         step: r.step,
         status: r.status,
         output: r.outputJson ? safeJson(r.outputJson) : null,
       })),
     )
     const category = input.category ?? categoryFromEventType(decision.eventType)
-    const extractRow = matched.find(r => r.step === "extract") ?? matched.find(r => r.step === "prefilter")
-    const aiPrelabel = projected && matched.length
+    const extractRow = selected.find(r => r.step === "extract")
+    const preRow = selected.find(r => r.step === "prefilter")
+    // Primary display identity prefers extract; run fingerprint keeps prefilter in prompt/model fields
+    // when both steps exist so mixed prefilter configs cannot silently collapse into extract-only.
+    const runPromptHash = selected.length === 0
+      ? null
+      : selected.map(r => `${r.step}:${r.promptHash ?? ""}`).join("|")
+    const runModelId = selected.length === 0
+      ? null
+      : selected.map(r => `${r.step}:${r.modelId ?? ""}`).join("|")
+    const runModelName = selected.length === 0
+      ? null
+      : selected.map(r => `${r.step}:${r.modelName ?? ""}`).join("|")
+    const aiPrelabel = projected && selected.length
       ? {
           decision,
-          analysisIds: matched.map(r => r.id),
-          promptHash: extractRow?.promptHash ?? matched.find(r => r.promptHash)?.promptHash ?? null,
-          modelId: extractRow?.modelId ?? matched.find(r => r.modelId)?.modelId ?? null,
-          modelName: extractRow?.modelName ?? matched.find(r => r.modelName)?.modelName ?? null,
+          analysisIds: selected.map(r => r.id),
+          promptHash: runPromptHash ?? extractRow?.promptHash ?? preRow?.promptHash ?? null,
+          modelId: runModelId ?? extractRow?.modelId ?? preRow?.modelId ?? null,
+          modelName: runModelName ?? extractRow?.modelName ?? preRow?.modelName ?? null,
           operator: "system:ai",
         }
       : undefined

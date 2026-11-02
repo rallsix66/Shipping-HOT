@@ -20,6 +20,54 @@ export class LabelInputError extends Error {
   }
 }
 
+/** Serialize BEGIN IMMEDIATE work on one db0 connection (no nested txns). */
+const labelTxnTails = new WeakMap<object, Promise<void>>()
+
+function isSqliteBusyOrNested(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error ?? "")
+  return /SQLITE_BUSY|database is locked|cannot start a transaction within a transaction|transaction within a transaction/i.test(message)
+}
+
+function isUniqueConstraint(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error ?? "")
+  return /UNIQUE constraint failed|SQLITE_CONSTRAINT_UNIQUE|constraint failed/i.test(message)
+}
+
+async function withLabelTransaction<T>(db: Database, work: () => Promise<T>): Promise<T> {
+  const key = db as unknown as object
+  const previous = labelTxnTails.get(key) ?? Promise.resolve()
+  let release!: () => void
+  const current = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const tail = previous.then(() => current)
+  labelTxnTails.set(key, tail)
+  await previous
+  try {
+    try {
+      await db.prepare("BEGIN IMMEDIATE").run()
+    } catch (error) {
+      if (isSqliteBusyOrNested(error)) throw new LabelInputError("decision_conflict_retry")
+      throw error
+    }
+    try {
+      const result = await work()
+      await db.prepare("COMMIT").run()
+      return result
+    } catch (error) {
+      try {
+        await db.prepare("ROLLBACK").run()
+      } catch {
+        // preserve original
+      }
+      throw error
+    }
+  } finally {
+    release()
+    if (labelTxnTails.get(key) === tail) labelTxnTails.delete(key)
+  }
+}
+
 function asCategory(value: unknown): LabelCategory {
   if (typeof value === "string" && (LABEL_CATEGORIES as readonly string[]).includes(value)) return value as LabelCategory
   throw new LabelInputError("invalid_category")
@@ -414,11 +462,6 @@ export class IntelLabelRepository {
   }
 
   async saveHumanDecision(input: SaveHumanDecisionInput, now = new Date().toISOString()): Promise<LabelDecisionView> {
-    const item = await this.getItem(input.labelItemId)
-    if (!item) throw new LabelInputError("label_item_not_found")
-    if (item.contentHash !== input.expectedContentHash) {
-      throw new LabelInputError("content_hash_mismatch")
-    }
     if (input.kind !== "human_confirm" && input.kind !== "human_correct") {
       throw new LabelInputError("invalid_decision_kind")
     }
@@ -431,47 +474,84 @@ export class IntelLabelRepository {
       ? input.clientRequestId.trim().slice(0, 160)
       : null
 
-    // Real request-ID idempotency: same ID returns the original row only when
-    // kind/hash/decision match; conflicting reuse is rejected. Different IDs
-    // always insert (A→B→A yields three audit rows; latest wins).
-    if (requestId) {
-      const existing = await this.db.prepare(`
+    const convergeExisting = (mapped: LabelDecisionView, itemHash: string): LabelDecisionView => {
+      const sameKind = mapped.kind === input.kind
+      const sameHash = mapped.contentHash === itemHash
+      const sameDecision = JSON.stringify(mapped.decision) === JSON.stringify(decision)
+      const sameOperator = mapped.operator === operator
+      if (!sameKind || !sameHash || !sameDecision || !sameOperator) {
+        throw new LabelInputError("client_request_id_conflict")
+      }
+      return mapped
+    }
+
+    // Atomic INSERT decision + queue UPDATE. Concurrent same request-id serializes
+    // on BEGIN IMMEDIATE / unique index and converges to one row.
+    const runOnce = async (): Promise<LabelDecisionView> => withLabelTransaction(this.db, async () => {
+      const item = await this.getItem(input.labelItemId)
+      if (!item) throw new LabelInputError("label_item_not_found")
+      if (item.contentHash !== input.expectedContentHash) {
+        throw new LabelInputError("content_hash_mismatch")
+      }
+
+      if (requestId) {
+        const existing = await this.db.prepare(`
+          SELECT * FROM intel_label_decision
+          WHERE label_item_id = ? AND client_request_id = ?
+          LIMIT 1
+        `).get(input.labelItemId, requestId) as Row | undefined
+        if (existing) return convergeExisting(mapDecision(existing), item.contentHash)
+      }
+
+      const inserted = await this.insertDecision({
+        labelItemId: item.id,
+        itemId: item.itemId,
+        versionId: item.versionId,
+        contentHash: item.contentHash,
+        kind: input.kind,
+        operator,
+        isHuman: true,
+        decision,
+        analysisIds: [],
+        promptHash: null,
+        modelId: null,
+        modelName: null,
+        clientRequestId: requestId,
+        createdAt: now,
+      })
+      await this.db.prepare(`
+        UPDATE intel_label_item SET queue_status = 'human_confirmed', updated_at = ? WHERE id = ?
+      `).run(now, item.id)
+      return inserted
+    })
+
+    const resolveAfterUnique = async (): Promise<LabelDecisionView> => {
+      if (!requestId) throw new LabelInputError("client_request_id_conflict")
+      const item = await this.getItem(input.labelItemId)
+      if (!item) throw new LabelInputError("label_item_not_found")
+      const raced = await this.db.prepare(`
         SELECT * FROM intel_label_decision
         WHERE label_item_id = ? AND client_request_id = ?
         LIMIT 1
       `).get(input.labelItemId, requestId) as Row | undefined
-      if (existing) {
-        const mapped = mapDecision(existing)
-        const sameKind = mapped.kind === input.kind
-        const sameHash = mapped.contentHash === item.contentHash
-        const sameDecision = JSON.stringify(mapped.decision) === JSON.stringify(decision)
-        if (!sameKind || !sameHash || !sameDecision) {
-          throw new LabelInputError("client_request_id_conflict")
-        }
-        return mapped
-      }
+      if (!raced) throw new LabelInputError("client_request_id_conflict")
+      return convergeExisting(mapDecision(raced), item.contentHash)
     }
 
-    const inserted = await this.insertDecision({
-      labelItemId: item.id,
-      itemId: item.itemId,
-      versionId: item.versionId,
-      contentHash: item.contentHash,
-      kind: input.kind,
-      operator,
-      isHuman: true,
-      decision,
-      analysisIds: [],
-      promptHash: null,
-      modelId: null,
-      modelName: null,
-      clientRequestId: requestId,
-      createdAt: now,
-    })
-    await this.db.prepare(`
-      UPDATE intel_label_item SET queue_status = 'human_confirmed', updated_at = ? WHERE id = ?
-    `).run(now, item.id)
-    return inserted
+    try {
+      return await runOnce()
+    } catch (error) {
+      if (error instanceof LabelInputError && error.message === "decision_conflict_retry") {
+        try {
+          return await runOnce()
+        } catch (retryError) {
+          if (requestId && isUniqueConstraint(retryError)) return await resolveAfterUnique()
+          throw retryError
+        }
+      }
+      if (requestId && isUniqueConstraint(error)) return await resolveAfterUnique()
+      throw error
+    }
   }
 
   private async insertDecision(input: {

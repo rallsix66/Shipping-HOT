@@ -55,12 +55,17 @@ export function IntelLabelPage() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
   const [pendingNav, setPendingNav] = useState<null | (() => void)>(null)
+  const [draftReady, setDraftReady] = useState(false)
   const dirty = useMemo(() => !decisionEqual(draft, baseline), [draft, baseline])
   const seededForId = useRef<string>("")
   const seededHashRef = useRef<string>("")
   const saveGen = useRef(0)
   const activeItemRef = useRef<string>("")
   const requestIdRef = useRef<string>("")
+  const draftBoundIdRef = useRef<string>("")
+  const draftBoundHashRef = useRef<string>("")
+  const dirtyRef = useRef(false)
+  const savingRef = useRef(false)
 
   const params = new URLSearchParams(
     Object.entries(filter).filter(([, v]) => v && v !== "all"),
@@ -75,6 +80,8 @@ export function IntelLabelPage() {
   const coverage = list.data?.coverage
   const activeId = items.find(i => i.id === selectedId)?.id ?? items[0]?.id ?? ""
   activeItemRef.current = activeId
+  dirtyRef.current = dirty
+  savingRef.current = saving
 
   const detail = useQuery({
     queryKey: ["intel-label", activeId, params],
@@ -86,18 +93,28 @@ export function IntelLabelPage() {
     refetchOnWindowFocus: false,
   })
 
-  // Seed draft only when label id / contentHash changes — never on save refetch updatedAt,
-  // and never while dirty/saving, so late responses cannot clobber edits or wipe save messages.
+  // Seed when label id / contentHash is not yet bound. Same identity already seeded keeps
+  // dirty edits and success messages (ignore refetch). Never clobber a dirty draft bound
+  // to a different item — leave/abandon must clear binding first. Unbound dirty race
+  // (edit before first seed) still seeds so draftReady can unlock save.
   useEffect(() => {
     const d = detail.data
     if (!d) return
     if (d.item.id !== activeItemRef.current) return
     if (saving) return
-    if (dirty) return
-    // Same identity already seeded: ignore refetch after save (preserves success message).
+    // Same identity already seeded: ignore refetch after save (preserves dirty + message).
     if (
       seededForId.current === d.item.id
       && seededHashRef.current === d.item.contentHash
+      && draftReady
+    ) {
+      return
+    }
+    // Dirty draft still bound to another item: wait for abandon/nav; do not mix identities.
+    if (
+      dirty
+      && draftBoundIdRef.current
+      && draftBoundIdRef.current !== d.item.id
     ) {
       return
     }
@@ -108,13 +125,16 @@ export function IntelLabelPage() {
     setBaseline({ ...seed, notes: seed.notes ?? "" })
     seededForId.current = d.item.id
     seededHashRef.current = d.item.contentHash
+    draftBoundIdRef.current = d.item.id
+    draftBoundHashRef.current = d.item.contentHash
     requestIdRef.current = newRequestId(d.item.id)
+    setDraftReady(true)
     setMessage("")
-  }, [detail.data?.item.id, detail.data?.item.contentHash, activeId, dirty, saving, detail.data])
+  }, [detail.data?.item.id, detail.data?.item.contentHash, activeId, dirty, saving, draftReady, detail.data])
 
   const blockLeave = dirty || saving
   const blocker = useBlocker({
-    shouldBlockFn: () => blockLeave,
+    shouldBlockFn: () => dirtyRef.current || savingRef.current,
     withResolver: true,
     enableBeforeUnload: blockLeave,
   })
@@ -125,6 +145,17 @@ export function IntelLabelPage() {
       blocker.proceed?.()
     })
   }, [blocker, blocker.status])
+
+  function abandonDraft() {
+    setDraft(emptyDecision())
+    setBaseline(emptyDecision())
+    seededForId.current = ""
+    seededHashRef.current = ""
+    draftBoundIdRef.current = ""
+    draftBoundHashRef.current = ""
+    requestIdRef.current = ""
+    setDraftReady(false)
+  }
 
   function guardNav(next: () => void) {
     if (saving) {
@@ -151,6 +182,10 @@ export function IntelLabelPage() {
     }
     const itemId = detail.data.item.id
     const contentHash = detail.data.item.contentHash
+    if (draftBoundIdRef.current !== itemId || draftBoundHashRef.current !== contentHash || seededForId.current !== itemId) {
+      setMessage("目标条目草稿未就绪，已阻止保存（请等待加载完成）")
+      return
+    }
     const snapshot = draft
     const reqId = requestIdRef.current || newRequestId(itemId)
     const gen = ++saveGen.current
@@ -191,15 +226,21 @@ export function IntelLabelPage() {
   function go(id: string | null) {
     if (!id) return
     guardNav(() => {
-      seededForId.current = ""
-      seededHashRef.current = ""
+      abandonDraft()
       setSelectedId(id)
     })
   }
 
   return (
     <ShippingShell title="情报标注">
-      <div className="manual-intel" data-testid="intel-label-page" data-saving={saving ? "1" : "0"} data-dirty={dirty ? "1" : "0"}>
+      <div
+        className="manual-intel"
+        data-testid="intel-label-page"
+        data-saving={saving ? "1" : "0"}
+        data-dirty={dirty ? "1" : "0"}
+        data-draft-item={draftReady ? (draftBoundIdRef.current || "") : ""}
+        data-draft-ready={draftReady && draftBoundIdRef.current === activeId ? "1" : "0"}
+      >
         <p>§4.9 人工复核 · 只存 URL/摘录/标注 · 浏览不触发模型</p>
         <section className="manual-intel__panel">
           <h2>覆盖（如实显示，不编造）</h2>
@@ -251,8 +292,7 @@ export function IntelLabelPage() {
                 disabled={saving}
                 value={filter.queueStatus}
                 onChange={e => guardNav(() => {
-                  seededForId.current = ""
-                  seededHashRef.current = ""
+                  abandonDraft()
                   setFilter(f => ({ ...f, queueStatus: e.target.value }))
                 })}
               >
@@ -268,8 +308,7 @@ export function IntelLabelPage() {
                 disabled={saving}
                 value={filter.category}
                 onChange={e => guardNav(() => {
-                  seededForId.current = ""
-                  seededHashRef.current = ""
+                  abandonDraft()
                   setFilter(f => ({ ...f, category: e.target.value }))
                 })}
               >
@@ -288,8 +327,7 @@ export function IntelLabelPage() {
                 disabled={saving}
                 value={filter.language}
                 onChange={e => guardNav(() => {
-                  seededForId.current = ""
-                  seededHashRef.current = ""
+                  abandonDraft()
                   setFilter(f => ({ ...f, language: e.target.value }))
                 })}
               >
@@ -312,8 +350,7 @@ export function IntelLabelPage() {
                   data-selected={item.id === activeId ? "1" : "0"}
                   disabled={saving}
                   onClick={() => guardNav(() => {
-                    seededForId.current = ""
-                    seededHashRef.current = ""
+                    abandonDraft()
                     setSelectedId(item.id)
                   })}
                 >
@@ -491,8 +528,8 @@ export function IntelLabelPage() {
               >
                 取消修改
               </button>
-              <button type="button" data-testid="label-confirm" disabled={saving} onClick={() => void save("human_confirm")}>确认 AI（人工）</button>
-              <button type="button" data-testid="label-correct" disabled={saving} onClick={() => void save("human_correct")}>纠正并保存</button>
+              <button type="button" data-testid="label-confirm" disabled={saving || !draftReady} onClick={() => void save("human_confirm")}>确认 AI（人工）</button>
+              <button type="button" data-testid="label-correct" disabled={saving || !draftReady} onClick={() => void save("human_correct")}>纠正并保存</button>
             </div>
             {dirty && <p data-testid="label-dirty">有未保存修改</p>}
             {pendingNav && (
@@ -504,8 +541,8 @@ export function IntelLabelPage() {
                   onClick={() => {
                     const goNext = pendingNav
                     setPendingNav(null)
-                    seededForId.current = ""
-                    seededHashRef.current = ""
+                    abandonDraft()
+                    setMessage("")
                     goNext?.()
                   }}
                 >
