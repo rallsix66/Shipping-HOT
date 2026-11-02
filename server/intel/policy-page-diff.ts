@@ -2,6 +2,8 @@
  * R3-8 TikTok Shop offline whole-page compare (§4.11).
  * Hashes dated paragraphs; detects added / modified / removed / unchanged.
  * No network. Fixtures only in tests.
+ * Plain HTML: preserve paragraph boundaries, then normalize each block
+ * (do not collapse the whole page to one line before split).
  */
 import { createHash } from "node:crypto"
 
@@ -28,30 +30,44 @@ function hashText(text: string): string {
   return createHash("sha256").update(text, "utf8").digest("hex")
 }
 
-/** Prefer explicit data-date sections; fall back to blocks whose text contains an ISO date. */
+function pushDated(out: DatedParagraph[], date: string, text: string) {
+  const normalized = normalizeText(text)
+  if (!normalized) return
+  out.push({ date, text: normalized, hash: hashText(`${date}\n${normalized}`) })
+}
+
+/** Prefer explicit dated-block sections (attribute order independent); fall back to plain blocks. */
 export function extractDatedParagraphs(html: string): DatedParagraph[] {
   const out: DatedParagraph[] = []
-  const sectionRe = /<section\s[^>]*class=["'][^"']*dated-block[^"']*["'][^>]*data-date=["'](20\d{2}-\d{2}-\d{2})["'][^>]*>([\s\S]*?)<\/section>/gi
+  const sectionRe = /<section\b([^>]*)>([\s\S]*?)<\/section>/gi
   let m: RegExpExecArray | null = sectionRe.exec(html)
   while (m) {
-    const date = m[1]!
-    const inner = m[2]!.replace(/<[^>]+>/g, " ")
-    const text = normalizeText(inner)
-    if (text) out.push({ date, text, hash: hashText(`${date}\n${text}`) })
+    const attrs = m[1] || ""
+    const hasDatedClass = /class\s*=\s*["'][^"']*\bdated-block\b[^"']*["']/i.test(attrs)
+    const dm = attrs.match(/data-date\s*=\s*["'](20\d{2}-\d{2}-\d{2})["']/i)
+    if (hasDatedClass && dm) {
+      const inner = m[2]!.replace(/<[^>]+>/g, " ")
+      pushDated(out, dm[1]!, inner)
+    }
     m = sectionRe.exec(html)
   }
   if (out.length) {
     out.sort((a, b) => a.date.localeCompare(b.date) || a.hash.localeCompare(b.hash))
     return out
   }
-  // Fallback: split on blank lines / headings after stripping tags
-  const plain = normalizeText(html.replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, "\n"))
+
+  // Fallback: strip tags while keeping block boundaries as newlines, THEN normalize per block.
+  const plain = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<\/(p|div|section|article|h[1-6]|li|tr)\b[^>]*>/gi, "\n")
+    .replace(/<(br|hr)\b[^>]*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
   const blocks = plain.split(/\n+/).map(normalizeText).filter(Boolean)
   for (const block of blocks) {
     const dm = block.match(ISO_DATE)
     if (!dm) continue
-    const date = dm[1]
-    out.push({ date, text: block, hash: hashText(`${date}\n${block}`) })
+    pushDated(out, dm[1]!, block)
   }
   out.sort((a, b) => a.date.localeCompare(b.date) || a.hash.localeCompare(b.hash))
   return out
@@ -86,7 +102,6 @@ export function diffDatedParagraphs(prev: DatedParagraph[], next: DatedParagraph
       removed.push(...beforeList)
       continue
     }
-    // Pair by hash first, then leftover as modified/added/removed
     const afterLeft = [...afterList]
     const beforeLeft: DatedParagraph[] = []
     for (const b of beforeList) {

@@ -61,17 +61,6 @@ export function ShippingShell({ children, title, showLegend = true }: { children
               <p>来源健康与采集管理未开放。读取接口存在不代表采集已启用。</p>
             </details>
 
-            <Link
-              to="/policies"
-              search={{ country: "VN" } as never}
-              hash="r38-keep"
-              data-testid="shell-nav-policies-query-hash"
-              style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}
-              tabIndex={-1}
-              aria-hidden="true"
-            >
-              policies-query-hash
-            </Link>
           </nav>
           <p className="rc-side-note">系统和 AI 的判断仅供参考。参考日历不代表港口停运。</p>
         </aside>

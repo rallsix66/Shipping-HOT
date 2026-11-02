@@ -166,9 +166,9 @@ async function seedTwoProviders(repo: LlmRegistryRepository) {
 describe("migration 031 llm-registry", () => {
   it("upgrades a fresh isolated DB to schema v37 and is idempotent", async () => {
     const { db, native } = await setup()
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(37)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(38)
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(37)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(38)
     const tables = native.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'llm_%' ORDER BY name").all()
     expect(tables).toEqual([
       { name: "llm_binding_audit" },
@@ -202,7 +202,7 @@ describe("migration 031 llm-registry", () => {
     expect(native.prepare("SELECT MAX(version) AS v FROM schema_migrations").get()).toEqual({ v: 30 })
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name = 'llm_provider'").get()).toBeUndefined()
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(37)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(38)
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name = 'llm_provider'").get()).toEqual({ name: "llm_provider" })
     await llmRegistryMigration.up(db)
     await llmRegistryMigration.up(db)
@@ -260,7 +260,7 @@ describe("migration 031 llm-registry", () => {
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name LIKE 'llm_%'").all()).toEqual([])
 
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(37)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(38)
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name = 'llm_provider'").get()).toEqual({ name: "llm_provider" })
     native.close()
     rmSync(dir, { recursive: true, force: true })
@@ -270,7 +270,7 @@ describe("migration 031 llm-registry", () => {
 describe("migration 033 intel-analysis-reuse-key", () => {
   it("fresh init reaches v33 with reuse_key and is idempotent on repeat init", async () => {
     const { db, native } = await setup()
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(37)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(38)
     const cols = native.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name: string }>
     expect(cols.some(c => c.name === "reuse_key")).toBe(true)
     expect(native.prepare("SELECT name FROM sqlite_master WHERE type='index' AND name='idx_intel_analysis_reuse_dedupe'").get()).toEqual({
@@ -278,7 +278,7 @@ describe("migration 033 intel-analysis-reuse-key", () => {
     })
     await initShippingTables(db, "mock")
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(37)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(38)
     expect(native.prepare("SELECT COUNT(*) AS c FROM schema_migrations WHERE version = 33").get()).toEqual({ c: 1 })
   })
 
@@ -342,7 +342,7 @@ describe("migration 033 intel-analysis-reuse-key", () => {
 
     // Must go through normal initShippingTables (not direct migration.up).
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(37)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(38)
     expect((native.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name: string }>).some(c => c.name === "reuse_key")).toBe(true)
     expect(native.prepare("SELECT id, step, status FROM intel_analysis").get()).toEqual({
       id: "an-keep-1",
@@ -354,7 +354,7 @@ describe("migration 033 intel-analysis-reuse-key", () => {
     })
     // Repeat init stays idempotent; row still present.
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(37)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(38)
     expect(native.prepare("SELECT COUNT(*) AS c FROM intel_analysis").get()).toEqual({ c: 1 })
     native.close()
     rmSync(dir, { recursive: true, force: true })
@@ -437,7 +437,7 @@ describe("migration 033 intel-analysis-reuse-key", () => {
     )
 
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(37)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(38)
     expect((native.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name: string }>).some(c => c.name === "reuse_key")).toBe(true)
     expect(native.prepare("SELECT id, reuse_key FROM intel_analysis").get()).toEqual({
       id: "an-keep-2",
@@ -532,7 +532,7 @@ describe("migration 033 intel-analysis-reuse-key", () => {
     expect(idxNames.includes("idx_intel_analysis_reuse_dedupe")).toBe(false)
 
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(37)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(38)
     expect((native.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name: string }>).some(c => c.name === "reuse_key")).toBe(true)
     expect(native.prepare("SELECT id FROM intel_analysis").get()).toEqual({ id: "an-keep-3" })
     native.close()

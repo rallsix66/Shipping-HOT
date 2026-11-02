@@ -6,7 +6,7 @@
   "checks": [
     {
       "ok": true,
-      "label": "schema v37 after init (got 37)"
+      "label": "schema v38 after init (got 38)"
     },
     {
       "ok": true,
@@ -50,7 +50,7 @@
     },
     {
       "ok": true,
-      "label": "duplicate submit returns same id (ldc_65dd204fecc7430cb1fce4b7)"
+      "label": "duplicate submit returns same id (ldc_d2c5c8c63d494870b4fa1a30)"
     },
     {
       "ok": true,
@@ -246,7 +246,7 @@
     },
     {
       "ok": true,
-      "label": "hidden policies search/hash Link present"
+      "label": "production Shell has no hidden policies-query-hash Link"
     },
     {
       "ok": true,
@@ -271,6 +271,18 @@
     {
       "ok": true,
       "label": "leave-yes kept hash (got #r38-keep)"
+    },
+    {
+      "ok": true,
+      "label": "stale leave href captured (got /policies?country=VN#r38-stale)"
+    },
+    {
+      "ok": true,
+      "label": "leave-no stays on label"
+    },
+    {
+      "ok": true,
+      "label": "leave-no cleared pending leave href"
     },
     {
       "ok": true,
@@ -322,7 +334,7 @@
     },
     {
       "ok": true,
-      "label": "A→B→A three distinct decision ids (ldc_8dc7bf5e815a429a99cd9f1d,ldc_911d6ce6c0de497ba7bed151,ldc_6a0c23776a1540b082657316)"
+      "label": "A→B→A three distinct decision ids (ldc_1e502f00df73497fbf6b76b0,ldc_910ed42836594b079d042ace,ldc_e2823036a1f74cbba12ea3b4)"
     },
     {
       "ok": true,
@@ -371,7 +383,7 @@
       ]
     },
     "save": {
-      "id": "ldc_65dd204fecc7430cb1fce4b7",
+      "id": "ldc_d2c5c8c63d494870b4fa1a30",
       "labelItemId": "lbl_e2e_001",
       "itemId": "item_e2e_1",
       "versionId": "ver_e2e_1",
@@ -397,7 +409,7 @@
       "modelId": null,
       "modelName": null,
       "clientRequestId": "e2e-req-1",
-      "createdAt": "2026-11-02T05:31:56.624Z"
+      "createdAt": "2026-11-02T06:03:25.506Z"
     },
     "uiSaveReadback": {
       "queueStatus": "human_confirmed",
@@ -406,7 +418,7 @@
       "isOfficialStatement": true
     },
     "evalStdout": "{\n  \"ok\": true,\n  \"outPath\": \"D:\\\\try one\\\\Shipping HOT\\\\.tmp\\\\worktrees\\\\r3-1-llm-registry-20261027\\\\docs\\\\evidence\\\\r3-8-policy-auto-20261102\\\\intel-eval-report.json\",\n  \"status\": \"INCOMPLETE\",\n  \"r3_5\": \"BLOCKED\",\n  \"humanLabeled\": 2\n}\n",
-    "evalStderr": "(node:43376) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "evalStderr": "(node:36600) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:\n--import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/tsx-alias-loader.mjs\", pathToFileURL(\"./\"));'\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
     "evalStatus": 0,
     "evalReport": {
       "status": "INCOMPLETE",

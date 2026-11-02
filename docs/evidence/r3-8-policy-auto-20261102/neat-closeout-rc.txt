@@ -1,0 +1,10 @@
+Neat Freak (non-destructive) — R3-8 RC 2026-11-02 Asia/Shanghai
+
+Code: verified-current (policy-auto v38, page-diff, leave merge, e2e harness)
+Runtime: not-applicable (unmerged / undeployed; local gates only)
+Docs: changed-and-verified (status.md R3-8 RC + evidence README/gates)
+Rules: verified-current (AGENTS unchanged beyond existing R3 constraints)
+Memory: out-of-scope (no memory write authorized)
+Workspace: pending residue kept (main dirty / R2 / wt-s* / diag / Junction per charter); no destructive cleanup
+
+S7 NOT_RUN; R3-5 BLOCKED recorded.

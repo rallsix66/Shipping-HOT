@@ -98,16 +98,36 @@ function frozen(row: RecordRow): string | null {
 export class PolicyRepository {
   constructor(private readonly db: Database) {}
 
+  /** Nestable transactions: outer BEGIN IMMEDIATE, inner SAVEPOINT (for atomic policy+side effects). */
+  private txDepth = 0
+
   private async tx<T>(fn: () => Promise<T>): Promise<T> {
-    await this.db.prepare("BEGIN").run()
+    const nested = this.txDepth > 0
+    const sp = `policy_sp_${this.txDepth}`
+    if (nested) await this.db.prepare(`SAVEPOINT ${sp}`).run()
+    else await this.db.prepare("BEGIN IMMEDIATE").run()
+    this.txDepth += 1
     try {
       const result = await fn()
-      await this.db.prepare("COMMIT").run()
+      if (nested) await this.db.prepare(`RELEASE ${sp}`).run()
+      else await this.db.prepare("COMMIT").run()
       return result
     } catch (error) {
-      await this.db.prepare("ROLLBACK").run()
+      try {
+        if (nested) await this.db.prepare(`ROLLBACK TO ${sp}`).run()
+        else await this.db.prepare("ROLLBACK").run()
+      } catch {
+        /* ignore rollback errors */
+      }
       throw error
+    } finally {
+      this.txDepth -= 1
     }
+  }
+
+  /** Public wrapper so callers (e.g. PolicyAutoService) can bind policy write + audit atomically. */
+  async runInTransaction<T>(fn: () => Promise<T>): Promise<T> {
+    return await this.tx(fn)
   }
 
   private async row(id: string): Promise<RecordRow | undefined> {

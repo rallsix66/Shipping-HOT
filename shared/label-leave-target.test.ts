@@ -33,3 +33,16 @@ describe("blockedLeaveTarget", () => {
     expect(blockedLeaveTarget(merged).hash).toBe("r38-keep")
   })
 })
+
+it("mergeLeaveFromHref restores search when blocker omits it", () => {
+  const merged = mergeLeaveFromHref(
+    { pathname: "/policies", search: {} },
+    "/policies?country=VN#r38-keep",
+  )
+  expect(blockedLeaveHref(merged)).toBe("/policies?country=VN#r38-keep")
+  expect(blockedLeaveTarget(merged)).toEqual({
+    to: "/policies",
+    search: { country: "VN" },
+    hash: "r38-keep",
+  })
+})

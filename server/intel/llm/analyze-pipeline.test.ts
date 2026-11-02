@@ -428,7 +428,7 @@ describe("runOfflineAnalyze offline chain", () => {
     cleanups.push(() => native.close())
     const db = wrap(native)
     await initShippingTables(db, "mock")
-    expect((await import("#/database/runtime")).latestSchemaVersion).toBe(37)
+    expect((await import("#/database/runtime")).latestSchemaVersion).toBe(38)
     const store = secrets()
     await setupRegistry(db, store)
     const intel = new IntelRepository(db)

@@ -587,6 +587,7 @@ export function IntelLabelPage() {
                   onClick={() => {
                     setPendingNav(null)
                     setPendingLeaveHref("")
+                    intendedHrefRef.current = ""
                     blocker.reset?.()
                   }}
                 >

@@ -1,20 +1,20 @@
-# R3-8 policy auto (offline only) — 2026-11-02
+# R3-8 policy auto RC（dots REQUEST CHANGES）— 2026-11-02
 
-Parent tip: `483a8646fec9635c9f534a18cca2142ab4b78bc6` (dots accept ts 1793595541.081439).
+Parent accepted tip then REQUEST CHANGES on: `3fbac06a18741d7c31f3ba8a326ccf589ff4c728`.
 
 ## Scope
-Offline policy-library auto create/update per plan §4.11. **Not** full R3. No live crawl, no Shopee/Lazada auto, no R4, no merge/deploy.
+Offline policy-library auto create/update. **Not** full R3. No live crawl, no Shopee/Lazada auto, no R4, no merge/deploy.
 
-## Delivered
-- schema **v37** `policy_auto_pending` / `policy_auto_audit`
-- `PolicyAutoService.apply` outcomes: created|updated|unchanged|needs_human_confirm|rejected
-- Exact identity: country + publisher + documentNumber; missing/ambiguous → human pending (idempotent)
-- Source≠status: media→rumor; platform≠government; dates need evidence; clock injected in tests
-- TikTok Shop offline dated-paragraph fixtures (add/modify/idempotent); Shopee/Lazada out of auto scope
-- Defenses: `aiPrelabelHasSelectableRun` rejects mixed/NULL run_id; leave-confirm preserves search+hash (`mergeLeaveFromHref` because TanStack useBlocker strips hash)
+## RC fixes (all five + same-slice cleanup)
+1. **Authoritative entry** — `applyFromExactIntel` / `buildCandidateFromExactIntel` from exact item/version/contentHash + consistent analysis run + rights; missing publisher/doc#/status → human. GET zero-model via invoke counters.
+2. **Rights on all writes** — `sanitizeCandidateForPersist` before pending/audit/create/revise; platform excerpt+link only.
+3. **Atomicity** — policy version + auto audit (or pending + audit) in nestable IMMEDIATE/SAVEPOINT tx; pending `candidate_fp` unique (v38); write-chain mutex; mid-flight audit fault rollback + retry + Promise.all covered.
+4. **Current-version idempotency** — fingerprint vs current content only (A→B→A bumps); includes `applicableTimezone` + current pageFp.
+5. **Page diff** — split paragraphs before normalize; plain multi-date HTML + attr-order fixtures.
+6. **Cleanup** — removed prod Shell hidden `shell-nav-policies-query-hash`; e2e harness stamps real Shell Link; leave-no clears `intendedHrefRef`.
 
 ## Gates
-See `gates.txt`. Label browser e2e log: `label-browser-e2e.txt`. Full vitest: `vitest-full.txt`.
+See `gates.txt` / `gates-rc.txt`. Label e2e: `label-browser-e2e-rc.txt`. Full vitest: `vitest-full-rc.txt`.
 
 ## Explicit non-claims
 - Real 200 human label set / real accuracy&cost: **not run**

@@ -1,0 +1,21 @@
+R3-8 REQUEST CHANGES rework gates (Asia/Shanghai wall clock ~2026-11-02 14:05)
+
+pnpm typecheck  PASS
+pnpm lint       PASS
+pnpm build      PASS
+pnpm test       PASS  172 files / 2182 passed / 10 skipped  (vitest-full-rc.txt)
+label browser e2e (scripts/e2e-r3-1-label-browser.mjs)  PASS  90/90  (label-browser-e2e-rc.txt)
+  - production Shell has no hidden policies-query-hash Link
+  - harness stamps search+hash onto real Shell policies Link
+  - leave-no clears intendedHref (Back does not reuse prior hash)
+  - R3-5 boundary remains BLOCKED (asserted)
+S7 integrated harness  NOT_RUN (EXPECTED_SCHEMA_VERSION synced to 38 only)
+Neat Freak             done (evidence + status sync; no destructive cleanup)
+
+Schema: v38 additive (038-policy-auto-pending-idempotent: candidate_fp + partial unique pending)
+
+Explicit non-claims:
+- real 200 human label set / real accuracy&cost NOT RUN
+- R3-5 BLOCKED; S7 NOT_RUN; unmerged; undeployed
+- zero live crawl / paid / keys / new sources / Slack send
+- parent baseline tip 3fbac06a18741d7c31f3ba8a326ccf589ff4c728

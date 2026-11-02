@@ -34,7 +34,16 @@ export function mergeLeaveFromHref(next: BlockedLocationLike, href: string | nul
       if (base.hash == null || base.hash === "") {
         if (u.hash) base.hash = u.hash
       }
-      // If blocker search is missing but href has query, keep href as authority for href string.
+      const searchEmpty
+        = base.search == null
+          || base.search === ""
+          || (typeof base.search === "object"
+            && !Array.isArray(base.search)
+            && Object.keys(base.search as Record<string, unknown>).length === 0)
+      if (searchEmpty && u.search) {
+        base.search = Object.fromEntries(new URLSearchParams(u.search))
+      }
+      // Clicked <a href> is authority for the leave-confirm href string (path+search+hash).
       base.href = `${u.pathname}${u.search}${u.hash}`
     } catch {
       base.href = href

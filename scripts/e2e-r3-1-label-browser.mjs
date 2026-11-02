@@ -254,7 +254,7 @@ async function main() {
     }
   }, 60000)
   if (!ready) throw new Error(`server not ready; log: ${serverLogPath}`)
-  check(ready?.database?.schemaVersion === 37, `schema v37 after init (got ${ready?.database?.schemaVersion})`)
+  check(ready?.database?.schemaVersion === 38, `schema v38 after init (got ${ready?.database?.schemaVersion})`)
 
   await seedLabels()
 
@@ -759,7 +759,7 @@ async function main() {
   const homePath = await evalStr("location.pathname")
   check(homePath === "/" || homePath === "", `leave-yes reached home URL (got ${homePath})`)
 
-  // R3-8: leave-yes must preserve target search + hash (hidden Shell Link)
+  // R3-8: leave-yes must preserve target search + hash via test harness link (not a permanent Shell e2e Link)
   await cdp.send("Runtime.evaluate", {
     expression: `document.querySelector('[data-testid=shell-nav-label]')?.click(); 'ok'`,
     returnByValue: true,
@@ -767,8 +767,13 @@ async function main() {
   await waitFor(async () => {
     return (await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))")) ? true : undefined
   }, 15000)
-  check(await evalBool("Boolean(document.querySelector('[data-testid=shell-nav-policies-query-hash]'))"), "hidden policies search/hash Link present")
+  check(await evalBool("!document.querySelector('[data-testid=shell-nav-policies-query-hash]')"), "production Shell has no hidden policies-query-hash Link")
   await evalBool(`(() => {
+    const link = document.querySelector('[data-testid=shell-nav-policies]');
+    if (!link) return false;
+    link.setAttribute('data-e2e-href-backup', link.getAttribute('href') || '/policies');
+    link.setAttribute('href', '/policies?country=VN#r38-keep');
+    link.setAttribute('data-e2e-policies-query-hash', '1');
     const notes = document.querySelector('[data-testid=label-notes]');
     const op = document.querySelector('[data-testid=label-operator]');
     const nset = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
@@ -781,7 +786,7 @@ async function main() {
   })()`)
   check(await evalBool(`document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty') === '1'`), "dirty before search/hash leave")
   await cdp.send("Runtime.evaluate", {
-    expression: `document.querySelector('[data-testid=shell-nav-policies-query-hash]')?.click(); 'ok'`,
+    expression: `document.querySelector('[data-testid=shell-nav-policies]')?.click(); 'ok'`,
     returnByValue: true,
   })
   await waitFor(async () => {
@@ -790,6 +795,13 @@ async function main() {
   check(await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))"), "search/hash Link dirty nav shows leave confirm")
   const leaveHref = await evalStr("document.querySelector('[data-testid=label-leave-confirm]')?.getAttribute('data-leave-href') || ''")
   check(leaveHref.includes("policies") && leaveHref.includes("country") && leaveHref.includes("r38-keep"), `leave confirm data-leave-href keeps search/hash (got ${leaveHref})`)
+  await evalBool(`(() => {
+    const link = document.querySelector('[data-testid=shell-nav-policies]');
+    const backup = link?.getAttribute('data-e2e-href-backup');
+    if (link && backup) link.setAttribute('href', backup);
+    link?.removeAttribute('data-e2e-policies-query-hash');
+    return true;
+  })()`)
   await cdp.send("Runtime.evaluate", {
     expression: `document.querySelector('[data-testid=label-leave-yes]')?.click(); 'ok'`,
     returnByValue: true,
@@ -806,6 +818,57 @@ async function main() {
   check(String(afterPath).includes("policies"), `leave-yes reached policies (got ${afterPath})`)
   check(String(afterSearch).includes("country"), `leave-yes kept search (got ${afterSearch})`)
   check(String(afterHash).includes("r38-keep"), `leave-yes kept hash (got ${afterHash})`)
+
+  // R3-8: leave-no (留下) must clear intended href so a later Back does not reuse prior hash target
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=shell-nav-label]')?.click(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))")) ? true : undefined
+  }, 15000)
+  await evalBool(`(() => {
+    const link = document.querySelector('[data-testid=shell-nav-policies]');
+    if (!link) return false;
+    link.setAttribute('data-e2e-href-backup', link.getAttribute('data-e2e-href-backup') || link.getAttribute('href') || '/policies');
+    link.setAttribute('href', '/policies?country=VN#r38-stale');
+    link.setAttribute('data-e2e-policies-query-hash', '1');
+    const notes = document.querySelector('[data-testid=label-notes]');
+    const op = document.querySelector('[data-testid=label-operator]');
+    const nset = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+    const oset = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    oset?.call(op, 'e2e.stale');
+    op.dispatchEvent(new Event('input', { bubbles: true }));
+    nset?.call(notes, 'stale-hash-draft');
+    notes.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  })()`)
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=shell-nav-policies]')?.click(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")) ? true : undefined
+  }, 8000)
+  const staleHref = await evalStr("document.querySelector('[data-testid=label-leave-confirm]')?.getAttribute('data-leave-href') || ''")
+  check(staleHref.includes("r38-stale"), `stale leave href captured (got ${staleHref})`)
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-leave-no]')?.click(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("!document.querySelector('[data-testid=label-leave-confirm]')")) ? true : undefined
+  }, 8000)
+  check(await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))"), "leave-no stays on label")
+  await evalBool(`(() => {
+    const link = document.querySelector('[data-testid=shell-nav-policies]');
+    const backup = link?.getAttribute('data-e2e-href-backup');
+    if (link && backup) link.setAttribute('href', backup);
+    link?.removeAttribute('data-e2e-policies-query-hash');
+    link?.removeAttribute('data-e2e-href-backup');
+    return true;
+  })()`)
+  check(await evalBool("!document.querySelector('[data-testid=label-leave-confirm]')?.getAttribute('data-leave-href')"), "leave-no cleared pending leave href")
 
   // Real route history: home → label (Shell Link), dirty, history.back stay + leave
   await cdp.send("Runtime.evaluate", {
