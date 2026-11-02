@@ -270,6 +270,20 @@ describe("industry selection helpers", () => {
       numbers: { delayDays: longOk },
     }))?.numbers.delayDays).toBe(longOk)
 
+    // >200 and ≤8192 chars must not truncate (fail-closed only above max)
+    const over200 = "N".repeat(201)
+    expect(over200.length).toBeGreaterThan(200)
+    expect(over200.length).toBeLessThanOrEqual(8192)
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      numbers: { note: over200 },
+    }))?.numbers.note).toBe(over200)
+    const atMax = "M".repeat(8192)
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      numbers: { note: atMax },
+    }))?.numbers.note).toBe(atMax)
+
     // impossible calendar date
     expect(parseExtractOutput(JSON.stringify({
       ...JSON.parse(extractJson),
@@ -283,6 +297,19 @@ describe("industry selection helpers", () => {
       ...JSON.parse(extractJson),
       occurredAt: "2026-11-02",
     }))?.occurredAt).toBe("2026-11-02")
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      occurredAt: "2026-11-02T12:00:00+08:00",
+    }))?.occurredAt).toBe("2026-11-02T12:00:00+08:00")
+    // invalid timezone offsets must fail closed
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      occurredAt: "2026-11-02T12:00:00+99:99",
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      occurredAt: "2026-11-02T12:00:00-15:00",
+    }))).toBeNull()
 
     // ports must be UN/LOCODE; free-text / bad length fail
     expect(parseExtractOutput(JSON.stringify({
@@ -401,7 +428,7 @@ describe("runOfflineAnalyze offline chain", () => {
     cleanups.push(() => native.close())
     const db = wrap(native)
     await initShippingTables(db, "mock")
-    expect((await import("#/database/runtime")).latestSchemaVersion).toBe(33)
+    expect((await import("#/database/runtime")).latestSchemaVersion).toBe(34)
     const store = secrets()
     await setupRegistry(db, store)
     const intel = new IntelRepository(db)

@@ -11,7 +11,7 @@ import "./risk-console.css"
 
 export { ProvenanceBadge } from "./ui"
 
-function ConsoleLink({ to, label }: { to: "/" | "/events" | "/feed" | "/settings" | "/policies" | "/calendar" | "/ports", label: string }) {
+function ConsoleLink({ to, label }: { to: "/" | "/events" | "/feed" | "/label" | "/settings" | "/policies" | "/calendar" | "/ports", label: string }) {
   const matchRoute = useMatchRoute()
   const active = !!matchRoute({ to, fuzzy: to !== "/" })
   return <Link to={to} aria-current={active ? "page" : undefined} activeOptions={{ exact: to === "/" }}>{label}</Link>

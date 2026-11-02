@@ -196,7 +196,8 @@ function asStrictDateOrNull(value: unknown): string | null | undefined {
   if (typeof value !== "string") return undefined
   const s = value.trim()
   if (!s || s.length > 64) return undefined
-  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/)
+  // Capture optional timezone offset separately so +99:99 / +14:99 are rejected.
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?(?:(Z)|([+-])(\d{2}):?(\d{2}))?)?$/)
   if (!m) return undefined
   const y = Number(m[1])
   const mo = Number(m[2])
@@ -210,6 +211,14 @@ function asStrictDateOrNull(value: unknown): string | null | undefined {
     const mm = Number(m[5])
     const ss = m[6] !== undefined ? Number(m[6]) : 0
     if (hh > 23 || mm > 59 || ss > 59) return undefined
+  }
+  if (m[8] !== undefined) {
+    const offH = Number(m[9])
+    const offM = Number(m[10])
+    // Valid civil offsets roughly UTC−12..+14; minutes must be 0..59 (reject +99:99).
+    if (!Number.isInteger(offH) || !Number.isInteger(offM)) return undefined
+    if (offM > 59) return undefined
+    if (offH > 14 || (offH === 14 && offM > 0)) return undefined
   }
   return s
 }

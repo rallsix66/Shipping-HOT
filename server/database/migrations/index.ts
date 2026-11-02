@@ -32,6 +32,7 @@ import { manualScope20261026Migration } from "#/database/migrations/030-manual-s
 import { llmRegistryMigration } from "#/database/migrations/031-llm-registry"
 import { intelAnalysisMigration } from "#/database/migrations/032-intel-analysis"
 import { intelAnalysisReuseKeyMigration } from "#/database/migrations/033-intel-analysis-reuse-key"
+import { intelLabelMigration } from "#/database/migrations/034-intel-label"
 
 export interface ShippingMigration {
   readonly version: number
@@ -77,6 +78,7 @@ export const shippingMigrations: readonly ShippingMigration[] = [
   llmRegistryMigration,
   intelAnalysisMigration,
   intelAnalysisReuseKeyMigration,
+  intelLabelMigration,
 ]
 
 export const latestShippingSchemaVersion = shippingMigrations[shippingMigrations.length - 1].version

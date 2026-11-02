@@ -1,3 +1,10 @@
+## R3-1 §4.9 label page + offline intel-eval (2026-11-02)
+
+- Same tip lane after limited-accept `98d28c0` (dots watermark >1793588344.661759): additive schema **v34** `intel_label_item` / `intel_label_decision`; UI `/label` + APIs under `/api/shipping/intel/labels`; `scripts/intel-eval.ts` offline (AIHOT@44578fa selection→metrics skeleton, MIT provenance); AI prelabel ≠ human; browse/save never call providers; R3-5 **BLOCKED** when shared LLM budget unconfigured.
+- Opportunistic: registry mid-fail 033 after ALTER/index asserts full rollback; numbers >200 ≤8192 no truncate; dates reject invalid TZ (+99:99).
+- Gates: `pnpm build` / `typecheck` / `lint` / full Vitest **2141 PASS** / 10 skipped; isolated label browser e2e **22/22**; Neat Freak docs sync this entry + AGENTS `/label`; S7 harness **NOT_RUN** (EXPECTED_SCHEMA_VERSION already 34). Unmerged / undeployed. No Slack send / no user disturb.
+- Evidence: `.tmp/r3-1-llm-registry-20261027/r3-label-eval-20261102/`.
+
 ## R3-1 UI P2 closeout + offline payload-gate chain (2026-11-02)
 
 - Resume same R3-1 tip `88d9ecd` (dots 1793584535): Settings UI P2 — selector/late init never clobber dirty budget draft; browser asserts enabled click + POST + status GET + selector-switch.

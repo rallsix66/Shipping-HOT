@@ -164,11 +164,11 @@ async function seedTwoProviders(repo: LlmRegistryRepository) {
 }
 
 describe("migration 031 llm-registry", () => {
-  it("upgrades a fresh isolated DB to schema v33 and is idempotent", async () => {
+  it("upgrades a fresh isolated DB to schema v34 and is idempotent", async () => {
     const { db, native } = await setup()
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(33)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(34)
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(33)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(34)
     const tables = native.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'llm_%' ORDER BY name").all()
     expect(tables).toEqual([
       { name: "llm_binding_audit" },
@@ -202,7 +202,7 @@ describe("migration 031 llm-registry", () => {
     expect(native.prepare("SELECT MAX(version) AS v FROM schema_migrations").get()).toEqual({ v: 30 })
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name = 'llm_provider'").get()).toBeUndefined()
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(33)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(34)
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name = 'llm_provider'").get()).toEqual({ name: "llm_provider" })
     await llmRegistryMigration.up(db)
     await llmRegistryMigration.up(db)
@@ -210,7 +210,7 @@ describe("migration 031 llm-registry", () => {
     native.close()
     rmSync(dir, { recursive: true, force: true })
   })
-  it("rolls back a mid-fail 031 injected via production migration entry, stays on v30, then retries to v33", async () => {
+  it("rolls back a mid-fail 031 injected via production migration entry, stays on v30, then retries to latest", async () => {
     const { shippingMigrations } = await import("#/database/migrations")
     const dir = mkdtempSync(join(tmpdir(), "r3-1-mig-rb-"))
     const path = join(dir, "v30-fail.sqlite3")
@@ -260,7 +260,7 @@ describe("migration 031 llm-registry", () => {
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name LIKE 'llm_%'").all()).toEqual([])
 
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(33)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(34)
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name = 'llm_provider'").get()).toEqual({ name: "llm_provider" })
     native.close()
     rmSync(dir, { recursive: true, force: true })
@@ -270,7 +270,7 @@ describe("migration 031 llm-registry", () => {
 describe("migration 033 intel-analysis-reuse-key", () => {
   it("fresh init reaches v33 with reuse_key and is idempotent on repeat init", async () => {
     const { db, native } = await setup()
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(33)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(34)
     const cols = native.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name: string }>
     expect(cols.some(c => c.name === "reuse_key")).toBe(true)
     expect(native.prepare("SELECT name FROM sqlite_master WHERE type='index' AND name='idx_intel_analysis_reuse_dedupe'").get()).toEqual({
@@ -278,7 +278,7 @@ describe("migration 033 intel-analysis-reuse-key", () => {
     })
     await initShippingTables(db, "mock")
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(33)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(34)
     expect(native.prepare("SELECT COUNT(*) AS c FROM schema_migrations WHERE version = 33").get()).toEqual({ c: 1 })
   })
 
@@ -342,7 +342,7 @@ describe("migration 033 intel-analysis-reuse-key", () => {
 
     // Must go through normal initShippingTables (not direct migration.up).
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(33)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(34)
     expect((native.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name: string }>).some(c => c.name === "reuse_key")).toBe(true)
     expect(native.prepare("SELECT id, step, status FROM intel_analysis").get()).toEqual({
       id: "an-keep-1",
@@ -354,7 +354,7 @@ describe("migration 033 intel-analysis-reuse-key", () => {
     })
     // Repeat init stays idempotent; row still present.
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(33)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(34)
     expect(native.prepare("SELECT COUNT(*) AS c FROM intel_analysis").get()).toEqual({ c: 1 })
     native.close()
     rmSync(dir, { recursive: true, force: true })
@@ -437,7 +437,7 @@ describe("migration 033 intel-analysis-reuse-key", () => {
     )
 
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(33)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(34)
     expect((native.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name: string }>).some(c => c.name === "reuse_key")).toBe(true)
     expect(native.prepare("SELECT id, reuse_key FROM intel_analysis").get()).toEqual({
       id: "an-keep-2",
@@ -447,7 +447,7 @@ describe("migration 033 intel-analysis-reuse-key", () => {
     rmSync(dir, { recursive: true, force: true })
   })
 
-  it("rolls back mid-fail 033 via initShippingTables, keeps old rows, then retries to v33", async () => {
+  it("rolls back mid-fail 033 via initShippingTables, keeps old rows, then retries to latest", async () => {
     const { shippingMigrations } = await import("#/database/migrations")
     const dir = mkdtempSync(join(tmpdir(), "r3-1-mig033-rb-"))
     const pathDb = join(dir, "v32-fail.sqlite3")
@@ -500,7 +500,20 @@ describe("migration 033 intel-analysis-reuse-key", () => {
       "2026-11-01T00:00:00.000Z",
     )
 
-    const upSpy = vi.spyOn(intelAnalysisReuseKeyMigration, "up").mockImplementation(async () => {
+    // Throw AFTER ALTER + index rewrite so transactional rollback must undo column/index too.
+    const upSpy = vi.spyOn(intelAnalysisReuseKeyMigration, "up").mockImplementation(async (database) => {
+      if (!(await (async () => {
+        const rows = await database.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name?: string }>
+        return Array.isArray(rows) && rows.some(row => row.name === "reuse_key")
+      })())) {
+        await database.exec("ALTER TABLE intel_analysis ADD COLUMN reuse_key TEXT NULL")
+      }
+      await database.exec("DROP INDEX IF EXISTS idx_intel_analysis_dedupe")
+      await database.exec("DROP INDEX IF EXISTS idx_intel_analysis_reuse_dedupe")
+      await database.exec("CREATE INDEX IF NOT EXISTS idx_intel_analysis_reuse_dedupe ON intel_analysis(item_id, version_id, step, reuse_key, content_hash, status)")
+      // Prove mid-migration side effects existed before rollback assertion below.
+      const midCols = await database.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name: string }>
+      if (!midCols.some(c => c.name === "reuse_key")) throw new Error("mid_fail_setup_missing_column")
       throw new Error("injected_033_mid_fail")
     })
     try {
@@ -512,10 +525,14 @@ describe("migration 033 intel-analysis-reuse-key", () => {
     expect(native.prepare("SELECT MAX(version) AS v FROM schema_migrations").get()).toEqual({ v: 32 })
     expect(native.prepare("SELECT version FROM schema_migrations WHERE version = 33").get()).toBeUndefined()
     expect(native.prepare("SELECT COUNT(*) AS c FROM intel_analysis").get()).toEqual({ c: 1 })
+    expect(native.prepare("SELECT id FROM intel_analysis").get()).toEqual({ id: "an-keep-3" })
     expect((native.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name: string }>).some(c => c.name === "reuse_key")).toBe(false)
+    // New reuse dedupe index must not survive rollback; legacy name may or may not exist depending on 032 shape.
+    const idxNames = (native.prepare("PRAGMA index_list(intel_analysis)").all() as Array<{ name: string }>).map(r => r.name)
+    expect(idxNames.includes("idx_intel_analysis_reuse_dedupe")).toBe(false)
 
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(33)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(34)
     expect((native.prepare("PRAGMA table_info(intel_analysis)").all() as Array<{ name: string }>).some(c => c.name === "reuse_key")).toBe(true)
     expect(native.prepare("SELECT id FROM intel_analysis").get()).toEqual({ id: "an-keep-3" })
     native.close()

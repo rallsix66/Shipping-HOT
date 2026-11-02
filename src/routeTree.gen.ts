@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PortsRouteImport } from './routes/ports'
 import { Route as PoliciesRouteImport } from './routes/policies'
+import { Route as LabelRouteImport } from './routes/label'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -32,6 +33,11 @@ const PortsRoute = PortsRouteImport.update({
 const PoliciesRoute = PoliciesRouteImport.update({
   id: '/policies',
   path: '/policies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabelRoute = LabelRouteImport.update({
+  id: '/label',
+  path: '/label',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeedRoute = FeedRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
   '/feed': typeof FeedRoute
+  '/label': typeof LabelRoute
   '/policies': typeof PoliciesRoute
   '/ports': typeof PortsRoute
   '/settings': typeof SettingsRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
   '/feed': typeof FeedRoute
+  '/label': typeof LabelRoute
   '/policies': typeof PoliciesRoute
   '/ports': typeof PortsRoute
   '/settings': typeof SettingsRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
   '/feed': typeof FeedRoute
+  '/label': typeof LabelRoute
   '/policies': typeof PoliciesRoute
   '/ports': typeof PortsRoute
   '/settings': typeof SettingsRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/events'
     | '/feed'
+    | '/label'
     | '/policies'
     | '/ports'
     | '/settings'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/events'
     | '/feed'
+    | '/label'
     | '/policies'
     | '/ports'
     | '/settings'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/events'
     | '/feed'
+    | '/label'
     | '/policies'
     | '/ports'
     | '/settings'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   EventsRoute: typeof EventsRoute
   FeedRoute: typeof FeedRoute
+  LabelRoute: typeof LabelRoute
   PoliciesRoute: typeof PoliciesRoute
   PortsRoute: typeof PortsRoute
   SettingsRoute: typeof SettingsRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/policies'
       fullPath: '/policies'
       preLoaderRoute: typeof PoliciesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/label': {
+      id: '/label'
+      path: '/label'
+      fullPath: '/label'
+      preLoaderRoute: typeof LabelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feed': {
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   EventsRoute: EventsRoute,
   FeedRoute: FeedRoute,
+  LabelRoute: LabelRoute,
   PoliciesRoute: PoliciesRoute,
   PortsRoute: PortsRoute,
   SettingsRoute: SettingsRoute,

@@ -7,5 +7,6 @@ export const consoleNavigation = [
   { label: "政策库", to: "/policies", available: true },
   { label: "日历", to: "/calendar", available: true },
   { label: "资讯", to: "/feed", available: true },
+  { label: "标注", to: "/label", available: true },
   { label: "设置", to: "/settings", available: true },
 ] as const

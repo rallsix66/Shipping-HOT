@@ -115,7 +115,7 @@ describe("policy console honest rendering", () => {
 describe("gradual module opening", () => {
   it("opens only existing routes while retaining all currently usable routes", () => {
     const opened = consoleNavigation.filter(i => i.available).map(i => i.to)
-    expect(new Set(opened)).toEqual(new Set(["/", "/ports", "/events", "/feed", "/calendar", "/policies", "/settings"]))
+    expect(new Set(opened)).toEqual(new Set(["/", "/ports", "/events", "/feed", "/calendar", "/policies", "/label", "/settings"]))
     for (const route of opened) expect(readFileSync(`src/routes/${route === "/" ? "index" : route.slice(1)}.tsx`, "utf8")).toContain("createFileRoute")
     const unopened = consoleNavigation.filter(i => !i.available)
     expect(new Set(opened).size).toBe(opened.length)
