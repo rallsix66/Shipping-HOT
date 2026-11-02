@@ -1,6 +1,8 @@
 A2 RC material-bind gates — 2026-11-02 18:02:15 Asia/Shanghai
 
 baseline: 287473f888103175b2c8e36c5f8fc46a1880c798
+product_tip: 334ce8ec24c2a6cfb3fbb2469a9c1c18d738c262
+final_tip_note: HEAD after evidence annotate commit (see git log); review tip is branch HEAD after push
 typecheck: PASS (exit 0) — see typecheck.txt (non-empty UTF-8 raw log)
 lint: PASS (exit 0) — see lint.txt
 build: PASS (exit 0) — see build.txt

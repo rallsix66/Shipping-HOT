@@ -1,3 +1,5 @@
+final_tip: 334ce8ec24c2a6cfb3fbb2469a9c1c18d738c262
+
 # Neat closeout — R3-A2 rc-material-bind (2026-11-02 18:02:15 Asia/Shanghai)
 
 ## 影响
