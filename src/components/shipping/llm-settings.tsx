@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { myFetch } from "~/utils"
 
 interface SecretMeta {
@@ -132,12 +132,49 @@ export function LlmSettingsPanel() {
   }>()
   const [sharedBudgetMessage, setSharedBudgetMessage] = useState<string>()
 
-  const applySharedBudgetForm = (status: {
-    configured: boolean
-    monthlyBudget: number | null
-    currency: string | null
-  }) => {
-    // Only first load / explicit save success / explicit clear may sync dirty inputs.
+  // Selector values read via refs so reload identity stays stable (selector changes
+  // must NOT re-run initial syncBudgetForm and clobber unsaved budget drafts).
+  const providerIdForModelRef = useRef(providerIdForModel)
+  const testProviderIdRef = useRef(testProviderId)
+  const testModelIdRef = useRef(testModelId)
+  const bindModelIdRef = useRef(bindModelId)
+  useEffect(() => {
+    providerIdForModelRef.current = providerIdForModel
+  }, [providerIdForModel])
+  useEffect(() => {
+    testProviderIdRef.current = testProviderId
+  }, [testProviderId])
+  useEffect(() => {
+    testModelIdRef.current = testModelId
+  }, [testModelId])
+  useEffect(() => {
+    bindModelIdRef.current = bindModelId
+  }, [bindModelId])
+
+  /** True after the first successful budget-form hydrate from server status. */
+  const budgetFormHydratedRef = useRef(false)
+  /** True once the operator edits budget inputs; blocks late init / non-force sync. */
+  const budgetDraftDirtyRef = useRef(false)
+
+  const applySharedBudgetForm = (
+    status: {
+      configured: boolean
+      monthlyBudget: number | null
+      currency: string | null
+    },
+    opts?: { force?: boolean },
+  ) => {
+    // Only first hydrate / explicit save success / explicit clear may sync dirty inputs.
+    // Selector-driven reloads and late responses must not overwrite an edited draft.
+    if (budgetFormHydratedRef.current && budgetDraftDirtyRef.current && !opts?.force) {
+      return
+    }
+    if (!budgetFormHydratedRef.current && budgetDraftDirtyRef.current && !opts?.force) {
+      // Operator edited before first status arrived — keep draft; mark hydrated so we
+      // do not silently overwrite later without force.
+      budgetFormHydratedRef.current = true
+      return
+    }
     if (status.configured && status.monthlyBudget != null && status.currency) {
       setSharedBudgetInput(String(status.monthlyBudget))
       setSharedCurrencyInput(status.currency)
@@ -145,9 +182,11 @@ export function LlmSettingsPanel() {
       setSharedBudgetInput("")
       setSharedCurrencyInput("USD")
     }
+    budgetFormHydratedRef.current = true
+    if (opts?.force) budgetDraftDirtyRef.current = false
   }
 
-  const reload = useCallback(async (opts?: { syncBudgetForm?: boolean }) => {
+  const reload = useCallback(async (opts?: { syncBudgetForm?: boolean, forceSyncBudgetForm?: boolean }) => {
     setLoadError(undefined)
     try {
       const [p, m, b, budgetStatus] = await Promise.all([
@@ -168,30 +207,35 @@ export function LlmSettingsPanel() {
       ])
       setSharedBudgetStatus(budgetStatus)
       if (opts?.syncBudgetForm) {
-        applySharedBudgetForm(budgetStatus)
+        applySharedBudgetForm(budgetStatus, { force: opts.forceSyncBudgetForm === true })
       }
       setProviders(p.items)
       setModels(m.items)
       setBindings(b.items)
       // Drop deleted/stale provider selections; never keep a ghost id that can still submit.
-      const nextProviderIdForModel = p.items.some(item => item.id === providerIdForModel)
-        ? providerIdForModel
+      const curProviderIdForModel = providerIdForModelRef.current
+      const curTestProviderId = testProviderIdRef.current
+      const curTestModelId = testModelIdRef.current
+      const curBindModelId = bindModelIdRef.current
+      const nextProviderIdForModel = p.items.some(item => item.id === curProviderIdForModel)
+        ? curProviderIdForModel
         : (p.items[0]?.id ?? "")
-      const nextTestProviderId = p.items.some(item => item.id === testProviderId)
-        ? testProviderId
+      const nextTestProviderId = p.items.some(item => item.id === curTestProviderId)
+        ? curTestProviderId
         : (p.items[0]?.id ?? "")
       setProviderIdForModel(nextProviderIdForModel)
       setTestProviderId(nextTestProviderId)
       // Keep bindModelId as-is even if invalid — never silent swap.
-      if (!bindModelId && m.items[0]) setBindModelId(m.items[0].id)
+      if (!curBindModelId && m.items[0]) setBindModelId(m.items[0].id)
       const modelsForProvider = m.items.filter(model => model.providerId === nextTestProviderId)
-      const stillValid = modelsForProvider.some(model => model.id === testModelId)
+      const stillValid = modelsForProvider.some(model => model.id === curTestModelId)
       if (!stillValid) setTestModelId(modelsForProvider[0]?.id ?? "")
     } catch (error) {
       setLoadError(apiErrorCode(error))
     }
-  }, [bindModelId, providerIdForModel, testModelId, testProviderId])
+  }, [])
 
+  // First mount only: hydrate budget form once. Selector changes must not re-sync.
   useEffect(() => {
     void reload({ syncBudgetForm: true })
   }, [reload])
@@ -541,10 +585,40 @@ export function LlmSettingsPanel() {
         notAHardInvoiceCap?: boolean
       }>("/shipping/llm/shared-budget")
       setSharedBudgetStatus(status)
-      applySharedBudgetForm(status)
+      applySharedBudgetForm(status, { force: true })
       setSharedBudgetMessage(`共享 LLM 总池已保存（回读 ${status.monthlyBudget ?? "—"} ${status.currency ?? ""} · 状态 ${status.state}）`)
     } catch (error) {
       setSharedBudgetMessage(`共享 LLM 总池保存失败：${apiErrorCode(error)}`)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const clearSharedBudget = async () => {
+    setBusy(true)
+    setSharedBudgetMessage(undefined)
+    setActionMessage(undefined)
+    try {
+      await myFetch("/shipping/settings", {
+        method: "POST",
+        body: { sharedLlmBudget: null },
+      })
+      const status = await myFetch<{
+        configured: boolean
+        monthlyBudget: number | null
+        currency: string | null
+        estimatedUsage: number
+        pendingUnknownReserve: number
+        estimatedTotal: number
+        state: string
+        rejectionReason?: string
+        notAHardInvoiceCap?: boolean
+      }>("/shipping/llm/shared-budget")
+      setSharedBudgetStatus(status)
+      applySharedBudgetForm(status, { force: true })
+      setSharedBudgetMessage(`共享 LLM 总池已清空（回读状态 ${status.state}）`)
+    } catch (error) {
+      setSharedBudgetMessage(`共享 LLM 总池清空失败：${apiErrorCode(error)}`)
     } finally {
       setBusy(false)
     }
@@ -586,7 +660,10 @@ export function LlmSettingsPanel() {
               data-testid="shared-llm-budget-input"
               inputMode="decimal"
               value={sharedBudgetInput}
-              onChange={e => setSharedBudgetInput(e.target.value)}
+              onChange={(e) => {
+                budgetDraftDirtyRef.current = true
+                setSharedBudgetInput(e.target.value)
+              }}
               placeholder="未配置则 fail-closed"
             />
           </label>
@@ -596,7 +673,10 @@ export function LlmSettingsPanel() {
               className="mt-1 w-full rounded border px-2 py-1 text-sm uppercase"
               data-testid="shared-llm-budget-currency"
               value={sharedCurrencyInput}
-              onChange={e => setSharedCurrencyInput(e.target.value.toUpperCase())}
+              onChange={(e) => {
+                budgetDraftDirtyRef.current = true
+                setSharedCurrencyInput(e.target.value.toUpperCase())
+              }}
               maxLength={3}
             />
           </label>
@@ -610,6 +690,15 @@ export function LlmSettingsPanel() {
             onClick={() => void saveSharedBudget()}
           >
             保存总池
+          </button>
+          <button
+            type="button"
+            className="btn-gradient"
+            data-testid="shared-llm-budget-clear"
+            disabled={busy}
+            onClick={() => void clearSharedBudget()}
+          >
+            清空总池
           </button>
         </div>
         {sharedBudgetMessage && (

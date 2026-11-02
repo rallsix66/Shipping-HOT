@@ -201,7 +201,7 @@ async function main() {
     }
   }, 60000)
   if (!ready) throw new Error(`server not ready; log: ${serverLogPath}`)
-  check(ready?.database?.schemaVersion === 31, `schema v31 after init (got ${ready?.database?.schemaVersion})`)
+  check(ready?.database?.schemaVersion === 32, `schema v32 after init (got ${ready?.database?.schemaVersion})`)
 
   // Shared pool GET before configure: unconfigured fail-closed, zero provider/receipt side effects.
   const countersBeforeSharedGet = await readDbCounters()
@@ -953,9 +953,7 @@ async function main() {
     const q = (s) => document.querySelector(s)
     const sleep = (ms) => new Promise(r => setTimeout(r, ms))
     const setReactValue = (el, value) => {
-      const proto = el instanceof HTMLSelectElement
-        ? window.HTMLSelectElement.prototype
-        : window.HTMLInputElement.prototype
+      const proto = el.tagName === "SELECT" ? window.HTMLSelectElement.prototype : window.HTMLInputElement.prototype
       const desc = Object.getOwnPropertyDescriptor(proto, "value")
       desc.set.call(el, value)
       el.dispatchEvent(new Event("input", { bubbles: true }))
@@ -976,30 +974,108 @@ async function main() {
     if (midBudget !== "99.25" || midCurrency !== "CNY") {
       return { ok: false, reason: "draft_not_applied", beforeBudget, beforeCurrency, midBudget, midCurrency }
     }
+
+    // Must actually click an enabled test-submit; never skip-and-PASS.
     const testSubmit = q('[data-testid="llm-test-submit"]')
-    if (testSubmit && testSubmit.disabled === false) {
-      testSubmit.click()
-      await sleep(1500)
+    if (!testSubmit) return { ok: false, reason: "missing_test_submit" }
+    if (testSubmit.disabled !== false) return { ok: false, reason: "test_submit_disabled" }
+
+    const seen = { testPost: false, statusGetAfterPost: false, urls: [] }
+    const originalFetch = window.fetch.bind(window)
+    window.fetch = async (input, init) => {
+      const url = typeof input === "string" ? input : (input && input.url) || ""
+      const method = ((init && init.method) || (typeof input !== "string" && input && input.method) || "GET").toUpperCase()
+      seen.urls.push(method + " " + url)
+      const res = await originalFetch(input, init)
+      if (method === "POST" && String(url).includes("/shipping/llm/test-connection")) {
+        seen.testPost = true
+      }
+      if (seen.testPost && method === "GET" && (String(url).includes("/shipping/llm/shared-budget") || String(url).includes("/api/shipping/llm/shared-budget"))) {
+        seen.statusGetAfterPost = true
+      }
+      return res
     }
-    await sleep(400)
-    const afterBudget = q('[data-testid="shared-llm-budget-input"]')?.value
-    const afterCurrency = q('[data-testid="shared-llm-budget-currency"]')?.value
-    const statusState = q('[data-testid="shared-llm-budget-status-state"]')?.textContent || ""
-    return {
-      ok: afterBudget === "99.25" && afterCurrency === "CNY",
-      beforeBudget,
-      beforeCurrency,
-      midBudget,
-      midCurrency,
-      afterBudget,
-      afterCurrency,
-      statusState,
-      testMessage: q('[data-testid="llm-test-message"]')?.textContent || "",
+    try {
+      testSubmit.click()
+      const deadline = Date.now() + 5000
+      while (Date.now() < deadline && !(seen.testPost && seen.statusGetAfterPost)) {
+        await sleep(50)
+      }
+      if (!seen.testPost) return { ok: false, reason: "test_post_not_observed", seen, midBudget, midCurrency }
+      if (!seen.statusGetAfterPost) return { ok: false, reason: "status_get_after_post_not_observed", seen, midBudget, midCurrency }
+      await sleep(200)
+      const afterBudget = q('[data-testid="shared-llm-budget-input"]')?.value
+      const afterCurrency = q('[data-testid="shared-llm-budget-currency"]')?.value
+      const statusState = q('[data-testid="shared-llm-budget-status-state"]')?.textContent || ""
+      return {
+        ok: afterBudget === "99.25" && afterCurrency === "CNY",
+        beforeBudget,
+        beforeCurrency,
+        midBudget,
+        midCurrency,
+        afterBudget,
+        afterCurrency,
+        statusState,
+        seen,
+        testMessage: q('[data-testid="llm-test-message"]')?.textContent || "",
+      }
+    } finally {
+      window.fetch = originalFetch
     }
   })()`, true)
 
   evidence.uiDirtyDraftSurvivesMockRefresh = dirtyDraftUi
   check(dirtyDraftUi?.ok === true, `unsaved budget draft survives mock status refresh (got ${JSON.stringify(dirtyDraftUi)})`)
+
+  // UI: changing selectors must not clobber an unsaved budget draft (P2).
+  const selectorDraftUi = await evaluate(`(async () => {
+    const q = (s) => document.querySelector(s)
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms))
+    const setReactValue = (el, value) => {
+      const proto = el.tagName === "SELECT" ? window.HTMLSelectElement.prototype : window.HTMLInputElement.prototype
+      const desc = Object.getOwnPropertyDescriptor(proto, "value")
+      desc.set.call(el, value)
+      el.dispatchEvent(new Event("input", { bubbles: true }))
+      el.dispatchEvent(new Event("change", { bubbles: true }))
+    }
+    const budget = q('[data-testid="shared-llm-budget-input"]')
+    const currency = q('[data-testid="shared-llm-budget-currency"]')
+    if (!budget || !currency) return { ok: false, reason: "missing_inputs" }
+    setReactValue(budget, "77.77")
+    setReactValue(currency, "USD")
+    await sleep(150)
+    if (q('[data-testid="shared-llm-budget-input"]')?.value !== "77.77") {
+      return { ok: false, reason: "draft_not_set" }
+    }
+    const providerSelect = q('[data-testid="llm-test-provider"]') || q('[data-testid="llm-test-provider-select"]')
+    const modelSelect = q('[data-testid="llm-test-model"]') || q('[data-testid="llm-test-model-select"]')
+    const modelCreateProvider = q('[data-testid="llm-model-provider"]') || q('[data-testid="llm-model-provider-select"]')
+    const bindModel = q('[data-testid="llm-binding-model"]') || q('[data-testid="llm-binding-model-select"]')
+    const touched = []
+    for (const el of [providerSelect, modelSelect, modelCreateProvider, bindModel]) {
+      if (!el || el.tagName !== "SELECT" || el.options.length < 1) continue
+      const prev = el.value
+      let next = prev
+      for (const opt of el.options) {
+        if (opt.value && opt.value !== prev) { next = opt.value; break }
+      }
+      setReactValue(el, next)
+      touched.push({ testid: el.getAttribute("data-testid"), prev, next })
+      await sleep(120)
+    }
+    await sleep(400)
+    const afterBudget = q('[data-testid="shared-llm-budget-input"]')?.value
+    const afterCurrency = q('[data-testid="shared-llm-budget-currency"]')?.value
+    return {
+      ok: afterBudget === "77.77" && afterCurrency === "USD" && touched.length >= 1,
+      afterBudget,
+      afterCurrency,
+      touched,
+      reason: touched.length < 1 ? "no_selector_found" : undefined,
+    }
+  })()`, true)
+  evidence.uiDirtyDraftSurvivesSelectorChange = selectorDraftUi
+  check(selectorDraftUi?.ok === true, `unsaved budget draft survives selector change (got ${JSON.stringify(selectorDraftUi)})`)
 
   // UI: shared-budget status GET failure must show unavailable (not stale ready).
   const statusFailUi = await evaluate(`(async () => {
@@ -1015,15 +1091,10 @@ async function main() {
     }
     try {
       const testSubmit = q('[data-testid="llm-test-submit"]')
-      if (testSubmit && testSubmit.disabled === false) {
-        testSubmit.click()
-        await sleep(1500)
-      } else {
-        // Trigger refreshSharedBudgetStatus via a second click attempt / CustomEvent fallback:
-        // re-set a draft and rely on panel's post-test refresh.
-        testSubmit?.click()
-        await sleep(1500)
-      }
+      if (!testSubmit) return { ok: false, reason: "missing_test_submit" }
+      if (testSubmit.disabled !== false) return { ok: false, reason: "test_submit_disabled" }
+      testSubmit.click()
+      await sleep(1500)
       const stateText = q('[data-testid="shared-llm-budget-status-state"]')?.textContent || ""
       const rejection = q('[data-testid="shared-llm-budget-rejection"]')?.textContent || ""
       const draftStill = q('[data-testid="shared-llm-budget-input"]')?.value

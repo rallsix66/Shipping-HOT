@@ -162,11 +162,11 @@ async function seedTwoProviders(repo: LlmRegistryRepository) {
 }
 
 describe("migration 031 llm-registry", () => {
-  it("upgrades a fresh isolated DB to schema v31 and is idempotent", async () => {
+  it("upgrades a fresh isolated DB to schema v32 and is idempotent", async () => {
     const { db, native } = await setup()
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(31)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(32)
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(31)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(32)
     const tables = native.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'llm_%' ORDER BY name").all()
     expect(tables).toEqual([
       { name: "llm_binding_audit" },
@@ -200,7 +200,7 @@ describe("migration 031 llm-registry", () => {
     expect(native.prepare("SELECT MAX(version) AS v FROM schema_migrations").get()).toEqual({ v: 30 })
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name = 'llm_provider'").get()).toBeUndefined()
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(31)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(32)
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name = 'llm_provider'").get()).toEqual({ name: "llm_provider" })
     await llmRegistryMigration.up(db)
     await llmRegistryMigration.up(db)
@@ -208,7 +208,7 @@ describe("migration 031 llm-registry", () => {
     native.close()
     rmSync(dir, { recursive: true, force: true })
   })
-  it("rolls back a mid-fail 031 injected via production migration entry, stays on v30, then retries to v31", async () => {
+  it("rolls back a mid-fail 031 injected via production migration entry, stays on v30, then retries to v32", async () => {
     const { shippingMigrations } = await import("#/database/migrations")
     const dir = mkdtempSync(join(tmpdir(), "r3-1-mig-rb-"))
     const path = join(dir, "v30-fail.sqlite3")
@@ -258,7 +258,7 @@ describe("migration 031 llm-registry", () => {
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name LIKE 'llm_%'").all()).toEqual([])
 
     await initShippingTables(db, "mock")
-    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(31)
+    expect((await readDatabaseMetadata(db)).schemaVersion).toBe(32)
     expect(native.prepare("SELECT name FROM sqlite_master WHERE name = 'llm_provider'").get()).toEqual({ name: "llm_provider" })
     native.close()
     rmSync(dir, { recursive: true, force: true })

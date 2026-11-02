@@ -18,10 +18,10 @@
 
 ## Pending (honest, not claimed done)
 
-1. **model-payload-gate pipeline**: `admitModelPayload` is skeleton only; **NOT WIRED** into prefilter/extract/runtime pipeline yet (unit tests cover the pure gate).
+1. **model-payload-gate pipeline (2026-11-02)**: **WIRED** offline via `runOfflineAnalyze` (`server/intel/llm/analyze-pipeline.ts`) — dedupe → admitModelPayload → prefilter → extract → dual severity (+ median when |diff|>1); migration 032 `intel_analysis`; fake provider + isolated DB tests. Not a live HTTP analyze route; GET still never analyzes.
 2. Real dual-vendor live models, R3-2~5 slices, production enablement -- out of scope.
 3. Dedicated Settings field for shared LLM pool (currently reuses `translation.monthlyBudget` + USD); fake amounts only in isolation -- not user spend authorization.
-4. Price-precision persistence round-trip assert still not separate (deferred until that test is next touched); 79 browser checks stay attributed to prior tip.
+4. Price-precision persistence round-trip assert still not separate (deferred until that test is next touched). Settings browser 2026-11-02 resume: 100/100 PASS (selector-switch + enabled click+POST+status GET + dirty draft).
 
 ## Aggregate vs ADR-011
 

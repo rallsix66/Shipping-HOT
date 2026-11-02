@@ -1,3 +1,10 @@
+## R3-1 UI P2 closeout + offline payload-gate chain (2026-11-02)
+
+- Resume same R3-1 tip `88d9ecd` (dots 1793584535): Settings UI P2 — selector/late init never clobber dirty budget draft; browser asserts enabled click + POST + status GET + selector-switch.
+- Offline analyze chain: dedupe → admitModelPayload → prefilter → extract → dual severity (+ optional median); schema **v32** `intel_analysis`; reuse material auth/version, registry/paidRequest/shared budget; stop before provider on missing rights/binding/budget/version; UNKNOWN not exclusion; no double-pay; third fail ≠ forged complete.
+- Gates: install/build/typecheck/lint/full Vitest 2129 PASS; isolated Settings browser 100/100 PASS; Neat Freak inventory exit 0; S7 harness **NOT_RUN** (EXPECTED_SCHEMA_VERSION bumped to 32 only). Unmerged / undeployed.
+- Evidence: `.tmp/r3-1-llm-registry-20261027/resume-p2-payload-gate-20261102/`.
+
 ## 2026-10-27 — day20 events 连续性离线统计（dots 1793072775.334919）
 
 ## R3-1 billing + translation-test paid path (2026-10-27)
