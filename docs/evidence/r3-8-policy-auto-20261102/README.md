@@ -20,3 +20,6 @@ See `gates.txt` / `gates-rc.txt`. Label e2e: `label-browser-e2e-rc.txt`. Full vi
 - Real 200 human label set / real accuracy&cost: **not run**
 - R3-5: **BLOCKED**; S7: **NOT_RUN**
 - Unmerged / undeployed; Slack **not sent** by agent
+
+## RC2
+See subdirectory rc2/ for REQUEST CHANGES round-2 on tip e3409e45 (schema v39, extract contract, persist rights, source-op idempotency, real GET).
