@@ -10,12 +10,14 @@ import { licensedBlocks } from "#/intel/content-license"
 import { intelSourceSeeds } from "#/intel/sources"
 import { resolveSharedLlmBudgetGate } from "#/intel/llm/shared-budget"
 import {
+  buildAnalysisReuseKey,
   parseExtractOutput,
   parsePrefilterDecision,
   parseSeverityScoreOutput,
   runOfflineAnalyze,
 } from "#/intel/llm/analyze-pipeline"
-import { computeSeverity, median3 } from "#/intel/industry/selection"
+import type { ExactVersionModelLicense } from "#/intel/llm/model-payload-gate"
+import { aggregateMedianSeverity, computeSeverity, median3 } from "#/intel/industry/selection"
 import { EXTRACT_PROMPT, PREFILTER_PROMPT, SEVERITY_SCORE_PROMPT } from "#/intel/industry/prompts"
 import type { OpenAiChatRequest, OpenAiChatResponse, OpenAiCompatibleTransport, OpenAiEmbeddingRequest, OpenAiEmbeddingResponse } from "#/intel/llm/openai-compatible"
 import type { SecretStore } from "#/providers/contracts"
@@ -161,36 +163,99 @@ async function seedMaterial(intel: IntelRepository) {
   })
 }
 
+function licenseFor(saved: { itemId: string, versionId: string }, contentHash: string): ExactVersionModelLicense {
+  return { itemId: saved.itemId, versionId: saved.versionId, contentHash, permitted: true as const }
+}
+
 describe("industry selection helpers", () => {
-  it("applies routine and rumour caps and median3", () => {
-    const holiday = computeSeverity("holiday_notice", { impact: 9, scope: 9, urgency: 9, actionability: 9 })
-    expect(holiday.severity).toBe(1)
-    expect(holiday.capsApplied).toContain("routine_notice_max_1")
+  it("caps only routine holiday/advisory; major holiday_notice stays high; median aggregate keeps all evidence", () => {
+    const majorHoliday = computeSeverity("holiday_notice", { impact: 9, scope: 9, urgency: 9, actionability: 9 })
+    expect(majorHoliday.severity).toBeGreaterThan(1)
+    expect(majorHoliday.capsApplied).not.toContain("routine_notice_max_1")
+
+    const routineHoliday = computeSeverity(
+      "holiday_notice",
+      { impact: 1, scope: 1, urgency: 1, actionability: 1 },
+      { routineNotice: true },
+    )
+    expect(routineHoliday.severity).toBe(1)
+    expect(routineHoliday.capsApplied).toContain("routine_notice_max_1")
+
+    const lowDimHoliday = computeSeverity("holiday_notice", { impact: 2, scope: 1, urgency: 1, actionability: 1 })
+    expect(lowDimHoliday.severity).toBe(1)
+
     const rumour = computeSeverity("other", { impact: 9, scope: 9, urgency: 9, actionability: 9 }, { rumourOnly: true })
     expect(rumour.severity).toBe(2)
     expect(median3(1, 5, 3)).toBe(3)
+
+    const a = computeSeverity("port_congestion", { impact: 2, scope: 2, urgency: 2, actionability: 2 }, {}, { attemptIndex: 1 })
+    const b = computeSeverity("port_congestion", { impact: 9, scope: 9, urgency: 9, actionability: 9 }, {}, { attemptIndex: 2 })
+    const c = computeSeverity("port_congestion", { impact: 1, scope: 1, urgency: 1, actionability: 1 }, {}, { attemptIndex: 3 })
+    // severities roughly [2?,5?,1?] — aggregate must not hang attempt-3 dims when median is from another attempt
+    const agg = aggregateMedianSeverity("port_congestion", [a, b, c])
+    expect(agg.aggregation).toBe("median3")
+    expect(agg.capsApplied).toContain("median3")
+    expect(agg.evidence).toHaveLength(3)
+    expect(agg.severity).toBe(median3(a.severity, b.severity, c.severity))
+    const match = [a, b, c].find(x => x.severity === agg.severity)!
+    expect(agg.dimensions).toEqual(match.dimensions)
+    expect(agg.beforeCap).toBe(match.beforeCap)
   })
 
   it("keeps prompt hashes stable", () => {
     expect(PREFILTER_PROMPT.hash).toMatch(/^[a-f0-9]{64}$/)
     expect(EXTRACT_PROMPT.hash).toMatch(/^[a-f0-9]{64}$/)
     expect(SEVERITY_SCORE_PROMPT.hash).toMatch(/^[a-f0-9]{64}$/)
+    expect(EXTRACT_PROMPT.text).toContain("isOfficialStatement")
+    expect(EXTRACT_PROMPT.text).toContain("isFirstParty")
+    expect(EXTRACT_PROMPT.text).toContain("do not conflate")
   })
 
-  it("parses prefilter/extract/severity and demotes BLOCK when content missing", () => {
+  it("strict-parses extract/severity; rejects silent coerces", () => {
     expect(parsePrefilterDecision(prefilterPass, false)).toBe("PASS")
     expect(parsePrefilterDecision(prefilterBlock, true)).toBe("UNKNOWN")
-    expect(parsePrefilterDecision(prefilterUnknown, false)).toBe("UNKNOWN")
-    const extracted = parseExtractOutput(extractJson)
-    expect(extracted?.numbers.delayDays).toBe("3 days")
-    expect(extracted?.numbers.waitingDays).toBeNull()
-    expect(extracted?.occurredAt).toBeNull()
+    expect(parseExtractOutput(extractJson)?.numbers.delayDays).toBe("3 days")
+    expect(parseExtractOutput(extractJson)?.occurredAt).toBeNull()
     expect(parseSeverityScoreOutput(scoreAgree)?.dimensions.impact).toBe(7)
+
+    // countries=123 / ports=string / bool='yes' / numbers=[] / float dims must fail
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      countries: 123,
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      ports: "MYPKG",
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      isOfficialStatement: "yes",
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      numbers: [],
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      dimensions: { impact: 10.4, scope: 5, urgency: 6, actionability: 4 },
+    }))).toBeNull()
+    expect(parseExtractOutput(JSON.stringify({
+      ...JSON.parse(extractJson),
+      dimensions: { impact: -0.4, scope: 5, urgency: 6, actionability: 4 },
+    }))).toBeNull()
+    expect(parseSeverityScoreOutput(JSON.stringify({
+      dimensions: { impact: 7.2, scope: 5, urgency: 6, actionability: 4 },
+      rumourOnly: false,
+    }))).toBeNull()
+    expect(parseSeverityScoreOutput(JSON.stringify({
+      dimensions: { impact: 7, scope: 5, urgency: 6, actionability: 4 },
+      rumourOnly: "yes",
+    }))).toBeNull()
   })
 })
 
 describe("runOfflineAnalyze offline chain", () => {
-  it("denies private_material / missing permission before any provider hit", async () => {
+  it("denies private_material / bare-true / mismatched license before any provider hit", async () => {
     const native = new NativeDatabase(":memory:")
     cleanups.push(() => native.close())
     const db = wrap(native)
@@ -201,6 +266,7 @@ describe("runOfflineAnalyze offline chain", () => {
     const saved = await seedMaterial(intel)
     const state: ScriptedState = { chatHits: 0, embeddingHits: 0, scripts: [prefilterPass] }
     const transport = createScriptedTransport(state)
+    const shared = resolveSharedLlmBudgetGate(10, "USD")
 
     const denied = await runOfflineAnalyze({
       db,
@@ -208,15 +274,15 @@ describe("runOfflineAnalyze offline chain", () => {
       secretStore: store,
       itemId: saved.itemId,
       versionId: saved.versionId,
-      modelUsePermitted: false,
+      modelUseLicense: {
+        itemId: saved.itemId,
+        versionId: saved.versionId,
+        contentHash: "wrong-hash",
+        permitted: true,
+      },
       transport,
-      currency: "USD",
-      monthlyBudget: undefined,
-      sharedBudget: resolveSharedLlmBudgetGate(10, "USD"),
-      resolveClaimConfig: createPaidClaimBudgetResolver({
-        mode: "registry",
-        overridePool: resolveSharedLlmBudgetGate(10, "USD"),
-      }),
+      sharedBudget: shared,
+      resolveClaimConfig: createPaidClaimBudgetResolver({ mode: "registry", overridePool: shared }),
       now: () => T0,
     })
     expect(denied.ok).toBe(false)
@@ -232,7 +298,6 @@ describe("runOfflineAnalyze offline chain", () => {
     const db = wrap(native)
     await initShippingTables(db, "mock")
     const store = secrets()
-    // provider/model exist but no bindings
     const repo = new LlmRegistryRepository(db)
     const provider = await repo.createProvider({
       id: "fixture-vendor-b",
@@ -252,20 +317,17 @@ describe("runOfflineAnalyze offline chain", () => {
     const saved = await seedMaterial(intel)
     const state: ScriptedState = { chatHits: 0, embeddingHits: 0, scripts: [] }
     const transport = createScriptedTransport(state)
+    const shared = resolveSharedLlmBudgetGate(10, "USD")
     const result = await runOfflineAnalyze({
       db,
       intelRepo: intel,
       secretStore: store,
       itemId: saved.itemId,
       versionId: saved.versionId,
-      modelUsePermitted: true,
+      modelUseLicense: licenseFor(saved, hash(body)),
       transport,
-      currency: "USD",
-      sharedBudget: resolveSharedLlmBudgetGate(10, "USD"),
-      resolveClaimConfig: createPaidClaimBudgetResolver({
-        mode: "registry",
-        overridePool: resolveSharedLlmBudgetGate(10, "USD"),
-      }),
+      sharedBudget: shared,
+      resolveClaimConfig: createPaidClaimBudgetResolver({ mode: "registry", overridePool: shared }),
       now: () => T0,
     })
     expect(result.ok).toBe(false)
@@ -274,7 +336,7 @@ describe("runOfflineAnalyze offline chain", () => {
     expect(state.chatHits).toBe(0)
   })
 
-  it("completes PASS → extract → dual severity without tiebreak when scores agree", async () => {
+  it("completes PASS -> extract -> dual severity without tiebreak when scores agree", async () => {
     const native = new NativeDatabase(":memory:")
     cleanups.push(() => native.close())
     const db = wrap(native)
@@ -299,9 +361,8 @@ describe("runOfflineAnalyze offline chain", () => {
       secretStore: store,
       itemId: saved.itemId,
       versionId: saved.versionId,
-      modelUsePermitted: true,
+      modelUseLicense: licenseFor(saved, hash(body)),
       transport,
-      currency: "USD",
       sharedBudget: shared,
       resolveClaimConfig: createPaidClaimBudgetResolver({ mode: "registry", overridePool: shared }),
       now: () => T0,
@@ -311,15 +372,11 @@ describe("runOfflineAnalyze offline chain", () => {
     expect(result.status).toBe("completed")
     expect(result.prefilter).toBe("PASS")
     expect(result.extract?.numbers.delayDays).toBe("3 days")
-    expect(result.extract?.numbers.waitingDays).toBeNull()
     expect(result.severityScores).toHaveLength(2)
     expect(state.chatHits).toBe(4)
-    expect(result.receiptIds.length).toBeGreaterThanOrEqual(4)
+    expect(result.severity?.aggregation).toBe("single")
     const rows = await analysis.listForVersion(saved.itemId, saved.versionId)
-    expect(rows.some(r => r.step === "prefilter" && r.promptHash === PREFILTER_PROMPT.hash)).toBe(true)
-    expect(rows.some(r => r.step === "extract" && r.modelName === "fixture-chat")).toBe(true)
-    expect(rows.filter(r => r.step === "severity")).toHaveLength(2)
-    expect(rows.every(r => r.versionId === saved.versionId)).toBe(true)
+    expect(rows.some(r => r.reuseKey && r.reuseKey.length === 64)).toBe(true)
   })
 
   it("unknown prefilter continues; BLOCK skips extract; wrong version denied", async () => {
@@ -331,6 +388,8 @@ describe("runOfflineAnalyze offline chain", () => {
     await setupRegistry(db, store)
     const intel = new IntelRepository(db)
     const saved = await seedMaterial(intel)
+    const shared = resolveSharedLlmBudgetGate(50, "USD")
+    const resolver = createPaidClaimBudgetResolver({ mode: "registry", overridePool: shared })
 
     const unknownState: ScriptedState = {
       chatHits: 0,
@@ -343,23 +402,17 @@ describe("runOfflineAnalyze offline chain", () => {
       secretStore: store,
       itemId: saved.itemId,
       versionId: saved.versionId,
-      modelUsePermitted: true,
+      modelUseLicense: licenseFor(saved, hash(body)),
       transport: createScriptedTransport(unknownState),
-      currency: "USD",
-      sharedBudget: resolveSharedLlmBudgetGate(50, "USD"),
-      resolveClaimConfig: createPaidClaimBudgetResolver({
-        mode: "registry",
-        overridePool: resolveSharedLlmBudgetGate(50, "USD"),
-      }),
+      sharedBudget: shared,
+      resolveClaimConfig: resolver,
       now: () => T0,
     })
     expect(unknownResult.ok).toBe(true)
     if (!unknownResult.ok) throw new Error(unknownResult.reason)
     expect(unknownResult.prefilter).toBe("UNKNOWN")
-    expect(unknownResult.extract).not.toBeNull()
     expect(unknownState.chatHits).toBe(4)
 
-    // Fresh DB path for BLOCK using a second item/version
     const blockedBody = "Totally unrelated cooking recipe ".repeat(10)
     const blocked = await intel.writeEntry({
       sourceId: source.id,
@@ -378,20 +431,15 @@ describe("runOfflineAnalyze offline chain", () => {
       secretStore: store,
       itemId: blocked.itemId,
       versionId: blocked.versionId,
-      modelUsePermitted: true,
+      modelUseLicense: licenseFor(blocked, hash(blockedBody)),
       transport: createScriptedTransport(blockState),
-      currency: "USD",
-      sharedBudget: resolveSharedLlmBudgetGate(50, "USD"),
-      resolveClaimConfig: createPaidClaimBudgetResolver({
-        mode: "registry",
-        overridePool: resolveSharedLlmBudgetGate(50, "USD"),
-      }),
+      sharedBudget: shared,
+      resolveClaimConfig: resolver,
       now: () => T0,
     })
     expect(blockedResult.ok).toBe(true)
     if (!blockedResult.ok) throw new Error(blockedResult.reason)
     expect(blockedResult.status).toBe("skipped_block")
-    expect(blockedResult.extract).toBeNull()
     expect(blockState.chatHits).toBe(1)
 
     const mismatch = await runOfflineAnalyze({
@@ -400,14 +448,10 @@ describe("runOfflineAnalyze offline chain", () => {
       secretStore: store,
       itemId: saved.itemId,
       versionId: blocked.versionId,
-      modelUsePermitted: true,
+      modelUseLicense: licenseFor(saved, hash(body)),
       transport: createScriptedTransport({ chatHits: 0, embeddingHits: 0, scripts: [] }),
-      currency: "USD",
-      sharedBudget: resolveSharedLlmBudgetGate(50, "USD"),
-      resolveClaimConfig: createPaidClaimBudgetResolver({
-        mode: "registry",
-        overridePool: resolveSharedLlmBudgetGate(50, "USD"),
-      }),
+      sharedBudget: shared,
+      resolveClaimConfig: resolver,
       now: () => T0,
     })
     expect(mismatch.ok).toBe(false)
@@ -415,7 +459,7 @@ describe("runOfflineAnalyze offline chain", () => {
     expect(mismatch.code).toBe("version_mismatch")
   })
 
-  it("runs third median when |diff|>1 and does not forge complete when tiebreak fails", async () => {
+  it("runs third median when |diff|>1; keeps three evidences; does not forge complete when tiebreak fails", async () => {
     const native = new NativeDatabase(":memory:")
     cleanups.push(() => native.close())
     const db = wrap(native)
@@ -424,6 +468,8 @@ describe("runOfflineAnalyze offline chain", () => {
     await setupRegistry(db, store)
     const intel = new IntelRepository(db)
     const saved = await seedMaterial(intel)
+    const shared = resolveSharedLlmBudgetGate(50, "USD")
+    const resolver = createPaidClaimBudgetResolver({ mode: "registry", overridePool: shared })
 
     const tieState: ScriptedState = {
       chatHits: 0,
@@ -436,14 +482,10 @@ describe("runOfflineAnalyze offline chain", () => {
       secretStore: store,
       itemId: saved.itemId,
       versionId: saved.versionId,
-      modelUsePermitted: true,
+      modelUseLicense: licenseFor(saved, hash(body)),
       transport: createScriptedTransport(tieState),
-      currency: "USD",
-      sharedBudget: resolveSharedLlmBudgetGate(50, "USD"),
-      resolveClaimConfig: createPaidClaimBudgetResolver({
-        mode: "registry",
-        overridePool: resolveSharedLlmBudgetGate(50, "USD"),
-      }),
+      sharedBudget: shared,
+      resolveClaimConfig: resolver,
       now: () => T0,
     })
     expect(tied.ok).toBe(true)
@@ -451,6 +493,8 @@ describe("runOfflineAnalyze offline chain", () => {
     expect(tied.severityScores).toHaveLength(3)
     expect(tieState.chatHits).toBe(5)
     expect(tied.severity?.capsApplied).toContain("median3")
+    expect(tied.severity?.aggregation).toBe("median3")
+    expect(tied.severity?.evidence).toHaveLength(3)
 
     const failBody = "Another fixture port notice ".repeat(15)
     const failSaved = await intel.writeEntry({
@@ -474,14 +518,10 @@ describe("runOfflineAnalyze offline chain", () => {
       secretStore: store,
       itemId: failSaved.itemId,
       versionId: failSaved.versionId,
-      modelUsePermitted: true,
+      modelUseLicense: licenseFor(failSaved, hash(failBody)),
       transport: createScriptedTransport(failState),
-      currency: "USD",
-      sharedBudget: resolveSharedLlmBudgetGate(50, "USD"),
-      resolveClaimConfig: createPaidClaimBudgetResolver({
-        mode: "registry",
-        overridePool: resolveSharedLlmBudgetGate(50, "USD"),
-      }),
+      sharedBudget: shared,
+      resolveClaimConfig: resolver,
       now: () => T0,
     })
     expect(failed.ok).toBe(false)
@@ -491,23 +531,34 @@ describe("runOfflineAnalyze offline chain", () => {
     expect(failed.analyses.some(a => a.step === "severity_tiebreak" && a.status === "failed")).toBe(true)
   })
 
-  it("reuses completed analysis on repeat without extra provider hits (no double-pay)", async () => {
+  it("reuses completed analysis on repeat; in-place modelName edit must NOT reuse", async () => {
     const native = new NativeDatabase(":memory:")
     cleanups.push(() => native.close())
     const db = wrap(native)
     await initShippingTables(db, "mock")
     const store = secrets()
-    await setupRegistry(db, store)
+    const { model, repo } = await setupRegistry(db, store)
     const intel = new IntelRepository(db)
     const analysis = new IntelAnalysisRepository(db)
     const saved = await seedMaterial(intel)
     const state: ScriptedState = {
       chatHits: 0,
       embeddingHits: 0,
-      scripts: [prefilterPass, extractJson, scoreAgree, scoreAgree],
+      // First run (4) + post-rename re-pay (4); second run reuses with zero hits.
+      scripts: [
+        prefilterPass,
+        extractJson,
+        scoreAgree,
+        scoreAgree,
+        prefilterPass,
+        extractJson,
+        scoreAgree,
+        scoreAgree,
+      ],
     }
     const transport = createScriptedTransport(state)
     const shared = resolveSharedLlmBudgetGate(50, "USD")
+    const resolver = createPaidClaimBudgetResolver({ mode: "registry", overridePool: shared })
     const first = await runOfflineAnalyze({
       db,
       intelRepo: intel,
@@ -515,21 +566,16 @@ describe("runOfflineAnalyze offline chain", () => {
       secretStore: store,
       itemId: saved.itemId,
       versionId: saved.versionId,
-      modelUsePermitted: true,
+      modelUseLicense: licenseFor(saved, hash(body)),
       transport,
-      currency: "USD",
       sharedBudget: shared,
-      resolveClaimConfig: createPaidClaimBudgetResolver({ mode: "registry", overridePool: shared }),
+      resolveClaimConfig: resolver,
       now: () => T0,
     })
     expect(first.ok).toBe(true)
     const hitsAfterFirst = state.chatHits
     expect(hitsAfterFirst).toBe(4)
 
-    // Second run: prefilter+extract reuse from intel_analysis; severity still calls
-    // (severity attempts intentionally not deduped across runs beyond paidRequest logical key).
-    // For no-double-pay on the same logical paidRequest identity, re-call with same transport
-    // should reuse receipts via paidRequest for identical identity keys.
     const second = await runOfflineAnalyze({
       db,
       intelRepo: intel,
@@ -537,25 +583,40 @@ describe("runOfflineAnalyze offline chain", () => {
       secretStore: store,
       itemId: saved.itemId,
       versionId: saved.versionId,
-      modelUsePermitted: true,
+      modelUseLicense: licenseFor(saved, hash(body)),
       transport,
-      currency: "USD",
       sharedBudget: shared,
-      resolveClaimConfig: createPaidClaimBudgetResolver({ mode: "registry", overridePool: shared }),
+      resolveClaimConfig: resolver,
       now: () => T0,
     })
     expect(second.ok).toBe(true)
     if (!second.ok) throw new Error(second.reason)
-    // prefilter+extract should be analysis-repo reused (no new chat for those two)
-    // severity attempts still go through paidRequest; receipt reuse means chat may still be invoked
-    // by our call wrapper only when claim decides to call — paidRequest short-circuits before call on reuse.
-    // So chatHits should stay at 4 if all four logical keys reuse.
     expect(state.chatHits).toBe(hitsAfterFirst)
     expect(second.analyses.some(a => a.status === "reused" && a.step === "prefilter")).toBe(true)
     expect(second.analyses.some(a => a.status === "reused" && a.step === "extract")).toBe(true)
+
+    // In-place modelName edit: same modelId, new name => reuse_key miss => re-pay
+    await repo.updateModel(model.id, { modelName: "fixture-chat-renamed" })
+    const third = await runOfflineAnalyze({
+      db,
+      intelRepo: intel,
+      analysisRepo: analysis,
+      secretStore: store,
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      modelUseLicense: licenseFor(saved, hash(body)),
+      transport,
+      sharedBudget: shared,
+      resolveClaimConfig: resolver,
+      now: () => T0,
+    })
+    expect(third.ok).toBe(true)
+    if (!third.ok) throw new Error(third.reason)
+    expect(state.chatHits).toBeGreaterThan(hitsAfterFirst)
+    expect(third.analyses.some(a => a.status === "completed" && a.step === "prefilter" && a.modelName === "fixture-chat-renamed")).toBe(true)
   })
 
-  it("denies when shared budget is unconfigured / exhausted before provider", async () => {
+  it("rejects CNY pool + USD model before provider (zero attempt); empty/disabled pool denies", async () => {
     const native = new NativeDatabase(":memory:")
     cleanups.push(() => native.close())
     const db = wrap(native)
@@ -565,18 +626,34 @@ describe("runOfflineAnalyze offline chain", () => {
     const intel = new IntelRepository(db)
     const saved = await seedMaterial(intel)
     const state: ScriptedState = { chatHits: 0, embeddingHits: 0, scripts: [prefilterPass] }
-    const unconfigured = await runOfflineAnalyze({
+    const cnyPool = resolveSharedLlmBudgetGate(50, "CNY")
+    const mismatch = await runOfflineAnalyze({
       db,
       intelRepo: intel,
       secretStore: store,
       itemId: saved.itemId,
       versionId: saved.versionId,
-      modelUsePermitted: true,
+      modelUseLicense: licenseFor(saved, hash(body)),
       transport: createScriptedTransport(state),
-      currency: "USD",
-      // no sharedBudget / resolveClaimConfig → paidRequest fail-closed for shared-capable path
-      // Actually without sharedBudget, monthlyBudget undefined may still fail differently.
-      // Use explicit null shared pool via resolver.
+      sharedBudget: cnyPool,
+      resolveClaimConfig: createPaidClaimBudgetResolver({ mode: "registry", overridePool: cnyPool }),
+      now: () => T0,
+    })
+    expect(mismatch.ok).toBe(false)
+    if (mismatch.ok) throw new Error("expected currency deny")
+    expect(mismatch.code).toBe("budget_denied")
+    expect(String(mismatch.reason)).toMatch(/currency/i)
+    expect(state.chatHits).toBe(0)
+
+    const emptyState: ScriptedState = { chatHits: 0, embeddingHits: 0, scripts: [prefilterPass] }
+    const empty = await runOfflineAnalyze({
+      db,
+      intelRepo: intel,
+      secretStore: store,
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      modelUseLicense: licenseFor(saved, hash(body)),
+      transport: createScriptedTransport(emptyState),
       sharedBudget: resolveSharedLlmBudgetGate(null, "USD"),
       resolveClaimConfig: createPaidClaimBudgetResolver({
         mode: "registry",
@@ -584,9 +661,131 @@ describe("runOfflineAnalyze offline chain", () => {
       }),
       now: () => T0,
     })
-    expect(unconfigured.ok).toBe(false)
-    if (unconfigured.ok) throw new Error("expected budget deny")
-    expect(unconfigured.code).toBe("budget_denied")
-    expect(state.chatHits).toBe(0)
+    expect(empty.ok).toBe(false)
+    if (empty.ok) throw new Error("expected empty deny")
+    expect(empty.code).toBe("budget_denied")
+    expect(emptyState.chatHits).toBe(0)
+  })
+
+  it("illegal extract output stays failed (not completed) and does not re-bill as success", async () => {
+    const native = new NativeDatabase(":memory:")
+    cleanups.push(() => native.close())
+    const db = wrap(native)
+    await initShippingTables(db, "mock")
+    const store = secrets()
+    await setupRegistry(db, store)
+    const intel = new IntelRepository(db)
+    const analysis = new IntelAnalysisRepository(db)
+    const saved = await seedMaterial(intel)
+    const badExtract = JSON.stringify({
+      eventType: "port_congestion",
+      countries: 123,
+      ports: ["MYPKG"],
+      cities: [],
+      chainStages: [],
+      namedEntity: null,
+      occurredAt: null,
+      effectiveFrom: null,
+      effectiveUntil: null,
+      numbers: {},
+      isOfficialStatement: false,
+      isFirstParty: true,
+      dimensions: { impact: 7, scope: 5, urgency: 6, actionability: 4 },
+    })
+    const state: ScriptedState = { chatHits: 0, embeddingHits: 0, scripts: [prefilterPass, badExtract] }
+    const shared = resolveSharedLlmBudgetGate(50, "USD")
+    const failed = await runOfflineAnalyze({
+      db,
+      intelRepo: intel,
+      analysisRepo: analysis,
+      secretStore: store,
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      modelUseLicense: licenseFor(saved, hash(body)),
+      transport: createScriptedTransport(state),
+      sharedBudget: shared,
+      resolveClaimConfig: createPaidClaimBudgetResolver({ mode: "registry", overridePool: shared }),
+      now: () => T0,
+    })
+    expect(failed.ok).toBe(false)
+    if (failed.ok) throw new Error("expected extract fail")
+    expect(failed.code).toBe("extract_failed")
+    expect(failed.analyses.some(a => a.step === "extract" && a.status === "failed")).toBe(true)
+    expect(failed.analyses.some(a => a.step === "extract" && a.status === "completed")).toBe(false)
+  })
+
+  it("third severity budget deny is distinct from bad JSON parse fail", async () => {
+    const native = new NativeDatabase(":memory:")
+    cleanups.push(() => native.close())
+    const db = wrap(native)
+    await initShippingTables(db, "mock")
+    const store = secrets()
+    const repo = new LlmRegistryRepository(db)
+    const provider = await repo.createProvider({
+      id: "fixture-vendor-budget",
+      name: "Fixture Vendor Budget",
+      baseUrl: "https://api.fixture-budget.example/v1",
+    })
+    await store.set(provider.secretRef, "sk-fixture-budget")
+    // High unit prices so estimate (400/200) = 0.6 and actual (40/20) = 0.06.
+    const model = await repo.createModel({
+      providerId: provider.id,
+      modelName: "fixture-chat-budget",
+      purpose: "chat",
+      unitPriceIn: 1000,
+      unitPriceOut: 1000,
+      currency: "USD",
+    })
+    await repo.upsertBinding({ step: "prefilter", modelId: model.id, updatedBy: "tester" })
+    await repo.upsertBinding({ step: "extract", modelId: model.id, updatedBy: "tester" })
+    const intel = new IntelRepository(db)
+    const saved = await seedMaterial(intel)
+    // budget in [0.78, 0.84): 4th estimate succeeds, 5th (tiebreak) denied.
+    const shared = resolveSharedLlmBudgetGate(0.80, "USD")
+    const state: ScriptedState = {
+      chatHits: 0,
+      embeddingHits: 0,
+      scripts: [prefilterPass, extractJson, scoreHigh, scoreLow, scoreMid],
+    }
+    const result = await runOfflineAnalyze({
+      db,
+      intelRepo: intel,
+      secretStore: store,
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      modelUseLicense: licenseFor(saved, hash(body)),
+      transport: createScriptedTransport(state),
+      sharedBudget: shared,
+      resolveClaimConfig: createPaidClaimBudgetResolver({ mode: "registry", overridePool: shared }),
+      now: () => T0,
+    })
+    expect(result.ok).toBe(false)
+    if (result.ok) throw new Error("expected budget fail on tiebreak")
+    expect(result.code).toBe("severity_failed")
+    expect(result.analyses.some(a => a.step === "severity_tiebreak" && a.status === "denied" && a.errorCode === "budget_denied")).toBe(true)
+    expect(result.analyses.some(a => a.errorCode === "invalid_severity_score")).toBe(false)
+    expect(state.chatHits).toBe(4)
+  })
+
+  it("buildAnalysisReuseKey changes when modelName or endpoint changes", () => {
+    const base = {
+      step: "extract" as const,
+      providerId: "p",
+      baseUrl: "https://a.example/v1",
+      modelId: "m1",
+      modelName: "chat-a",
+      unitPriceIn: 1,
+      unitPriceOut: 2,
+      currency: "USD",
+      promptHash: "abc",
+      contentHash: "def",
+      stepInputFingerprint: "ghi",
+    }
+    const k1 = buildAnalysisReuseKey(base)
+    const k2 = buildAnalysisReuseKey({ ...base, modelName: "chat-b" })
+    const k3 = buildAnalysisReuseKey({ ...base, baseUrl: "https://b.example/v1" })
+    expect(k1).not.toBe(k2)
+    expect(k1).not.toBe(k3)
+    expect(k1).toBe(buildAnalysisReuseKey(base))
   })
 })

@@ -1,20 +1,23 @@
 /**
- * Offline intel analyze chain (R3-1 / ADR-007 / plan §4.1–4.2):
- * dedupe → admitModelPayload → prefilter → extract → dual severity (+ optional median).
+ * Offline intel analyze chain (R3-1 / ADR-007 / plan section 4.1-4.2):
+ * dedupe -> admitModelPayload -> prefilter -> extract -> dual severity (+ optional median).
  *
  * - Exact item/version via readIntelMaterial; GET paths never call this module.
  * - Missing rights/binding/budget/version stops before provider.
- * - UNKNOWN prefilter does not exclude; BLOCK stops; missing body demotes BLOCK→UNKNOWN.
- * - Two independent severity scores; third median only when |diff| > 1; third failure ≠ forged complete.
- * - Each paid step has its own receipt/budget; reusable completed rows avoid double-pay.
- * - Persist material version, model, prompt hash, provenance/basis; failures stay auditable.
+ * - Per-step paidCtx.currency = model.currency (checked against shared pool BEFORE provider).
+ * - Reuse identity = reuse_key over provider/endpoint/model config + prompt + step input.
+ * - Strict output validation; illegal output stays auditable failed (no completed, no re-bill).
+ * - Severity attempts independent; median3 keeps all three evidences.
+ * - Default resolveClaimConfig = createPaidClaimBudgetResolver({ mode: "registry" }).
+ * - PRODUCTION BOUNDARY: injectable offline helper; not a claim of live HTTP/production pool wiring.
  */
+import { createHash } from "node:crypto"
 import type { Database } from "db0"
 import type { IntelRepository } from "#/database/intel"
 import { type IntelAnalysisRecord, IntelAnalysisRepository, type IntelAnalysisStep } from "#/database/intel-analysis"
 import { readClipAudit } from "#/intel/manual-license"
 import { readIntelMaterial } from "#/intel/material-read"
-import { admitModelPayload } from "#/intel/llm/model-payload-gate"
+import { type ExactVersionModelLicense, admitModelPayload } from "#/intel/llm/model-payload-gate"
 import { estimateTokenCost, resolveStepBinding } from "#/intel/llm/registry"
 import {
   PaidCostError,
@@ -39,14 +42,16 @@ import {
   type DimensionScores,
   type EventType,
   type SeverityBasis,
+  aggregateMedianSeverity,
   computeSeverity,
   isEventType,
-  median3,
 } from "#/intel/industry/selection"
 import type { SecretStore } from "#/providers/contracts"
 import type { SharedLlmBudgetGate } from "#/intel/llm/shared-budget"
-import type { PaidClaimBudgetConfig } from "#/services/shared-llm-budget-settings"
+import { type PaidClaimBudgetConfig, createPaidClaimBudgetResolver } from "#/services/shared-llm-budget-settings"
 import type { LlmModelRecord, LlmProviderRecord } from "#/database/llm-registry"
+
+export type { ExactVersionModelLicense }
 
 export type PrefilterDecision = "PASS" | "BLOCK" | "UNKNOWN"
 
@@ -60,11 +65,13 @@ export interface ExtractedIntel {
   occurredAt: string | null
   effectiveFrom: string | null
   effectiveUntil: string | null
-  /** Preserve original wording / nulls — never invent. */
+  /** Preserve original wording / nulls -- never invent. */
   numbers: Record<string, string | number | null>
   isOfficialStatement: boolean | null
   isFirstParty: boolean | null
   dimensions: DimensionScores
+  /** Explicit routine-notice evidence from extract when present. */
+  routineNotice?: boolean | null
 }
 
 export interface AnalyzePipelineInput {
@@ -74,12 +81,21 @@ export interface AnalyzePipelineInput {
   secretStore: SecretStore
   itemId: string
   versionId: string
-  /** Explicit model-use grant. readIntelMaterial is NOT a grant. */
-  modelUsePermitted: boolean
+  /**
+   * Exact-version model-use license. Bare `true` is NOT accepted.
+   * Must bind itemId/versionId/contentHash of the material under analysis.
+   */
+  modelUseLicense: ExactVersionModelLicense
   transport: OpenAiCompatibleTransport
-  currency: string
+  /** @deprecated Prefer model currency per step; retained for callers that still pass a pool hint. */
+  currency?: string
   monthlyBudget?: number | null
   sharedBudget?: SharedLlmBudgetGate
+  /**
+   * Claim-time budget resolver. When omitted, defaults to strict DB
+   * createPaidClaimBudgetResolver({ mode: "registry" }). Test overrides must pass
+   * createPaidClaimBudgetResolver({ mode, overridePool }) explicitly -- never silent.
+   */
   resolveClaimConfig?: (db: Database) => Promise<PaidClaimBudgetConfig>
   now?: () => Date
   timeoutMs?: number
@@ -123,39 +139,53 @@ export type AnalyzePipelineResult =
     receiptIds: string[]
   }
 
-function asFiniteInt(value: unknown, min: number, max: number): number | null {
-  if (typeof value !== "number" || !Number.isFinite(value)) return null
-  const n = Math.round(value)
-  if (n < min || n > max) return null
-  return n
+/** Strict integer in [min,max] -- no Math.round coercion of floats. */
+function asStrictInt(value: unknown, min: number, max: number): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)) return null
+  if (value < min || value > max) return null
+  return value
 }
 
-function asStringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return []
-  return value.filter((v): v is string => typeof v === "string").map(v => v.slice(0, 120))
+/** Required string array -- wrong type fails (no silent []). */
+function asStrictStringArray(value: unknown): string[] | null {
+  if (!Array.isArray(value)) return null
+  if (!value.every(v => typeof v === "string")) return null
+  return value.map(v => v.slice(0, 120))
 }
 
-function asNullableString(value: unknown): string | null {
-  if (value === null || value === undefined) return null
-  if (typeof value !== "string") return null
+function asStrictNullableString(value: unknown): string | null | undefined {
+  if (value === null) return null
+  if (value === undefined) return undefined
+  if (typeof value !== "string") return undefined
   return value.slice(0, 500)
 }
 
-function asNullableBool(value: unknown): boolean | null {
-  if (value === null || value === undefined) return null
-  if (typeof value === "boolean") return value
-  return null
+/** ISO date/datetime string or null. */
+function asStrictDateOrNull(value: unknown): string | null | undefined {
+  if (value === null) return null
+  if (typeof value !== "string") return undefined
+  const s = value.trim()
+  if (!s) return undefined
+  // Accept YYYY-MM-DD or full ISO-8601 datetime
+  if (!/^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/.test(s)) return undefined
+  return s.slice(0, 64)
 }
 
-/** Preserve raw numeric wording; do not coerce or invent. */
-function asNumbersMap(value: unknown): Record<string, string | number | null> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return {}
+function asStrictNullableBool(value: unknown): boolean | null | undefined {
+  if (value === null) return null
+  if (typeof value === "boolean") return value
+  return undefined
+}
+
+/** numbers must be a plain object (not array); values string|number|null only. */
+function asStrictNumbersMap(value: unknown): Record<string, string | number | null> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null
   const out: Record<string, string | number | null> = {}
   for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
     if (v === null) out[k] = null
     else if (typeof v === "number" && Number.isFinite(v)) out[k] = v
     else if (typeof v === "string") out[k] = v.slice(0, 200)
-    // drop invented object/array shapes
+    else return null
   }
   return out
 }
@@ -174,21 +204,27 @@ function parseJsonObject(text: string): Record<string, unknown> | null {
   }
 }
 
-export function parsePrefilterDecision(raw: unknown, contentMissing: boolean): PrefilterDecision | null {
-  let obj: Record<string, unknown> | null = null
-  if (typeof raw === "string") {
-    obj = parseJsonObject(raw)
-  } else if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    obj = raw as Record<string, unknown>
-  } else if (raw && typeof raw === "object" && "response" in (raw as object)) {
+function coerceRawObject(raw: unknown): Record<string, unknown> | null {
+  if (typeof raw === "string") return parseJsonObject(raw)
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null
+  if ("content" in (raw as object) && typeof (raw as { content?: unknown }).content === "string") {
+    return parseJsonObject(String((raw as { content: string }).content))
+  }
+  if ("response" in (raw as object)) {
     const response = (raw as { response?: unknown }).response
-    if (typeof response === "string") {
-      obj = parseJsonObject(response)
-    } else if (response && typeof response === "object" && "content" in (response as object)) {
-      const content = (response as { content?: unknown }).content
-      if (typeof content === "string") obj = parseJsonObject(content)
+    if (typeof response === "string") return parseJsonObject(response)
+    if (response && typeof response === "object" && "content" in (response as object)) {
+      return parseJsonObject(String((response as { content: string }).content))
+    }
+    if (response && typeof response === "object" && !Array.isArray(response)) {
+      return response as Record<string, unknown>
     }
   }
+  return raw as Record<string, unknown>
+}
+
+export function parsePrefilterDecision(raw: unknown, contentMissing: boolean): PrefilterDecision | null {
+  const obj = coerceRawObject(raw)
   if (!obj) return null
   const decision = obj.decision
   if (decision !== "PASS" && decision !== "BLOCK" && decision !== "UNKNOWN") return null
@@ -197,84 +233,115 @@ export function parsePrefilterDecision(raw: unknown, contentMissing: boolean): P
 }
 
 export function parseExtractOutput(raw: unknown): ExtractedIntel | null {
-  let obj: Record<string, unknown> | null = null
-  if (typeof raw === "string") {
-    obj = parseJsonObject(raw)
-  } else if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    if ("content" in (raw as object) && typeof (raw as { content?: unknown }).content === "string") {
-      obj = parseJsonObject(String((raw as { content: string }).content))
-    } else if ("response" in (raw as object)) {
-      const response = (raw as { response?: unknown }).response
-      if (typeof response === "string") {
-        obj = parseJsonObject(response)
-      } else if (response && typeof response === "object" && "content" in (response as object)) {
-        obj = parseJsonObject(String((response as { content: string }).content))
-      } else if (response && typeof response === "object") {
-        obj = response as Record<string, unknown>
-      }
-    } else {
-      obj = raw as Record<string, unknown>
-    }
-  }
+  const obj = coerceRawObject(raw)
   if (!obj || !isEventType(obj.eventType)) return null
   const dimsRaw = obj.dimensions
   if (!dimsRaw || typeof dimsRaw !== "object" || Array.isArray(dimsRaw)) return null
   const d = dimsRaw as Record<string, unknown>
-  const impact = asFiniteInt(d.impact, 0, 10)
-  const scope = asFiniteInt(d.scope, 0, 10)
-  const urgency = asFiniteInt(d.urgency, 0, 10)
-  const actionability = asFiniteInt(d.actionability, 0, 10)
+  const impact = asStrictInt(d.impact, 0, 10)
+  const scope = asStrictInt(d.scope, 0, 10)
+  const urgency = asStrictInt(d.urgency, 0, 10)
+  const actionability = asStrictInt(d.actionability, 0, 10)
   if (impact === null || scope === null || urgency === null || actionability === null) return null
+
+  const countries = asStrictStringArray(obj.countries)
+  const ports = asStrictStringArray(obj.ports)
+  const cities = asStrictStringArray(obj.cities)
+  const chainStages = asStrictStringArray(obj.chainStages)
+  if (!countries || !ports || !cities || !chainStages) return null
+
+  const namedEntity = asStrictNullableString(obj.namedEntity)
+  if (namedEntity === undefined) return null
+  const occurredAt = asStrictDateOrNull(obj.occurredAt)
+  const effectiveFrom = asStrictDateOrNull(obj.effectiveFrom)
+  const effectiveUntil = asStrictDateOrNull(obj.effectiveUntil)
+  if (occurredAt === undefined || effectiveFrom === undefined || effectiveUntil === undefined) return null
+
+  const numbers = asStrictNumbersMap(obj.numbers)
+  if (!numbers) return null
+
+  const isOfficialStatement = asStrictNullableBool(obj.isOfficialStatement)
+  const isFirstParty = asStrictNullableBool(obj.isFirstParty)
+  if (isOfficialStatement === undefined || isFirstParty === undefined) return null
+
+  let routineNotice: boolean | null | undefined = null
+  if ("routineNotice" in obj) {
+    routineNotice = asStrictNullableBool(obj.routineNotice)
+    if (routineNotice === undefined) return null
+  }
+
   return {
     eventType: obj.eventType,
-    countries: asStringArray(obj.countries),
-    ports: asStringArray(obj.ports),
-    cities: asStringArray(obj.cities),
-    chainStages: asStringArray(obj.chainStages),
-    namedEntity: asNullableString(obj.namedEntity),
-    occurredAt: asNullableString(obj.occurredAt),
-    effectiveFrom: asNullableString(obj.effectiveFrom),
-    effectiveUntil: asNullableString(obj.effectiveUntil),
-    numbers: asNumbersMap(obj.numbers),
-    isOfficialStatement: asNullableBool(obj.isOfficialStatement),
-    isFirstParty: asNullableBool(obj.isFirstParty),
+    countries,
+    ports,
+    cities,
+    chainStages,
+    namedEntity,
+    occurredAt,
+    effectiveFrom,
+    effectiveUntil,
+    numbers,
+    isOfficialStatement,
+    isFirstParty,
     dimensions: { impact, scope, urgency, actionability },
+    routineNotice: routineNotice ?? null,
   }
 }
 
 export function parseSeverityScoreOutput(raw: unknown): { dimensions: DimensionScores, rumourOnly: boolean | null } | null {
-  let obj: Record<string, unknown> | null = null
-  if (typeof raw === "string") {
-    obj = parseJsonObject(raw)
-  } else if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    if ("content" in (raw as object) && typeof (raw as { content?: unknown }).content === "string") {
-      obj = parseJsonObject(String((raw as { content: string }).content))
-    } else if ("response" in (raw as object)) {
-      const response = (raw as { response?: unknown }).response
-      if (typeof response === "string") {
-        obj = parseJsonObject(response)
-      } else if (response && typeof response === "object" && "content" in (response as object)) {
-        obj = parseJsonObject(String((response as { content: string }).content))
-      } else if (response && typeof response === "object") {
-        obj = response as Record<string, unknown>
-      }
-    } else {
-      obj = raw as Record<string, unknown>
-    }
-  }
+  const obj = coerceRawObject(raw)
   if (!obj) return null
   const dimsRaw = obj.dimensions
   if (!dimsRaw || typeof dimsRaw !== "object" || Array.isArray(dimsRaw)) return null
   const d = dimsRaw as Record<string, unknown>
-  const impact = asFiniteInt(d.impact, 0, 10)
-  const scope = asFiniteInt(d.scope, 0, 10)
-  const urgency = asFiniteInt(d.urgency, 0, 10)
-  const actionability = asFiniteInt(d.actionability, 0, 10)
+  const impact = asStrictInt(d.impact, 0, 10)
+  const scope = asStrictInt(d.scope, 0, 10)
+  const urgency = asStrictInt(d.urgency, 0, 10)
+  const actionability = asStrictInt(d.actionability, 0, 10)
   if (impact === null || scope === null || urgency === null || actionability === null) return null
+  const rumourOnly = asStrictNullableBool(obj.rumourOnly)
+  if (rumourOnly === undefined) return null
   return {
     dimensions: { impact, scope, urgency, actionability },
-    rumourOnly: asNullableBool(obj.rumourOnly),
+    rumourOnly,
   }
+}
+
+function sha256Json(value: unknown): string {
+  return createHash("sha256").update(JSON.stringify(value)).digest("hex")
+}
+
+/**
+ * Immutable reuse identity: provider/endpoint/model config + prompt + material + step input.
+ * Mutable row IDs alone are never sufficient (in-place modelName/baseUrl edits must miss).
+ */
+export function buildAnalysisReuseKey(input: {
+  step: IntelAnalysisStep
+  providerId: string
+  baseUrl: string
+  modelId: string
+  modelName: string
+  unitPriceIn: number
+  unitPriceOut: number
+  currency: string
+  promptHash: string
+  contentHash: string
+  stepInputFingerprint: string
+}): string {
+  return sha256Json({
+    v: 1,
+    step: input.step,
+    providerId: input.providerId,
+    baseUrl: input.baseUrl,
+    modelId: input.modelId,
+    modelName: input.modelName,
+    unitPriceIn: input.unitPriceIn,
+    unitPriceOut: input.unitPriceOut,
+    currency: input.currency,
+    promptHash: input.promptHash,
+    contentHash: input.contentHash,
+    stepInputFingerprint: input.stepInputFingerprint,
+  })
 }
 
 function chatContentFromReceiptResponse(response: unknown): string {
@@ -282,11 +349,9 @@ function chatContentFromReceiptResponse(response: unknown): string {
   if (response && typeof response === "object") {
     const r = response as Record<string, unknown>
     if (typeof r.content === "string") return r.content
-    if (r.kind === "analyze_chat" && typeof r.content === "string") return r.content
   }
   return ""
 }
-
 async function callChatStep(input: {
   ctx: PaidRequestContext
   provider: LlmProviderRecord
@@ -301,11 +366,17 @@ async function callChatStep(input: {
   estimatedTokensIn?: number
   estimatedTokensOut?: number
 }): Promise<ReceiptResult> {
+  // Per-step currency MUST equal the real model currency BEFORE provider.
+  // CNY pool + USD model fails in claim assert with zero attempt/provider.
+  const ctx: PaidRequestContext = {
+    ...input.ctx,
+    currency: input.model.currency,
+  }
   const tokensIn = input.estimatedTokensIn ?? 400
   const tokensOut = input.estimatedTokensOut ?? 200
   const estimatedCost = estimateTokenCost(input.model, tokensIn, tokensOut)
   return paidRequest(
-    input.ctx,
+    ctx,
     {
       providerId: input.provider.secretRef,
       capability: input.capability,
@@ -318,6 +389,7 @@ async function callChatStep(input: {
         purpose: input.purpose,
         modelId: input.model.id,
         providerId: input.provider.id,
+        modelCurrency: input.model.currency,
       },
       attemptTag: input.attemptTag,
       estimatedCost,
@@ -367,11 +439,31 @@ function mapPaidError(error: unknown): { code: AnalyzeDenyCode, reason: string }
   return { code: "extract_failed", reason: error instanceof Error ? error.message : "unknown_error" }
 }
 
+function reuseKeyForBinding(step: IntelAnalysisStep, provider: LlmProviderRecord, model: LlmModelRecord, promptHash: string, contentHash: string, stepInputFingerprint: string): string {
+  return buildAnalysisReuseKey({
+    step,
+    providerId: provider.id,
+    baseUrl: provider.baseUrl,
+    modelId: model.id,
+    modelName: model.modelName,
+    unitPriceIn: model.unitPriceIn,
+    unitPriceOut: model.unitPriceOut,
+    currency: model.currency,
+    promptHash,
+    contentHash,
+    stepInputFingerprint,
+  })
+}
+
 export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<AnalyzePipelineResult> {
   const analysisRepo = input.analysisRepo ?? new IntelAnalysisRepository(input.db)
   const receiptIds: string[] = []
   const analyses: IntelAnalysisRecord[] = []
   const nowIso = () => (input.now ? input.now() : new Date()).toISOString()
+
+  // Default budget path: strict DB registry resolver. Test overrides must be explicit.
+  const resolveClaimConfig = input.resolveClaimConfig
+    ?? createPaidClaimBudgetResolver({ mode: "registry" })
 
   const materialResult = await readIntelMaterial(input.intelRepo, input.itemId, input.versionId)
   if (!materialResult.ok) {
@@ -404,9 +496,15 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
     material.version.id,
   )
   const clipAudit = readClipAudit(manual)
+  const materialRef = {
+    itemId: material.itemId,
+    versionId: material.version.id,
+    contentHash: material.version.contentHash,
+  }
   const gate = admitModelPayload({
     clipAudit,
-    modelUsePermitted: input.modelUsePermitted,
+    license: input.modelUseLicense,
+    materialRef,
   })
   if (!gate.allow) {
     const row = await analysisRepo.insert({
@@ -461,13 +559,14 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
   const prefilterBinding = prefilterResolved
   const extractBinding = extractResolved
 
+  // Base paid context; each callChatStep overrides currency to the step model currency.
   const paidCtx: PaidRequestContext = {
     db: input.db,
     secretStore: input.secretStore,
     monthlyBudget: input.monthlyBudget,
-    currency: input.currency,
+    currency: prefilterBinding.model.currency,
     sharedBudget: input.sharedBudget,
-    resolveClaimConfig: input.resolveClaimConfig,
+    resolveClaimConfig,
     now: input.now,
     timeoutMs: input.timeoutMs,
   }
@@ -479,13 +578,21 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
   // ---------- prefilter (with dedupe) ----------
   let prefilterDecision: PrefilterDecision | null = null
   {
+    const userMsg = buildPrefilterUserMessage({ title, bodyText, contentMissing })
+    const reuseKey = reuseKeyForBinding(
+      "prefilter",
+      prefilterBinding.provider,
+      prefilterBinding.model,
+      PREFILTER_PROMPT.hash,
+      material.version.contentHash,
+      sha256Json({ user: userMsg }),
+    )
     const reusable = await analysisRepo.findReusable({
       itemId: material.itemId,
       versionId: material.version.id,
       contentHash: material.version.contentHash,
       step: "prefilter",
-      modelId: prefilterBinding.model.id,
-      promptHash: PREFILTER_PROMPT.hash,
+      reuseKey,
     })
     if (reusable?.outputJson) {
       const reusedDecision = parsePrefilterDecision(reusable.outputJson, contentMissing)
@@ -501,9 +608,10 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
           modelId: prefilterBinding.model.id,
           modelName: prefilterBinding.model.modelName,
           promptHash: PREFILTER_PROMPT.hash,
+          reuseKey,
           output: { decision: reusedDecision, reusedFrom: reusable.id },
           provenance: "system",
-          basis: JSON.stringify({ reusedFrom: reusable.id, decision: reusedDecision }),
+          basis: JSON.stringify({ reusedFrom: reusable.id, decision: reusedDecision, reuseKey }),
           receiptId: reusable.receiptId,
           createdAt: nowIso(),
         })
@@ -525,11 +633,14 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
             versionId: material.version.id,
             contentHash: material.version.contentHash,
             promptHash: PREFILTER_PROMPT.hash,
+            reuseKey,
             modelId: prefilterBinding.model.id,
+            modelName: prefilterBinding.model.modelName,
+            baseUrl: prefilterBinding.provider.baseUrl,
           },
           attemptTag: "prefilter-1",
           system: PREFILTER_PROMPT.text,
-          user: buildPrefilterUserMessage({ title, bodyText, contentMissing }),
+          user: userMsg,
           transport: input.transport,
         })
         receiptIds.push(result.receiptId)
@@ -546,6 +657,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
             modelId: prefilterBinding.model.id,
             modelName: prefilterBinding.model.modelName,
             promptHash: PREFILTER_PROMPT.hash,
+            reuseKey,
             output: { content },
             provenance: "ai",
             basis: JSON.stringify({ parse: "invalid_prefilter" }),
@@ -575,9 +687,10 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
           modelId: prefilterBinding.model.id,
           modelName: prefilterBinding.model.modelName,
           promptHash: PREFILTER_PROMPT.hash,
+          reuseKey,
           output: { decision, content },
           provenance: "ai",
-          basis: JSON.stringify({ decision, receiptReused: result.reused }),
+          basis: JSON.stringify({ decision, receiptReused: result.reused, reuseKey }),
           receiptId: result.receiptId,
           createdAt: nowIso(),
         })
@@ -594,6 +707,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
           modelId: prefilterBinding.model.id,
           modelName: prefilterBinding.model.modelName,
           promptHash: PREFILTER_PROMPT.hash,
+          reuseKey,
           provenance: "system",
           basis: JSON.stringify(mapped),
           errorCode: mapped.code,
@@ -602,7 +716,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
         analyses.push(row)
         return {
           ok: false,
-          code: mapped.code,
+          code: mapped.code === "budget_denied" ? "budget_denied" : mapped.code,
           reason: mapped.reason,
           itemId: material.itemId,
           versionId: material.version.id,
@@ -628,22 +742,30 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
       receiptIds,
     }
   }
-  // UNKNOWN and PASS both continue (UNKNOWN 不当排除)
 
   // ---------- extract ----------
   let extract: ExtractedIntel | null = null
   {
+    const userMsg = buildExtractUserMessage({ title, bodyText })
+    const reuseKey = reuseKeyForBinding(
+      "extract",
+      extractBinding.provider,
+      extractBinding.model,
+      EXTRACT_PROMPT.hash,
+      material.version.contentHash,
+      sha256Json({ user: userMsg }),
+    )
     const reusable = await analysisRepo.findReusable({
       itemId: material.itemId,
       versionId: material.version.id,
       contentHash: material.version.contentHash,
       step: "extract",
-      modelId: extractBinding.model.id,
-      promptHash: EXTRACT_PROMPT.hash,
+      reuseKey,
     })
     if (reusable?.outputJson) {
       try {
-        const parsed = parseExtractOutput(JSON.parse(reusable.outputJson))
+        const parsedOut = JSON.parse(reusable.outputJson) as { extract?: unknown }
+        const parsed = parseExtractOutput(parsedOut.extract ?? reusable.outputJson)
         if (parsed) {
           extract = parsed
           const row = await analysisRepo.insert({
@@ -656,9 +778,10 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
             modelId: extractBinding.model.id,
             modelName: extractBinding.model.modelName,
             promptHash: EXTRACT_PROMPT.hash,
+            reuseKey,
             output: { extract: parsed, reusedFrom: reusable.id },
             provenance: "system",
-            basis: JSON.stringify({ reusedFrom: reusable.id }),
+            basis: JSON.stringify({ reusedFrom: reusable.id, reuseKey }),
             receiptId: reusable.receiptId,
             createdAt: nowIso(),
           })
@@ -666,7 +789,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
           if (reusable.receiptId) receiptIds.push(reusable.receiptId)
         }
       } catch {
-        // fall through to paid call
+        // fall through
       }
     }
     if (!extract) {
@@ -683,11 +806,14 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
             versionId: material.version.id,
             contentHash: material.version.contentHash,
             promptHash: EXTRACT_PROMPT.hash,
+            reuseKey,
             modelId: extractBinding.model.id,
+            modelName: extractBinding.model.modelName,
+            baseUrl: extractBinding.provider.baseUrl,
           },
           attemptTag: "extract-1",
           system: EXTRACT_PROMPT.text,
-          user: buildExtractUserMessage({ title, bodyText }),
+          user: userMsg,
           transport: input.transport,
         })
         receiptIds.push(result.receiptId)
@@ -704,6 +830,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
             modelId: extractBinding.model.id,
             modelName: extractBinding.model.modelName,
             promptHash: EXTRACT_PROMPT.hash,
+            reuseKey,
             output: { content },
             provenance: "ai",
             basis: JSON.stringify({ parse: "invalid_extract" }),
@@ -733,9 +860,10 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
           modelId: extractBinding.model.id,
           modelName: extractBinding.model.modelName,
           promptHash: EXTRACT_PROMPT.hash,
+          reuseKey,
           output: { extract: parsed, content },
           provenance: "ai",
-          basis: JSON.stringify({ eventType: parsed.eventType, receiptReused: result.reused }),
+          basis: JSON.stringify({ eventType: parsed.eventType, receiptReused: result.reused, reuseKey }),
           receiptId: result.receiptId,
           createdAt: nowIso(),
         })
@@ -752,6 +880,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
           modelId: extractBinding.model.id,
           modelName: extractBinding.model.modelName,
           promptHash: EXTRACT_PROMPT.hash,
+          reuseKey,
           provenance: "system",
           basis: JSON.stringify(mapped),
           errorCode: mapped.code,
@@ -774,10 +903,24 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
   // ---------- dual severity (+ optional third median) ----------
   const severityScores: number[] = []
   const severityBases: SeverityBasis[] = []
-  let rumourOnly: boolean | null = null
+  const extractFingerprint = sha256Json(extract)
 
   async function runSeverityAttempt(attemptIndex: number, step: IntelAnalysisStep): Promise<"ok" | "fail"> {
     const attemptTag = `severity-${attemptIndex}`
+    const userMsg = buildSeverityUserMessage({
+      title,
+      bodyText,
+      extract,
+      attemptIndex,
+    })
+    const reuseKey = reuseKeyForBinding(
+      step,
+      extractBinding.provider,
+      extractBinding.model,
+      SEVERITY_SCORE_PROMPT.hash,
+      material.version.contentHash,
+      sha256Json({ user: userMsg, extractFingerprint, attemptIndex }),
+    )
     try {
       const result = await callChatStep({
         ctx: paidCtx,
@@ -792,16 +935,15 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
           versionId: material.version.id,
           contentHash: material.version.contentHash,
           promptHash: SEVERITY_SCORE_PROMPT.hash,
+          reuseKey,
           modelId: extractBinding.model.id,
+          modelName: extractBinding.model.modelName,
+          baseUrl: extractBinding.provider.baseUrl,
+          extractFingerprint,
         },
         attemptTag,
         system: SEVERITY_SCORE_PROMPT.text,
-        user: buildSeverityUserMessage({
-          title,
-          bodyText,
-          extract,
-          attemptIndex,
-        }),
+        user: userMsg,
         transport: input.transport,
       })
       receiptIds.push(result.receiptId)
@@ -819,6 +961,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
           modelId: extractBinding.model.id,
           modelName: extractBinding.model.modelName,
           promptHash: SEVERITY_SCORE_PROMPT.hash,
+          reuseKey,
           output: { content },
           provenance: "ai",
           basis: JSON.stringify({ parse: "invalid_severity_score" }),
@@ -829,12 +972,13 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
         analyses.push(row)
         return "fail"
       }
-      if (scored.rumourOnly !== null) rumourOnly = scored.rumourOnly
+      // Each scoring attempt is independent -- do NOT carry prior rumourOnly.
       const basis = computeSeverity(extract!.eventType, scored.dimensions, {
         isOfficialStatement: extract!.isOfficialStatement,
         isFirstParty: extract!.isFirstParty,
-        rumourOnly,
-      })
+        rumourOnly: scored.rumourOnly,
+        routineNotice: extract!.routineNotice,
+      }, { attemptIndex })
       severityScores.push(basis.severity)
       severityBases.push(basis)
       const row = await analysisRepo.insert({
@@ -848,9 +992,16 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
         modelId: extractBinding.model.id,
         modelName: extractBinding.model.modelName,
         promptHash: SEVERITY_SCORE_PROMPT.hash,
+        reuseKey,
         output: { scored, basis, content },
         provenance: "ai",
-        basis: JSON.stringify({ severity: basis.severity, capsApplied: basis.capsApplied, receiptReused: result.reused }),
+        basis: JSON.stringify({
+          severity: basis.severity,
+          capsApplied: basis.capsApplied,
+          receiptReused: result.reused,
+          attemptIndex,
+          rumourOnly: scored.rumourOnly,
+        }),
         receiptId: result.receiptId,
         createdAt: nowIso(),
       })
@@ -869,6 +1020,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
         modelId: extractBinding.model.id,
         modelName: extractBinding.model.modelName,
         promptHash: SEVERITY_SCORE_PROMPT.hash,
+        reuseKey,
         provenance: "system",
         basis: JSON.stringify(mapped),
         errorCode: mapped.code,
@@ -905,7 +1057,6 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
   let finalSeverity = severityBases[0]!
   if (Math.abs(severityScores[0]! - severityScores[1]!) > 1) {
     if ((await runSeverityAttempt(3, "severity_tiebreak")) === "fail") {
-      // Third failure must NOT forge completion.
       return {
         ok: false,
         code: "severity_failed",
@@ -916,15 +1067,10 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
         receiptIds,
       }
     }
-    const med = median3(severityScores[0]!, severityScores[1]!, severityScores[2]!)
-    finalSeverity = {
-      ...severityBases[2]!,
-      severity: med,
-      capsApplied: [...severityBases[2]!.capsApplied, "median3"],
-    }
-  } else {
-    // Prefer the first score when within 1; record agreement in basis already.
-    finalSeverity = severityBases[0]!
+    finalSeverity = aggregateMedianSeverity(
+      extract!.eventType,
+      [severityBases[0]!, severityBases[1]!, severityBases[2]!],
+    )
   }
 
   const allReused = analyses.length > 0 && analyses.every(a => a.status === "reused")

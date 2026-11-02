@@ -1,7 +1,13 @@
 /**
  * Model payload admission gate (R3-1 / ADR-007).
- * `readIntelMaterial` returns stored material for internal use — that is NOT permission
+ * `readIntelMaterial` returns stored material for internal use -- that is NOT permission
  * to send content to a model. Default deny for private_material and unknown rights.
+ *
+ * PRODUCTION BOUNDARY (honest): this is still an injectable offline helper.
+ * It does NOT itself prove a production rights/annotation store, HTTP route, or
+ * authoritative total-pool wiring. Callers must supply a verifiable
+ * ExactVersionModelLicense bound to the exact item/version/contentHash.
+ * Passing bare `true` is NOT authorization evidence.
  */
 import type { ClipAudit } from "@shared/manual-clip"
 
@@ -10,26 +16,43 @@ export type ModelPayloadDenyCode =
   | "rights_unknown"
   | "rights_missing"
   | "no_model_permission"
+  | "license_mismatch"
 
 export type ModelPayloadGateResult =
   | { allow: true }
   | { allow: false, code: ModelPayloadDenyCode, reason: string }
 
+/** Verifiable exact-version model-use license. Bare boolean true is not a substitute. */
+export interface ExactVersionModelLicense {
+  itemId: string
+  versionId: string
+  contentHash: string
+  permitted: true
+  /** Optional opaque evidence id from a future rights store -- not required here. */
+  evidenceId?: string
+}
+
 export interface ModelPayloadCandidate {
   /** Manual clip audit metadata when present on the stored version. */
   clipAudit?: ClipAudit | null
   /**
-   * Explicit model-use permission record (defined by a later rights/annotation slice).
-   * Absent/false → deny. This slice only consumes the flag; it does not invent grants.
+   * Exact-version license. Prefer this over legacy modelUsePermitted.
+   * Must match the material under analysis (checked by caller or via materialRef).
+   */
+  license?: ExactVersionModelLicense | null
+  /**
+   * @deprecated Bare true is NOT authorization evidence. Kept only so callers that
+   * still pass a boolean fail closed unless a matching ExactVersionModelLicense is also present.
    */
   modelUsePermitted?: boolean
+  /** Material identity used to verify ExactVersionModelLicense binding. */
+  materialRef?: { itemId: string, versionId: string, contentHash: string }
 }
 
 /**
  * Decide whether candidate text/blocks may enter an LLM prompt.
- * Pipeline call sites must invoke this before prefilter/extract; this module alone does not call models.
- * R3-1 STATUS: skeleton only — NOT WIRED into the prefilter/extract/runtime pipeline yet
- * (call sites still pending a later slice). Unit tests cover the pure gate function.
+ * Pipeline call sites must invoke this before prefilter/extract.
+ * Offline helper only -- not a claim of production rights authority.
  */
 export function admitModelPayload(candidate: ModelPayloadCandidate): ModelPayloadGateResult {
   const audit = candidate.clipAudit
@@ -48,7 +71,6 @@ export function admitModelPayload(candidate: ModelPayloadCandidate): ModelPayloa
     }
   }
   if (audit && "rights" in audit) {
-    // Legacy declaration exists but is unverified — still not automatic model permission.
     if (audit.verification === "user_declaration_unverified") {
       return {
         allow: false,
@@ -57,12 +79,34 @@ export function admitModelPayload(candidate: ModelPayloadCandidate): ModelPayloa
       }
     }
   }
-  if (candidate.modelUsePermitted !== true) {
+
+  const license = candidate.license
+  if (license && license.permitted === true) {
+    const ref = candidate.materialRef
+    if (!ref
+      || license.itemId !== ref.itemId
+      || license.versionId !== ref.versionId
+      || license.contentHash !== ref.contentHash) {
+      return {
+        allow: false,
+        code: "license_mismatch",
+        reason: "ExactVersionModelLicense must bind to the exact item/version/contentHash under analysis",
+      }
+    }
+    return { allow: true }
+  }
+
+  // Bare modelUsePermitted=true is intentionally insufficient.
+  if (candidate.modelUsePermitted === true) {
     return {
       allow: false,
       code: "no_model_permission",
-      reason: "explicit model-use permission record required; readIntelMaterial is not a grant",
+      reason: "bare modelUsePermitted=true is not authorization evidence; ExactVersionModelLicense required",
     }
   }
-  return { allow: true }
+  return {
+    allow: false,
+    code: "no_model_permission",
+    reason: "explicit ExactVersionModelLicense required; readIntelMaterial is not a grant",
+  }
 }

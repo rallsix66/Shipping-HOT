@@ -26,19 +26,33 @@ export interface DimensionScores {
   impact: number
   /** 影响范围 0–10 */
   scope: number
-  /** 紧迫性 0–10 */
+  /** 紧迫度 0–10 */
   urgency: number
   /** 可行动性 0–10 */
   actionability: number
 }
 
-export interface SeverityBasis {
-  eventType: EventType
+export interface SeverityAttemptEvidence {
+  attemptIndex: number
   dimensions: DimensionScores
   weighted: number
   beforeCap: number
   severity: number
   capsApplied: string[]
+  rumourOnly: boolean | null
+}
+
+export interface SeverityBasis {
+  eventType: EventType
+  /** Single-attempt dimensions; for median3 this mirrors the attempt whose severity equals the median. */
+  dimensions: DimensionScores
+  weighted: number
+  beforeCap: number
+  severity: number
+  capsApplied: string[]
+  aggregation: "single" | "median3"
+  /** Full per-attempt evidence (required for auditable median3). */
+  evidence: SeverityAttemptEvidence[]
 }
 
 /** Per-event-type weights for the four internal dimensions. */
@@ -64,7 +78,6 @@ function clamp01to10(n: number): number {
 }
 
 function mapToSeverity1to5(weighted0to10: number): number {
-  // 0–10 → 1–5 (ceil of /2, floor at 1)
   const mapped = Math.ceil(weighted0to10 / 2)
   return Math.max(1, Math.min(5, mapped || 1))
 }
@@ -75,12 +88,20 @@ export function isEventType(value: unknown): value is EventType {
 
 /**
  * Compute severity 1–5 from dimension scores and event type.
- * Caps (plan §4.2): routine holiday/advisory ≤1; single unverified rumour ≤2.
+ * Caps (plan §4.2): routine announcements ≤1 (needs clear routine evidence — NOT every holiday_notice);
+ * single unverified rumour ≤2.
  */
 export function computeSeverity(
   eventType: EventType,
   dimensions: DimensionScores,
-  flags: { isOfficialStatement?: boolean | null, isFirstParty?: boolean | null, rumourOnly?: boolean | null } = {},
+  flags: {
+    isOfficialStatement?: boolean | null
+    isFirstParty?: boolean | null
+    rumourOnly?: boolean | null
+    /** Explicit routine-notice evidence (e.g. scheduled holiday calendar notice). */
+    routineNotice?: boolean | null
+  } = {},
+  meta: { attemptIndex?: number } = {},
 ): SeverityBasis {
   const weights = EVENT_TYPE_WEIGHTS[eventType]
   const d = {
@@ -97,11 +118,15 @@ export function computeSeverity(
   const beforeCap = severity
   const capsApplied: string[] = []
 
-  if (eventType === "holiday_notice" || (eventType === "carrier_advisory" && d.impact <= 2 && d.urgency <= 2)) {
-    if (severity > 1) {
-      severity = 1
-      capsApplied.push("routine_notice_max_1")
-    }
+  // Routine cap: only with clear routine evidence. Major disruption under a holiday_notice
+  // label must NOT be forced to 1. Low impact+urgency holiday/advisory may count as routine-like.
+  const routineByFlag = flags.routineNotice === true
+  const routineHolidayDims = eventType === "holiday_notice" && d.impact <= 2 && d.urgency <= 2
+  const routineAdvisory = eventType === "carrier_advisory" && d.impact <= 2 && d.urgency <= 2
+  if (routineByFlag || routineHolidayDims || routineAdvisory) {
+    if (severity > 1) severity = 1
+    // Always record that the routine path applied (even when already <=1).
+    capsApplied.push("routine_notice_max_1")
   }
   if (flags.rumourOnly === true && flags.isOfficialStatement !== true && flags.isFirstParty !== true) {
     if (severity > 2) {
@@ -110,11 +135,55 @@ export function computeSeverity(
     }
   }
 
-  return { eventType, dimensions: d, weighted: Number(weighted.toFixed(4)), beforeCap, severity, capsApplied }
+  const evidence: SeverityAttemptEvidence[] = [{
+    attemptIndex: meta.attemptIndex ?? 1,
+    dimensions: d,
+    weighted: Number(weighted.toFixed(4)),
+    beforeCap,
+    severity,
+    capsApplied: [...capsApplied],
+    rumourOnly: flags.rumourOnly ?? null,
+  }]
+
+  return {
+    eventType,
+    dimensions: d,
+    weighted: Number(weighted.toFixed(4)),
+    beforeCap,
+    severity,
+    capsApplied,
+    aggregation: "single",
+    evidence,
+  }
 }
 
 /** Median of three integers (for severity tie-break). */
 export function median3(a: number, b: number, c: number): number {
   const xs = [a, b, c].sort((x, y) => x - y)
   return xs[1]!
+}
+
+/**
+ * Aggregate three independent severity bases via median of severity scores.
+ * Preserves all three evidences; dimensions/weighted/beforeCap come from the
+ * earliest attempt whose severity equals the median (never blindly from attempt 3).
+ */
+export function aggregateMedianSeverity(
+  eventType: EventType,
+  bases: [SeverityBasis, SeverityBasis, SeverityBasis],
+): SeverityBasis {
+  const scores = bases.map(b => b.severity) as [number, number, number]
+  const med = median3(scores[0], scores[1], scores[2])
+  const evidence: SeverityAttemptEvidence[] = bases.flatMap(b => b.evidence)
+  const match = bases.find(b => b.severity === med) ?? bases[0]!
+  return {
+    eventType,
+    dimensions: match.dimensions,
+    weighted: match.weighted,
+    beforeCap: match.beforeCap,
+    severity: med,
+    capsApplied: ["median3"],
+    aggregation: "median3",
+    evidence,
+  }
 }

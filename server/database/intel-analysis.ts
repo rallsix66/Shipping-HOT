@@ -17,6 +17,7 @@ export interface IntelAnalysisRecord {
   modelId: string | null
   modelName: string | null
   promptHash: string | null
+  reuseKey: string | null
   outputJson: string | null
   provenance: IntelAnalysisProvenance
   basis: string
@@ -36,6 +37,7 @@ export interface IntelAnalysisWrite {
   modelId?: string | null
   modelName?: string | null
   promptHash?: string | null
+  reuseKey?: string | null
   output?: unknown
   provenance: IntelAnalysisProvenance
   basis: string
@@ -59,6 +61,7 @@ function mapRow(row: Row): IntelAnalysisRecord {
     modelId: row.model_id == null ? null : String(row.model_id),
     modelName: row.model_name == null ? null : String(row.model_name),
     promptHash: row.prompt_hash == null ? null : String(row.prompt_hash),
+    reuseKey: row.reuse_key == null ? null : String(row.reuse_key),
     outputJson: row.output_json == null ? null : String(row.output_json),
     provenance: row.provenance as IntelAnalysisProvenance,
     basis: String(row.basis),
@@ -78,9 +81,9 @@ export class IntelAnalysisRepository {
     await this.db.prepare(`
       INSERT INTO intel_analysis (
         id, item_id, version_id, content_hash, step, attempt_index, status,
-        provider_id, model_id, model_name, prompt_hash, output_json,
+        provider_id, model_id, model_name, prompt_hash, reuse_key, output_json,
         provenance, basis, receipt_id, error_code, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       entry.itemId,
@@ -93,6 +96,7 @@ export class IntelAnalysisRepository {
       entry.modelId ?? null,
       entry.modelName ?? null,
       entry.promptHash ?? null,
+      entry.reuseKey ?? null,
       outputJson,
       entry.provenance,
       entry.basis,
@@ -112,21 +116,21 @@ export class IntelAnalysisRepository {
   }
 
   /**
-   * Find a reusable completed/reused analysis for the same material version + step + model + prompt.
-   * Failed/unknown/denied rows are never reused as success.
+   * Reuse only when material version + step + immutable reuse_key match.
+   * reuse_key covers provider/endpoint/model config + prompt + step input fingerprint --
+   * never trust mutable row ids alone (in-place modelName/baseUrl edits must miss).
    */
   async findReusable(input: {
     itemId: string
     versionId: string
     contentHash: string
     step: IntelAnalysisStep
-    modelId: string
-    promptHash: string
+    reuseKey: string
   }): Promise<IntelAnalysisRecord | null> {
     const row = await this.db.prepare(`
       SELECT * FROM intel_analysis
       WHERE item_id = ? AND version_id = ? AND content_hash = ?
-        AND step = ? AND model_id = ? AND prompt_hash = ?
+        AND step = ? AND reuse_key = ?
         AND status IN ('completed', 'reused')
       ORDER BY created_at DESC
       LIMIT 1
@@ -135,8 +139,7 @@ export class IntelAnalysisRepository {
       input.versionId,
       input.contentHash,
       input.step,
-      input.modelId,
-      input.promptHash,
+      input.reuseKey,
     ) as Row | undefined
     return row ? mapRow(row) : null
   }

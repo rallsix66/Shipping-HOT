@@ -1066,12 +1066,14 @@ async function main() {
     await sleep(400)
     const afterBudget = q('[data-testid="shared-llm-budget-input"]')?.value
     const afterCurrency = q('[data-testid="shared-llm-budget-currency"]')?.value
+    const switched = touched.filter((t) => t.next && t.next !== t.prev)
     return {
-      ok: afterBudget === "77.77" && afterCurrency === "USD" && touched.length >= 1,
+      ok: afterBudget === "77.77" && afterCurrency === "USD" && switched.length >= 1,
       afterBudget,
       afterCurrency,
       touched,
-      reason: touched.length < 1 ? "no_selector_found" : undefined,
+      switched,
+      reason: switched.length < 1 ? (touched.length < 1 ? "no_selector_found" : "selector_did_not_change") : undefined,
     }
   })()`, true)
   evidence.uiDirtyDraftSurvivesSelectorChange = selectorDraftUi
