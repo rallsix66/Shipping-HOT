@@ -1,3 +1,10 @@
+## R3-1 §4.9 RC3 REQUEST CHANGES closeout (2026-11-02)
+
+- Parent tip `f18ba2119049f5d4dda1986ab61e3a829e171732` (dots REQUEST CHANGES ts 1793592897.126379). Same label→eval slice; **closed RC2 items stay closed** (save txn / same-ID concurrent / operator conflict+rollback; A→B draft bind no cross-write; eval true readonly + fileMustExist). No rewrite of executed 034/035; additive schema **v36** only.
+- Two fixes: (1) Analysis selection/eval identity — persistent `intel_analysis.run_id` (pipeline stamps one UUID per `runOfflineAnalyze`); `selectConsistentAnalysisRun` picks latest run_id group including failed/denied/charged steps (no latest-success-extract fallback; legacy missing run_id → complete=false); severity after extract kept in cost; per-step config fingerprint / `stepConfigsConflict` so same-config PASS+BLOCK evaluable while same-step different model/prompt still refused. Tests: old A→new BLOCK; old A→new fail; extract+dual severity fees; PASS+BLOCK evaluable. (2) SPA/Back browser proof — real Shell TanStack `Link` (`data-testid=shell-nav-*`); dirty nav must show confirm + keep URL/draft; leave-no/leave-yes to target; `history.back` via real route history must show confirm (no OR/conditional skip); product cancels POP immediately so address bar stays on `/label` while confirm is up, then leave-yes re-navigates.
+- Gates: typecheck / lint / build / full Vitest **2159 PASS** / 10 skipped; label browser e2e **80/80**; Neat Freak this entry + AGENTS v36 note. S7 harness **NOT_RUN**. Unmerged / undeployed. No Slack send / no user disturb. Real 200-label set / paid re-run still not executed; R3-5 **BLOCKED**; R3-8 only after label→eval accept.
+- Evidence: `.tmp/r3-1-llm-registry-20261027/r3-label-eval-rc3-20261102/`.
+
 ## R3-1 §4.9 RC2 REQUEST CHANGES closeout (2026-11-02)
 
 - Parent tip `6eb2dc5abb85adfdf9d607a2959b8733b04b638e` (dots REQUEST CHANGES ts 1793591483.616199). Same label→eval loop; **closed RC1 items stay closed** (completed/reused projection, excerpt redaction, eval denominators/sampleVersion, per-currency cost, SQL fail≠zero, 033, offline model chain). No rewrite of executed 034/035.

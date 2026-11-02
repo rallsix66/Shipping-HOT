@@ -12,6 +12,7 @@ export interface IntelAnalysisRecord {
   contentHash: string
   step: IntelAnalysisStep
   attemptIndex: number
+  runId: string | null
   status: IntelAnalysisStatus
   providerId: string | null
   modelId: string | null
@@ -32,6 +33,7 @@ export interface IntelAnalysisWrite {
   contentHash: string
   step: IntelAnalysisStep
   attemptIndex?: number
+  runId?: string | null
   status: IntelAnalysisStatus
   providerId?: string | null
   modelId?: string | null
@@ -56,6 +58,7 @@ function mapRow(row: Row): IntelAnalysisRecord {
     contentHash: String(row.content_hash),
     step: row.step as IntelAnalysisStep,
     attemptIndex: Number(row.attempt_index),
+    runId: row.run_id == null || row.run_id === "" ? null : String(row.run_id),
     status: row.status as IntelAnalysisStatus,
     providerId: row.provider_id == null ? null : String(row.provider_id),
     modelId: row.model_id == null ? null : String(row.model_id),
@@ -80,10 +83,10 @@ export class IntelAnalysisRepository {
     const outputJson = entry.output === undefined ? null : JSON.stringify(entry.output)
     await this.db.prepare(`
       INSERT INTO intel_analysis (
-        id, item_id, version_id, content_hash, step, attempt_index, status,
+        id, item_id, version_id, content_hash, step, attempt_index, run_id, status,
         provider_id, model_id, model_name, prompt_hash, reuse_key, output_json,
         provenance, basis, receipt_id, error_code, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       entry.itemId,
@@ -91,6 +94,7 @@ export class IntelAnalysisRepository {
       entry.contentHash,
       entry.step,
       entry.attemptIndex ?? 1,
+      entry.runId ?? null,
       entry.status,
       entry.providerId ?? null,
       entry.modelId ?? null,

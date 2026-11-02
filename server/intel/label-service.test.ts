@@ -7,7 +7,7 @@ import { IntelRepository } from "#/database/intel"
 import { IntelAnalysisRepository } from "#/database/intel-analysis"
 import { licensedBlocks } from "#/intel/content-license"
 import { intelSourceSeeds } from "#/intel/sources"
-import { LabelService, decisionFromAnalysisOutputs, selectConsistentAnalysisRun } from "#/intel/label-service"
+import { LabelService, decisionFromAnalysisOutputs, selectConsistentAnalysisRun, stepConfigsConflict } from "#/intel/label-service"
 
 type Native = InstanceType<typeof NativeDatabase>
 function wrap(native: Native) {
@@ -116,6 +116,7 @@ describe("label-service projection + live rights", () => {
       status: "completed",
       provenance: "ai",
       basis: "fixture",
+      runId: "run-proj-1",
       modelId: "model-pre",
       modelName: "fixture-pre",
       promptHash: "prompt-pre",
@@ -129,6 +130,7 @@ describe("label-service projection + live rights", () => {
       status: "completed",
       provenance: "ai",
       basis: "fixture",
+      runId: "run-proj-1",
       modelId: "model-ex",
       modelName: "fixture-ex",
       promptHash: "prompt-ex",
@@ -153,8 +155,8 @@ describe("label-service projection + live rights", () => {
     expect(detail.aiPrelabel?.decision.prefilterKeep).toBe(true)
     expect(detail.aiPrelabel?.decision.eventType).toBe("port_closure")
     expect(detail.aiPrelabel?.decision.isOfficialStatement).toBe(true)
-    expect(detail.aiPrelabel?.modelId).toBe("prefilter:model-pre|extract:model-ex")
-    expect(detail.aiPrelabel?.promptHash).toBe("prefilter:prompt-pre|extract:prompt-ex")
+    expect(detail.aiPrelabel?.modelId).toBe("extract:model-ex|prefilter:model-pre")
+    expect(detail.aiPrelabel?.promptHash).toBe("extract:prompt-ex|prefilter:prompt-pre")
     expect(detail.aiPrelabel?.analysisIds.length).toBe(2)
     expect(detail.material.excerpt).toBeTruthy()
     expect(detail.material.materialReadFailed).toBe(false)
@@ -207,16 +209,42 @@ describe("label-service projection + live rights", () => {
     expect(failed.item.id).toBe(enrolled.id)
   })
 
-  it("selectConsistentAnalysisRun prefers latest extract + prefilter at-or-before it", () => {
+  it("selectConsistentAnalysisRun picks latest run_id group including failed; legacy incomplete", () => {
     const rows = [
-      { id: "p1", step: "prefilter", status: "completed", createdAt: "2026-11-01T01:00:00.000Z", attemptIndex: 0, modelId: "A", promptHash: "pa" },
-      { id: "e1", step: "extract", status: "completed", createdAt: "2026-11-01T02:00:00.000Z", attemptIndex: 0, modelId: "A", promptHash: "ea" },
-      { id: "p2", step: "prefilter", status: "completed", createdAt: "2026-11-01T03:00:00.000Z", attemptIndex: 0, modelId: "B", promptHash: "pb" },
-      { id: "e2", step: "extract", status: "completed", createdAt: "2026-11-01T04:00:00.000Z", attemptIndex: 0, modelId: "B", promptHash: "eb" },
-      { id: "p3", step: "prefilter", status: "completed", createdAt: "2026-11-01T05:00:00.000Z", attemptIndex: 0, modelId: "C", promptHash: "pc" },
+      { id: "p1", step: "prefilter", status: "completed", createdAt: "2026-11-01T01:00:00.000Z", attemptIndex: 0, runId: "run-A", modelId: "A", promptHash: "pa" },
+      { id: "e1", step: "extract", status: "completed", createdAt: "2026-11-01T02:00:00.000Z", attemptIndex: 0, runId: "run-A", modelId: "A", promptHash: "ea" },
+      { id: "p2", step: "prefilter", status: "completed", createdAt: "2026-11-01T03:00:00.000Z", attemptIndex: 0, runId: "run-B", modelId: "B", promptHash: "pb" },
+      { id: "e2", step: "extract", status: "failed", createdAt: "2026-11-01T04:00:00.000Z", attemptIndex: 0, runId: "run-B", modelId: "B", promptHash: "eb" },
     ]
     const selected = selectConsistentAnalysisRun(rows)
-    expect(selected.map(r => r.id)).toEqual(["p2", "e2"])
+    expect(selected.complete).toBe(true)
+    expect(selected.runId).toBe("run-B")
+    expect(selected.rows.map(r => r.id)).toEqual(["p2", "e2"])
+    const legacy = selectConsistentAnalysisRun([
+      { id: "p1", step: "prefilter", status: "completed", createdAt: "2026-11-01T01:00:00.000Z", attemptIndex: 0, modelId: "A", promptHash: "pa" },
+    ])
+    expect(legacy.complete).toBe(false)
+    expect(legacy.rows).toEqual([])
+  })
+
+  it("stepConfigsConflict: same-config PASS+BLOCK ok; same-step different model refuses", () => {
+    const passFp = {
+      modelId: "extract:m1|prefilter:m1",
+      promptHash: "extract:pe|prefilter:pp",
+      modelName: "extract:N|prefilter:N",
+    }
+    const blockFp = {
+      modelId: "prefilter:m1",
+      promptHash: "prefilter:pp",
+      modelName: "prefilter:N",
+    }
+    expect(stepConfigsConflict(passFp, blockFp)).toBe(false)
+    const otherPre = {
+      modelId: "prefilter:m2",
+      promptHash: "prefilter:pp",
+      modelName: "prefilter:N",
+    }
+    expect(stepConfigsConflict(passFp, otherPre)).toBe(true)
   })
 
   it("a then B re-analysis enrolls B projection/ids/fingerprint; old receipts excluded; human kept", async () => {
@@ -243,6 +271,7 @@ describe("label-service projection + live rights", () => {
       modelId: "model-A",
       modelName: "A",
       promptHash: "prompt-A-pre",
+      runId: "run-A",
       receiptId: "rcpt-old",
       createdAt: "2026-11-01T01:00:00.000Z",
       output: { decision: "PASS", content: "a-pre" },
@@ -258,6 +287,7 @@ describe("label-service projection + live rights", () => {
       modelId: "model-A",
       modelName: "A",
       promptHash: "prompt-A-ex",
+      runId: "run-A",
       receiptId: "rcpt-old",
       createdAt: "2026-11-01T02:00:00.000Z",
       output: {
@@ -306,6 +336,7 @@ describe("label-service projection + live rights", () => {
       modelId: "model-B",
       modelName: "B",
       promptHash: "prompt-B-pre",
+      runId: "run-B",
       receiptId: "rcpt-new",
       createdAt: "2026-11-01T03:00:00.000Z",
       output: { decision: "PASS", content: "b-pre" },
@@ -321,6 +352,7 @@ describe("label-service projection + live rights", () => {
       modelId: "model-B",
       modelName: "B",
       promptHash: "prompt-B-ex",
+      runId: "run-B",
       receiptId: "rcpt-new",
       createdAt: "2026-11-01T04:00:00.000Z",
       output: {
@@ -343,8 +375,8 @@ describe("label-service projection + live rights", () => {
     expect(secondDetail.aiPrelabel?.analysisIds.sort()).toEqual([bPre.id, bEx.id].sort())
     expect(secondDetail.aiPrelabel?.analysisIds).not.toContain(aPre.id)
     expect(secondDetail.aiPrelabel?.analysisIds).not.toContain(aEx.id)
-    expect(secondDetail.aiPrelabel?.modelId).toBe("prefilter:model-B|extract:model-B")
-    expect(secondDetail.aiPrelabel?.promptHash).toBe("prefilter:prompt-B-pre|extract:prompt-B-ex")
+    expect(secondDetail.aiPrelabel?.modelId).toBe("extract:model-B|prefilter:model-B")
+    expect(secondDetail.aiPrelabel?.promptHash).toBe("extract:prompt-B-ex|prefilter:prompt-B-pre")
     expect(secondDetail.humanDecision?.decision.notes).toBe("keep-human")
     expect(secondDetail.item.queueStatus).toBe("human_confirmed")
 
@@ -360,6 +392,7 @@ describe("label-service projection + live rights", () => {
       modelId: "model-B-pre2",
       modelName: "B2",
       promptHash: "prompt-B-pre2",
+      runId: "run-C",
       receiptId: "rcpt-new",
       createdAt: "2026-11-01T05:00:00.000Z",
       output: { decision: "BLOCK", content: "b-pre2" },
@@ -375,6 +408,7 @@ describe("label-service projection + live rights", () => {
       modelId: "model-B",
       modelName: "B",
       promptHash: "prompt-B-ex",
+      runId: "run-C",
       receiptId: "rcpt-new",
       createdAt: "2026-11-01T06:00:00.000Z",
       output: {
@@ -391,8 +425,199 @@ describe("label-service projection + live rights", () => {
     const third = await service.enrollFromExisting({ itemId: saved.itemId, versionId: saved.versionId })
     const thirdDetail = await service.detail(third.id)
     expect(thirdDetail.aiPrelabel?.analysisIds.sort()).toEqual([bPre2.id, bEx2.id].sort())
-    expect(thirdDetail.aiPrelabel?.promptHash).toBe("prefilter:prompt-B-pre2|extract:prompt-B-ex")
+    expect(thirdDetail.aiPrelabel?.promptHash).toBe("extract:prompt-B-ex|prefilter:prompt-B-pre2")
     expect(thirdDetail.aiPrelabel?.decision.prefilterKeep).toBe(false)
     expect(thirdDetail.humanDecision?.decision.notes).toBe("keep-human")
+  })
+
+  it("rC3: old success then new BLOCK enrolls BLOCK run (not old A); severity after extract kept", async () => {
+    const { service, intel, analysis } = await fresh()
+    await intel.upsertSource(source, NOW)
+    const saved = await intel.writeEntry({
+      sourceId: source.id,
+      canonicalUrl: "https://example.test/label-rc3-block",
+      title: "RC3 BLOCK",
+      contentHash: hash(body),
+      contentScope: "full_text",
+      extractorVersion: "label-service-test-v1",
+      blocks: licensedBlocks("full_text", "RC3 BLOCK", body),
+      fetchedAt: NOW,
+    })
+    await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "prefilter",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "run-old",
+      modelId: "mA",
+      modelName: "A",
+      promptHash: "pA-pre",
+      receiptId: "r-old-pre",
+      createdAt: "2026-11-01T01:00:00.000Z",
+      output: { decision: "PASS", content: "old-pre" },
+    })
+    await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "extract",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "run-old",
+      modelId: "mA",
+      modelName: "A",
+      promptHash: "pA-ex",
+      receiptId: "r-old-ex",
+      createdAt: "2026-11-01T02:00:00.000Z",
+      output: { extract: { eventType: "port_closure", countries: ["MY"], ports: ["MYPKG"], effectiveFrom: "2026-11-01", isOfficialStatement: true }, content: "old-ex" },
+    })
+    // Real pipeline: severity createdAt AFTER extract
+    await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "severity",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "run-old",
+      modelId: "mA",
+      modelName: "A",
+      promptHash: "pA-sev",
+      receiptId: "r-old-sev1",
+      createdAt: "2026-11-01T02:00:01.000Z",
+      attemptIndex: 1,
+      output: { score: 2 },
+    })
+    await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "severity",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "run-old",
+      modelId: "mA",
+      modelName: "A",
+      promptHash: "pA-sev",
+      receiptId: "r-old-sev2",
+      createdAt: "2026-11-01T02:00:02.000Z",
+      attemptIndex: 2,
+      output: { score: 3 },
+    })
+    const first = await service.enrollFromExisting({ itemId: saved.itemId, versionId: saved.versionId })
+    const firstDetail = await service.detail(first.id)
+    expect(firstDetail.aiPrelabel?.analysisIds.length).toBe(4)
+
+    const bPre = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "prefilter",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "run-new-block",
+      modelId: "mB",
+      modelName: "B",
+      promptHash: "pB-pre",
+      receiptId: "r-new-pre",
+      createdAt: "2026-11-01T05:00:00.000Z",
+      output: { decision: "BLOCK", content: "new-block" },
+    })
+    const second = await service.enrollFromExisting({ itemId: saved.itemId, versionId: saved.versionId })
+    const d = await service.detail(second.id)
+    expect(d.aiPrelabel?.decision.prefilterKeep).toBe(false)
+    expect(d.aiPrelabel?.analysisIds).toEqual([bPre.id])
+    expect(d.aiPrelabel?.analysisIds.length).toBe(1)
+  })
+
+  it("rC3: old success then new failed extract keeps failed run ids (no A fallback)", async () => {
+    const { service, intel, analysis } = await fresh()
+    await intel.upsertSource(source, NOW)
+    const saved = await intel.writeEntry({
+      sourceId: source.id,
+      canonicalUrl: "https://example.test/label-rc3-fail",
+      title: "RC3 FAIL",
+      contentHash: hash(body),
+      contentScope: "full_text",
+      extractorVersion: "label-service-test-v1",
+      blocks: licensedBlocks("full_text", "RC3 FAIL", body),
+      fetchedAt: NOW,
+    })
+    await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "prefilter",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "run-A",
+      modelId: "mA",
+      modelName: "A",
+      promptHash: "pA",
+      receiptId: "rA",
+      createdAt: "2026-11-01T01:00:00.000Z",
+      output: { decision: "PASS", content: "a" },
+    })
+    await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "extract",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "run-A",
+      modelId: "mA",
+      modelName: "A",
+      promptHash: "pAex",
+      receiptId: "rA2",
+      createdAt: "2026-11-01T02:00:00.000Z",
+      output: { extract: { eventType: "port_closure", countries: ["MY"], ports: ["MYPKG"], effectiveFrom: null, isOfficialStatement: true }, content: "aex" },
+    })
+    const bPre = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "prefilter",
+      status: "completed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "run-B-fail",
+      modelId: "mB",
+      modelName: "B",
+      promptHash: "pB",
+      receiptId: "rB-pre",
+      createdAt: "2026-11-01T03:00:00.000Z",
+      output: { decision: "PASS", content: "b" },
+    })
+    const bFail = await analysis.insert({
+      itemId: saved.itemId,
+      versionId: saved.versionId,
+      contentHash: hash(body),
+      step: "extract",
+      status: "failed",
+      provenance: "ai",
+      basis: "fixture",
+      runId: "run-B-fail",
+      modelId: "mB",
+      modelName: "B",
+      promptHash: "pBex",
+      receiptId: "rB-fail-charged",
+      createdAt: "2026-11-01T04:00:00.000Z",
+      errorCode: "invalid_extract",
+      output: { content: "bad" },
+    })
+    const enrolled = await service.enrollFromExisting({ itemId: saved.itemId, versionId: saved.versionId })
+    const d = await service.detail(enrolled.id)
+    expect(d.aiPrelabel?.analysisIds.sort()).toEqual([bPre.id, bFail.id].sort())
+    expect(d.aiPrelabel?.analysisIds).toContain(bFail.id)
   })
 })

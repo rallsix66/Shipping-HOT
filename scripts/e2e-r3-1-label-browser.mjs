@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url"
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)))
 const RUN_DIR = resolve(process.env.E2E_R31_LABEL_DIR ?? join(ROOT, ".tmp", "r3-1-label-browser"))
-const EVIDENCE_DIR = resolve(process.env.E2E_R31_EVIDENCE_DIR ?? join(ROOT, ".tmp", "r3-1-llm-registry-20261027", "r3-label-eval-rc2-20261102"))
+const EVIDENCE_DIR = resolve(process.env.E2E_R31_EVIDENCE_DIR ?? join(ROOT, ".tmp", "r3-1-llm-registry-20261027", "r3-label-eval-rc3-20261102"))
 const DB_PATH = join(RUN_DIR, ".data", "shipping-hot-v3.sqlite3")
 const SERVER_ENTRY = join(ROOT, "dist", "output", "server", "index.mjs")
 const PORT = Number(process.env.E2E_R31_LABEL_PORT ?? "4491")
@@ -226,7 +226,7 @@ async function main() {
     }
   }, 60000)
   if (!ready) throw new Error(`server not ready; log: ${serverLogPath}`)
-  check(ready?.database?.schemaVersion === 35, `schema v35 after init (got ${ready?.database?.schemaVersion})`)
+  check(ready?.database?.schemaVersion === 36, `schema v36 after init (got ${ready?.database?.schemaVersion})`)
 
   await seedLabels()
 
@@ -673,58 +673,74 @@ async function main() {
   check(String(slowGuard?.afterNotes || "") === "slow-save-v1", `slow-save final notes from in-flight snapshot (${slowGuard?.afterNotes})`)
   check(slowGuard?.afterSaving === "0", `saving cleared after slow save (afterSaving=${slowGuard?.afterSaving})`)
 
-  // Real cross-route SPA leave: leave label for home, then exercise Back stay/leave.
+  // Real Shell TanStack Link SPA leave + history.back — no temp <a>, no OR/conditional skip PASS.
   await evalBool(`(() => {
     const notes = document.querySelector('[data-testid=label-notes]');
     const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
-    setter?.call(notes, 'back-nav-draft');
+    setter?.call(notes, 'spa-shell-draft');
     notes.dispatchEvent(new Event('input', { bubbles: true }));
     return true;
   })()`)
-  check(await evalBool(`document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty') === '1'`), "dirty before cross-route leave")
+  check(await evalBool(`document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty') === '1'`), "dirty before Shell nav leave")
+  check(await evalBool(`Boolean(document.querySelector('[data-testid=shell-nav-home]'))`), "Shell home Link present")
+
+  const pathBeforeShell = await evalStr(`location.pathname`)
+  check(String(pathBeforeShell).includes("label"), `on label route before Shell click (path=${pathBeforeShell})`)
+
   await cdp.send("Runtime.evaluate", {
-    expression: `(() => { const a = document.createElement('a'); a.href = '/'; a.textContent = 'home'; a.setAttribute('data-testid','e2e-home-link'); document.body.appendChild(a); a.click(); return 'ok'; })()`,
+    expression: `document.querySelector('[data-testid=shell-nav-home]')?.click(); 'ok'`,
     returnByValue: true,
   })
   await waitFor(async () => {
-    const leave = await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")
-    const left = await evalBool("!document.querySelector('[data-testid=intel-label-page]')")
-    return leave || left ? true : undefined
+    return (await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")) ? true : undefined
   }, 8000)
-  const leaveOnRoute = await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")
-  if (leaveOnRoute) {
-    await cdp.send("Runtime.evaluate", {
-      expression: `document.querySelector('[data-testid=label-leave-no]')?.click()`,
-      returnByValue: true,
-    })
-    await waitFor(async () => {
-      return (await evalBool("!document.querySelector('[data-testid=label-leave-confirm]')")) ? true : undefined
-    }, 5000)
-    check((await evalStr("document.querySelector('[data-testid=label-notes]')?.value || ''")).includes("back-nav-draft"), "cross-route leave-no keeps draft")
-    await cdp.send("Runtime.evaluate", {
-      expression: `document.querySelector('[data-testid=e2e-home-link]')?.click() || (() => { location.href = '/'; return true })()`,
-      returnByValue: true,
-    })
-    await waitFor(async () => {
-      return (await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")) ? true : undefined
-    }, 8000)
-    await cdp.send("Runtime.evaluate", {
-      expression: `document.querySelector('[data-testid=label-leave-yes]')?.click()`,
-      returnByValue: true,
-    })
-  }
-  await waitFor(async () => {
-    return (await evalBool("!document.querySelector('[data-testid=intel-label-page]')")) ? true : undefined
-  }, 10000)
-  check(await evalBool("!document.querySelector('[data-testid=intel-label-page]')"), "left label route after leave-yes")
-  // Navigate back to label and dirty again; browser Back should block via useBlocker
+  check(await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))"), "Shell Link dirty nav MUST show leave confirm")
+  check(await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))"), "Shell Link blocked: still on label page")
+  check((await evalStr("location.pathname")).includes("label"), "Shell Link blocked: URL still /label")
+  check((await evalStr("document.querySelector('[data-testid=label-notes]')?.value || ''")).includes("spa-shell-draft"), "Shell Link blocked: draft retained")
+
   await cdp.send("Runtime.evaluate", {
-    expression: `location.href = '${BASE}/label'; 'ok'`,
+    expression: `document.querySelector('[data-testid=label-leave-no]')?.click(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("!document.querySelector('[data-testid=label-leave-confirm]')")) ? true : undefined
+  }, 5000)
+  check(await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))"), "leave-no stays on label")
+  check((await evalStr("location.pathname")).includes("label"), "leave-no URL still /label")
+  check((await evalStr("document.querySelector('[data-testid=label-notes]')?.value || ''")).includes("spa-shell-draft"), "leave-no keeps draft")
+
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=shell-nav-home]')?.click(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")) ? true : undefined
+  }, 8000)
+  check(await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))"), "second Shell click shows confirm again")
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-leave-yes]')?.click(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const left = await evalBool("!document.querySelector('[data-testid=intel-label-page]')")
+    const path = await evalStr("location.pathname")
+    return left && (path === "/" || path === "") ? true : undefined
+  }, 10000)
+  check(await evalBool("!document.querySelector('[data-testid=intel-label-page]')"), "leave-yes left label page")
+  const homePath = await evalStr("location.pathname")
+  check(homePath === "/" || homePath === "", `leave-yes reached home URL (got ${homePath})`)
+
+  // Real route history: home → label (Shell Link), dirty, history.back stay + leave
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=shell-nav-label]')?.click(); 'ok'`,
     returnByValue: true,
   })
   await waitFor(async () => {
     return (await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))")) ? true : undefined
   }, 15000)
+  check(await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))"), "Shell label Link navigated to label")
+
   await evalBool(`(() => {
     const notes = document.querySelector('[data-testid=label-notes]');
     const op = document.querySelector('[data-testid=label-operator]');
@@ -736,26 +752,56 @@ async function main() {
     notes.dispatchEvent(new Event('input', { bubbles: true }));
     return true;
   })()`)
+  check(await evalBool(`document.querySelector('[data-testid=intel-label-page]')?.getAttribute('data-dirty') === '1'`), "dirty before history.back")
+
   await cdp.send("Runtime.evaluate", {
     expression: `history.back(); 'ok'`,
     returnByValue: true,
   })
   await waitFor(async () => {
-    const leave = await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")
-    const stayed = await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))")
-    return leave || stayed ? true : undefined
+    return (await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")) ? true : undefined
   }, 8000)
-  const leaveAfterBack = await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")
-  const stillOnLabel = await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))")
-  check(leaveAfterBack === true || stillOnLabel === true, `history.back while dirty blocked or stayed (leave=${leaveAfterBack} page=${stillOnLabel})`)
-  check(!(leaveAfterBack === false && stillOnLabel === false), "must not silently leave label on dirty Back")
-  if (leaveAfterBack) {
-    await cdp.send("Runtime.evaluate", {
-      expression: `document.querySelector('[data-testid=label-leave-no]')?.click()`,
-      returnByValue: true,
-    })
-    check((await evalStr("document.querySelector('[data-testid=label-notes]')?.value || ''")).includes("history-back-draft"), "Back leave-no keeps draft")
-  }
+  check(await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))"), "history.back dirty MUST show leave confirm (no OR skip)")
+  // Product cancels POP immediately so address bar returns to /label while confirm is up.
+  await waitFor(async () => {
+    const path = await evalStr("location.pathname")
+    return String(path).includes("label") ? true : undefined
+  }, 8000)
+  check(await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))"), "history.back blocked: still on label")
+  check((await evalStr("location.pathname")).includes("label"), "history.back blocked: URL still /label")
+  check((await evalStr("document.querySelector('[data-testid=label-notes]')?.value || ''")).includes("history-back-draft"), "history.back blocked: draft retained")
+
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-leave-no]')?.click(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("!document.querySelector('[data-testid=label-leave-confirm]')")) ? true : undefined
+  }, 5000)
+  check(await evalBool("Boolean(document.querySelector('[data-testid=intel-label-page]'))"), "Back leave-no stays on label")
+  check((await evalStr("document.querySelector('[data-testid=label-notes]')?.value || ''")).includes("history-back-draft"), "Back leave-no keeps draft")
+  check((await evalStr("location.pathname")).includes("label"), "Back leave-no URL still /label")
+
+  await cdp.send("Runtime.evaluate", {
+    expression: `history.back(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    return (await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))")) ? true : undefined
+  }, 8000)
+  check(await evalBool("Boolean(document.querySelector('[data-testid=label-leave-confirm]'))"), "second history.back shows confirm")
+  await cdp.send("Runtime.evaluate", {
+    expression: `document.querySelector('[data-testid=label-leave-yes]')?.click(); 'ok'`,
+    returnByValue: true,
+  })
+  await waitFor(async () => {
+    const left = await evalBool("!document.querySelector('[data-testid=intel-label-page]')")
+    const path = await evalStr("location.pathname")
+    return left && !String(path).includes("label") ? true : undefined
+  }, 10000)
+  check(await evalBool("!document.querySelector('[data-testid=intel-label-page]')"), "Back leave-yes left label")
+  const afterBackPath = await evalStr("location.pathname")
+  check(!String(afterBackPath).includes("label"), `Back leave-yes left label URL (got ${afterBackPath})`)
 
   const aba1 = await fetch(`${BASE}/api/shipping/intel/labels/lbl_e2e_002/decision`, {
     method: "POST",

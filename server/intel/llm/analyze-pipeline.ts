@@ -11,7 +11,7 @@
  * - Default resolveClaimConfig = createPaidClaimBudgetResolver({ mode: "registry" }).
  * - PRODUCTION BOUNDARY: injectable offline helper; not a claim of live HTTP/production pool wiring.
  */
-import { createHash } from "node:crypto"
+import { createHash, randomUUID } from "node:crypto"
 import type { Database } from "db0"
 import type { IntelRepository } from "#/database/intel"
 import { type IntelAnalysisRecord, IntelAnalysisRepository, type IntelAnalysisStep } from "#/database/intel-analysis"
@@ -518,6 +518,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
   const analysisRepo = input.analysisRepo ?? new IntelAnalysisRepository(input.db)
   const receiptIds: string[] = []
   const analyses: IntelAnalysisRecord[] = []
+  const runId = randomUUID()
   const nowIso = () => (input.now ? input.now() : new Date()).toISOString()
 
   // Default budget path: strict DB registry resolver. Test overrides must be explicit.
@@ -567,6 +568,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
   })
   if (!gate.allow) {
     const row = await analysisRepo.insert({
+      runId,
       itemId: material.itemId,
       versionId: material.version.id,
       contentHash: material.version.contentHash,
@@ -594,6 +596,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
   if (!prefilterResolved.ok || !extractResolved.ok) {
     const miss = !prefilterResolved.ok ? prefilterResolved : extractResolved
     const row = await analysisRepo.insert({
+      runId,
       itemId: material.itemId,
       versionId: material.version.id,
       contentHash: material.version.contentHash,
@@ -658,6 +661,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
       if (reusedDecision) {
         prefilterDecision = reusedDecision
         const row = await analysisRepo.insert({
+          runId,
           itemId: material.itemId,
           versionId: material.version.id,
           contentHash: material.version.contentHash,
@@ -707,6 +711,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
         const decision = parsePrefilterDecision(content, contentMissing)
         if (!decision) {
           const row = await analysisRepo.insert({
+            runId,
             itemId: material.itemId,
             versionId: material.version.id,
             contentHash: material.version.contentHash,
@@ -737,6 +742,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
         }
         prefilterDecision = decision
         const row = await analysisRepo.insert({
+          runId,
           itemId: material.itemId,
           versionId: material.version.id,
           contentHash: material.version.contentHash,
@@ -757,6 +763,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
       } catch (error) {
         const mapped = mapPaidError(error)
         const row = await analysisRepo.insert({
+          runId,
           itemId: material.itemId,
           versionId: material.version.id,
           contentHash: material.version.contentHash,
@@ -828,6 +835,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
         if (parsed) {
           extract = parsed
           const row = await analysisRepo.insert({
+            runId,
             itemId: material.itemId,
             versionId: material.version.id,
             contentHash: material.version.contentHash,
@@ -880,6 +888,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
         const parsed = parseExtractOutput(content)
         if (!parsed) {
           const row = await analysisRepo.insert({
+            runId,
             itemId: material.itemId,
             versionId: material.version.id,
             contentHash: material.version.contentHash,
@@ -910,6 +919,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
         }
         extract = parsed
         const row = await analysisRepo.insert({
+          runId,
           itemId: material.itemId,
           versionId: material.version.id,
           contentHash: material.version.contentHash,
@@ -930,6 +940,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
       } catch (error) {
         const mapped = mapPaidError(error)
         const row = await analysisRepo.insert({
+          runId,
           itemId: material.itemId,
           versionId: material.version.id,
           contentHash: material.version.contentHash,
@@ -1010,6 +1021,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
       const scored = parseSeverityScoreOutput(content)
       if (!scored) {
         const row = await analysisRepo.insert({
+          runId,
           itemId: material.itemId,
           versionId: material.version.id,
           contentHash: material.version.contentHash,
@@ -1041,6 +1053,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
       severityScores.push(basis.severity)
       severityBases.push(basis)
       const row = await analysisRepo.insert({
+        runId,
         itemId: material.itemId,
         versionId: material.version.id,
         contentHash: material.version.contentHash,
@@ -1069,6 +1082,7 @@ export async function runOfflineAnalyze(input: AnalyzePipelineInput): Promise<An
     } catch (error) {
       const mapped = mapPaidError(error)
       const row = await analysisRepo.insert({
+        runId,
         itemId: material.itemId,
         versionId: material.version.id,
         contentHash: material.version.contentHash,

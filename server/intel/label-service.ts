@@ -43,6 +43,7 @@ export interface AnalysisIdentityRow {
   status?: string
   createdAt: string
   attemptIndex?: number
+  runId?: string | null
   modelId?: string | null
   modelName?: string | null
   promptHash?: string | null
@@ -52,47 +53,116 @@ export interface AnalysisIdentityRow {
 }
 
 /**
- * Pick one coherent analyze run (not a cross-run mix of oldest prefilter + newest extract).
- * Prefer the latest completed/reused extract, then the latest prefilter at-or-before it,
- * plus severity rows in that window. Prefilter-only (BLOCK) uses the latest prefilter.
+ * Pick one coherent analyze run by persistent run_id (not latest-success extract / time-neighbor stitch).
+ * Includes failed/denied/charged steps of that run so receipts are not silently dropped.
+ * Legacy rows without run_id cannot be reliably grouped → complete=false (unselectable / incomplete).
  */
-export function selectConsistentAnalysisRun<T extends AnalysisIdentityRow>(rows: T[]): T[] {
-  const usable = rows.filter(r => !r.status || r.status === "completed" || r.status === "reused")
-  if (!usable.length) return []
-  const byNewest = (a: T, b: T) => {
-    const t = b.createdAt.localeCompare(a.createdAt)
-    if (t !== 0) return t
-    return (b.attemptIndex ?? 0) - (a.attemptIndex ?? 0)
+export interface AnalysisRunSelection<T extends AnalysisIdentityRow> {
+  rows: T[]
+  runId: string | null
+  complete: boolean
+  reason?: string
+}
+
+export function selectConsistentAnalysisRun<T extends AnalysisIdentityRow>(rows: T[]): AnalysisRunSelection<T> {
+  if (!rows.length) {
+    return { rows: [], runId: null, complete: true }
   }
-  const extracts = usable.filter(r => r.step === "extract").sort(byNewest)
-  const prefilters = usable.filter(r => r.step === "prefilter").sort(byNewest)
-  const picked: T[] = []
-  if (extracts.length) {
-    const extract = extracts[0]!
-    const pre = prefilters.find(p => p.createdAt <= extract.createdAt) ?? null
-    const start = pre?.createdAt ?? extract.createdAt
-    if (pre) picked.push(pre)
-    for (const r of usable) {
-      if ((r.step === "severity" || r.step === "severity_tiebreak")
-        && r.createdAt >= start
-        && r.createdAt <= extract.createdAt) {
-        picked.push(r)
-      }
+  const withRun = rows.filter(r => typeof r.runId === "string" && r.runId.length > 0)
+  if (!withRun.length) {
+    return {
+      rows: [],
+      runId: null,
+      complete: false,
+      reason: "legacy_ungroupable_missing_run_id",
     }
-    picked.push(extract)
-  } else if (prefilters.length) {
-    picked.push(prefilters[0]!)
-  } else {
-    return []
   }
-  const seen = new Set<string>()
-  const deduped: T[] = []
-  for (const r of picked.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || (a.attemptIndex ?? 0) - (b.attemptIndex ?? 0))) {
-    if (seen.has(r.id)) continue
-    seen.add(r.id)
-    deduped.push(r)
+  const byRun = new Map<string, T[]>()
+  for (const r of withRun) {
+    const id = r.runId as string
+    const list = byRun.get(id) ?? []
+    list.push(r)
+    byRun.set(id, list)
   }
-  return deduped
+  let bestId: string | null = null
+  let bestTs = ""
+  for (const [id, list] of byRun) {
+    const maxTs = list.reduce((m, r) => (r.createdAt > m ? r.createdAt : m), "")
+    if (!bestId || maxTs > bestTs || (maxTs === bestTs && id > bestId)) {
+      bestId = id
+      bestTs = maxTs
+    }
+  }
+  const selected = (byRun.get(bestId!) ?? []).slice().sort(
+    (a, b) => a.createdAt.localeCompare(b.createdAt) || (a.attemptIndex ?? 0) - (b.attemptIndex ?? 0),
+  )
+  return { rows: selected, runId: bestId, complete: true }
+}
+
+/** Per-step config fingerprint: step:value|… — eval compares overlapping steps only. */
+export function buildStepConfigFingerprint(
+  rows: Array<{ step: string, status?: string, promptHash?: string | null, modelId?: string | null, modelName?: string | null }>,
+  field: "promptHash" | "modelId" | "modelName",
+): string | null {
+  const byStep = new Map<string, string>()
+  for (const r of rows) {
+    const raw = r[field]
+    if (raw == null || raw === "") continue
+    if (!byStep.has(r.step)) byStep.set(r.step, String(raw))
+  }
+  if (!byStep.size) return null
+  return [...byStep.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([step, value]) => `${step}:${value}`)
+    .join("|")
+}
+
+export function parseStepConfigFingerprint(fp: string | null | undefined): Map<string, string> {
+  const out = new Map<string, string>()
+  if (!fp) return out
+  // Plain (non step:value) fingerprints still compare as a single synthetic step.
+  if (!fp.includes(":")) {
+    out.set("__run__", fp)
+    return out
+  }
+  for (const part of fp.split("|")) {
+    const idx = part.indexOf(":")
+    if (idx <= 0) continue
+    out.set(part.slice(0, idx), part.slice(idx + 1))
+  }
+  return out
+}
+
+/** True when overlapping steps disagree on modelId or promptHash (unexecuted step ≠ conflict). */
+export function stepConfigsConflict(
+  a: { modelId?: string | null, promptHash?: string | null, modelName?: string | null },
+  b: { modelId?: string | null, promptHash?: string | null, modelName?: string | null },
+): boolean {
+  const aModel = parseStepConfigFingerprint(a.modelId)
+  const bModel = parseStepConfigFingerprint(b.modelId)
+  const aPrompt = parseStepConfigFingerprint(a.promptHash)
+  const bPrompt = parseStepConfigFingerprint(b.promptHash)
+  const aName = parseStepConfigFingerprint(a.modelName)
+  const bName = parseStepConfigFingerprint(b.modelName)
+  const steps = new Set<string>([
+    ...aModel.keys(),
+    ...bModel.keys(),
+    ...aPrompt.keys(),
+    ...bPrompt.keys(),
+    ...aName.keys(),
+    ...bName.keys(),
+  ])
+  for (const step of steps) {
+    const overlaps
+      = (aModel.has(step) && bModel.has(step))
+        || (aPrompt.has(step) && bPrompt.has(step))
+        || (aName.has(step) && bName.has(step))
+    if (!overlaps) continue
+    if (aModel.has(step) && bModel.has(step) && aModel.get(step) !== bModel.get(step)) return true
+    if (aPrompt.has(step) && bPrompt.has(step) && aPrompt.get(step) !== bPrompt.get(step)) return true
+    if (aName.has(step) && bName.has(step) && aName.get(step) !== bName.get(step)) return true
+  }
+  return false
 }
 
 export function decisionFromAnalysisOutputs(
@@ -281,22 +351,21 @@ export class LabelService {
     if (!materialResult.ok) throw new LabelInputError(`material_${materialResult.code}`)
     const material = materialResult.material
     const analysisRows = await this.analysis.listForVersion(input.itemId, input.versionId)
-    const matched = analysisRows.filter(r =>
-      r.contentHash === material.version.contentHash
-      && (r.status === "completed" || r.status === "reused"),
-    )
-    const selected = selectConsistentAnalysisRun(matched.map(r => ({
+    const matched = analysisRows.filter(r => r.contentHash === material.version.contentHash)
+    const selection = selectConsistentAnalysisRun(matched.map(r => ({
       id: r.id,
       step: r.step,
       status: r.status,
       createdAt: r.createdAt,
       attemptIndex: r.attemptIndex,
+      runId: r.runId,
       modelId: r.modelId,
       modelName: r.modelName,
       promptHash: r.promptHash,
       receiptId: r.receiptId,
       outputJson: r.outputJson,
     })))
+    const selected = selection.rows
     const { decision, projected } = decisionFromAnalysisOutputs(
       selected.map(r => ({
         step: r.step,
@@ -305,29 +374,22 @@ export class LabelService {
       })),
     )
     const category = input.category ?? categoryFromEventType(decision.eventType)
-    const extractRow = selected.find(r => r.step === "extract")
-    const preRow = selected.find(r => r.step === "prefilter")
-    // Primary display identity prefers extract; run fingerprint keeps prefilter in prompt/model fields
-    // when both steps exist so mixed prefilter configs cannot silently collapse into extract-only.
-    const runPromptHash = selected.length === 0
-      ? null
-      : selected.map(r => `${r.step}:${r.promptHash ?? ""}`).join("|")
-    const runModelId = selected.length === 0
-      ? null
-      : selected.map(r => `${r.step}:${r.modelId ?? ""}`).join("|")
-    const runModelName = selected.length === 0
-      ? null
-      : selected.map(r => `${r.step}:${r.modelName ?? ""}`).join("|")
-    const aiPrelabel = projected && selected.length
+    const runPromptHash = buildStepConfigFingerprint(selected, "promptHash")
+    const runModelId = buildStepConfigFingerprint(selected, "modelId")
+    const runModelName = buildStepConfigFingerprint(selected, "modelName")
+    // Always bind the selected run's analysisIds (incl. failed-but-charged) when grouping is complete.
+    // Incomplete legacy rows stay without AI prelabel (do not invent a time-stitch).
+    const aiPrelabel = selection.complete && selected.length
       ? {
           decision,
           analysisIds: selected.map(r => r.id),
-          promptHash: runPromptHash ?? extractRow?.promptHash ?? preRow?.promptHash ?? null,
-          modelId: runModelId ?? extractRow?.modelId ?? preRow?.modelId ?? null,
-          modelName: runModelName ?? extractRow?.modelName ?? preRow?.modelName ?? null,
+          promptHash: runPromptHash,
+          modelId: runModelId,
+          modelName: runModelName,
           operator: "system:ai",
         }
       : undefined
+    void projected
     const excerpt = licensedExcerpt(material.blocks, material.bodyText, material.contentScope)
     return this.labels.enroll({
       itemId: input.itemId,

@@ -203,4 +203,40 @@ describe("intel-eval offline metrics", () => {
     expect(failed.note).toMatch(/cost_read_failed/)
     expect(failed.r3_5).not.toBe("PASS_REPORT")
   })
+
+  it("same-config PASS+BLOCK (overlapping prefilter) is evaluable; same-step different prompt still refused", () => {
+    const humans = [
+      human("1", { prefilterKeep: true, eventType: "port_closure", countries: ["MY"], ports: ["MYPKG"], effectiveFrom: null, isOfficialStatement: true }),
+      human("2", { prefilterKeep: false, eventType: null, countries: [], ports: [], effectiveFrom: null, isOfficialStatement: null }),
+    ]
+    const preds = new Map([
+      ["lbl_1", { prefilterKeep: true, eventType: "port_closure", countries: ["MY"], ports: ["MYPKG"], effectiveFrom: null, isOfficialStatement: true }],
+      ["lbl_2", { prefilterKeep: false, eventType: null, countries: [], ports: [], effectiveFrom: null, isOfficialStatement: null }],
+    ])
+    const sameConfigMeta = new Map([
+      ["lbl_1", { modelName: "extract:N|prefilter:N", modelId: "extract:m1|prefilter:m1", promptHash: "extract:pe|prefilter:pp", analysisIds: ["an-pass"] }],
+      ["lbl_2", { modelName: "prefilter:N", modelId: "prefilter:m1", promptHash: "prefilter:pp", analysisIds: ["an-block"] }],
+    ])
+    const ok = buildEvalReport({
+      human: humans,
+      predictionsByLabelItemId: preds,
+      predictionMetaByLabelItemId: sameConfigMeta,
+      cost: emptyCost(),
+    })
+    expect(ok.mixedModelPrompt).toBe(false)
+    expect(ok.reason).not.toBe("mixed_model_prompt_refused")
+
+    const conflictMeta = new Map([
+      ["lbl_1", { modelName: "prefilter:N", modelId: "prefilter:m1", promptHash: "prefilter:pp", analysisIds: ["an-1"] }],
+      ["lbl_2", { modelName: "prefilter:N", modelId: "prefilter:m1", promptHash: "prefilter:OTHER", analysisIds: ["an-2"] }],
+    ])
+    const bad = buildEvalReport({
+      human: humans,
+      predictionsByLabelItemId: preds,
+      predictionMetaByLabelItemId: conflictMeta,
+      cost: emptyCost(),
+    })
+    expect(bad.reason).toBe("mixed_model_prompt_refused")
+    expect(bad.mixedModelPrompt).toBe(true)
+  })
 })

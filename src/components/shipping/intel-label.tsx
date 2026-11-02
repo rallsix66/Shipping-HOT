@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useBlocker } from "@tanstack/react-router"
+import { useBlocker, useNavigate } from "@tanstack/react-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import type {
   LabelDecisionFields,
@@ -133,6 +133,7 @@ export function IntelLabelPage() {
   }, [detail.data?.item.id, detail.data?.item.contentHash, activeId, dirty, saving, draftReady, detail.data])
 
   const blockLeave = dirty || saving
+  const navigate = useNavigate()
   const blocker = useBlocker({
     shouldBlockFn: () => dirtyRef.current || savingRef.current,
     withResolver: true,
@@ -141,10 +142,15 @@ export function IntelLabelPage() {
 
   useEffect(() => {
     if (blocker.status !== "blocked") return
+    // POP (history.back) already moved the address bar; cancel immediately so URL/draft
+    // stay on /label while confirm is up. leave-yes re-navigates to the intended target.
+    const nextPath = blocker.next?.pathname || "/"
+    blocker.reset?.()
     setPendingNav(() => () => {
-      blocker.proceed?.()
+      dirtyRef.current = false
+      void navigate({ to: nextPath })
     })
-  }, [blocker, blocker.status])
+  }, [blocker, blocker.status, navigate])
 
   function abandonDraft() {
     setDraft(emptyDecision())
@@ -541,6 +547,7 @@ export function IntelLabelPage() {
                   onClick={() => {
                     const goNext = pendingNav
                     setPendingNav(null)
+                    dirtyRef.current = false
                     abandonDraft()
                     setMessage("")
                     goNext?.()

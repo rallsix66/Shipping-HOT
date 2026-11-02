@@ -14,7 +14,8 @@ export { ProvenanceBadge } from "./ui"
 function ConsoleLink({ to, label }: { to: "/" | "/events" | "/feed" | "/label" | "/settings" | "/policies" | "/calendar" | "/ports", label: string }) {
   const matchRoute = useMatchRoute()
   const active = !!matchRoute({ to, fuzzy: to !== "/" })
-  return <Link to={to} aria-current={active ? "page" : undefined} activeOptions={{ exact: to === "/" }}>{label}</Link>
+  const testId = to === "/" ? "shell-nav-home" : `shell-nav-${to.slice(1)}`
+  return <Link to={to} data-testid={testId} aria-current={active ? "page" : undefined} activeOptions={{ exact: to === "/" }}>{label}</Link>
 }
 
 export function ShippingShell({ children, title, showLegend = true }: { children: ReactNode, title?: string, showLegend?: boolean }) {

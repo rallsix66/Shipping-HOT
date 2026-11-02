@@ -34,6 +34,7 @@ import { intelAnalysisMigration } from "#/database/migrations/032-intel-analysis
 import { intelAnalysisReuseKeyMigration } from "#/database/migrations/033-intel-analysis-reuse-key"
 import { intelLabelMigration } from "#/database/migrations/034-intel-label"
 import { intelLabelRequestIdMigration } from "#/database/migrations/035-intel-label-request-id"
+import { intelAnalysisRunIdMigration } from "#/database/migrations/036-intel-analysis-run-id"
 
 export interface ShippingMigration {
   readonly version: number
@@ -81,6 +82,7 @@ export const shippingMigrations: readonly ShippingMigration[] = [
   intelAnalysisReuseKeyMigration,
   intelLabelMigration,
   intelLabelRequestIdMigration,
+  intelAnalysisRunIdMigration,
 ]
 
 export const latestShippingSchemaVersion = shippingMigrations[shippingMigrations.length - 1].version

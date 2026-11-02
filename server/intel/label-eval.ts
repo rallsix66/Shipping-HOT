@@ -7,6 +7,7 @@
  */
 import { createHash } from "node:crypto"
 import type { LabelDecisionFields, LabelDecisionView } from "@shared/intel-label"
+import { stepConfigsConflict } from "#/intel/label-service"
 
 export interface FieldMetric {
   name: string
@@ -291,7 +292,18 @@ export function buildEvalReport(input: {
     analysisIds: [...v.analysisIds],
     count: v.count,
   }))
-  const mixedModelPrompt = modelPromptVersions.length > 1
+  // Per-step overlap: PASS (prefilter+extract) vs BLOCK (prefilter-only) is NOT mixed when shared steps agree.
+  let mixedModelPrompt = false
+  if (modelPromptVersions.length > 1) {
+    for (let i = 0; i < modelPromptVersions.length && !mixedModelPrompt; i++) {
+      for (let j = i + 1; j < modelPromptVersions.length; j++) {
+        if (stepConfigsConflict(modelPromptVersions[i]!, modelPromptVersions[j]!)) {
+          mixedModelPrompt = true
+          break
+        }
+      }
+    }
+  }
 
   if (input.human.length === 0) {
     return {
